@@ -2,7 +2,7 @@
 
 Autores:
  - @githubusername
- - Junior Andrés Arrieta Tabaco
+ - Junior Andrés Arrieta Tabaco.
 
 ## 1 TL;DR
 
