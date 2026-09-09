@@ -2,6 +2,7 @@
 
 Autores:
  - @githubusername
+ - Antonio Jose Moreno Lopez
 
 ## 1 TL;DR
 
