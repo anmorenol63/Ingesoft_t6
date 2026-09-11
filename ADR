@@ -1,0 +1,129 @@
+# ADR-0001: Stack tecnológico para el sistema de inventario para Pymes
+
+Autores:
+
+
+* Junior Andrés Arrieta Tabaco
+* Edgar Mauricio Montufar Molano
+* Kevin Alexis Bermúdez Caicedo
+* Antonio Moreno
+
+Fecha: 2026-09-10
+
+## Estado
+
+Propuesto
+
+## Contexto
+
+El proyecto consiste en desarrollar un sistema de inventario orientado a pequeñas y medianas empresas (Pymes). El sistema debe permitir gestionar la información del inventario mediante una aplicación web, manteniendo una separación clara entre la interfaz de usuario, la lógica del sistema y el almacenamiento de los datos.
+
+Para el desarrollo se requiere seleccionar tecnologías para el frontend, backend, base de datos, infraestructura y control de versiones.
+
+Las principales condiciones consideradas para la selección del stack tecnológico son:
+
+* Facilidad de aprendizaje e implementación para el equipo de desarrollo.
+* Integración entre las diferentes tecnologías.
+* Disponibilidad de documentación y recursos de aprendizaje.
+* Capacidad para desarrollar una aplicación web funcional y mantenible.
+* Posibilidad de desplegar el proyecto en una infraestructura accesible.
+* Uso de herramientas adecuadas para el control y seguimiento de los cambios realizados durante el desarrollo.
+* Posibilidad de que el equipo trabaje de manera colaborativa sobre el mismo proyecto.
+
+## Decisión
+
+Se utilizará el siguiente stack tecnológico para el desarrollo del sistema de inventario para Pymes:
+
+| Componente           | Tecnología        | Propósito                                                                             |
+| -------------------- | ----------------- | ------------------------------------------------------------------------------------- |
+| Frontend             | React             | Desarrollo de la interfaz de usuario y componentes interactivos del sistema.          |
+| Backend              | Node.js + Express | Desarrollo de la lógica del servidor y API REST para la comunicación con el frontend. |
+| Base de datos        | PostgreSQL        | Almacenamiento y gestión de la información del sistema de inventario.                 |
+| Infraestructura      | Render            | Despliegue y ejecución de los servicios de la aplicación.                             |
+| Control de versiones | Git + GitHub      | Control de cambios, gestión del código fuente y trabajo colaborativo.                 |
+
+La arquitectura seguirá una separación entre frontend y backend. React será responsable de la interfaz de usuario, mientras que Node.js con Express gestionará la lógica del servidor y la comunicación con PostgreSQL. Render será utilizado para el despliegue de la aplicación y Git junto con GitHub permitirá gestionar las versiones y la colaboración entre los integrantes del equipo.
+
+## Alternativas consideradas
+
+### Frontend
+
+**React**
+
+Se selecciona React por su enfoque basado en componentes, su amplia documentación y su integración con aplicaciones web que requieren interfaces dinámicas e interactivas.
+
+**Alternativas consideradas:**
+
+* **Vue.js:** Es una alternativa sencilla y adecuada para interfaces web, pero el equipo decidió utilizar React como tecnología frontend.
+* **Angular:** Ofrece una estructura completa para aplicaciones web, pero presenta una curva de aprendizaje mayor para las necesidades y alcance del proyecto.
+
+### Backend
+
+**Node.js + Express**
+
+Se selecciona Node.js junto con Express debido a que permite desarrollar el backend utilizando JavaScript, facilitando la integración con React y permitiendo construir una API REST de manera sencilla.
+
+**Alternativas consideradas:**
+
+* **Django:** Es una alternativa robusta basada en Python, pero implicaría trabajar con un lenguaje diferente al utilizado en el frontend.
+* **Spring Boot:** Es una solución robusta para aplicaciones empresariales, pero presenta una mayor complejidad y curva de aprendizaje para el alcance actual del proyecto.
+
+### Base de datos
+
+**PostgreSQL**
+
+Se selecciona PostgreSQL debido a que es un sistema de gestión de bases de datos relacional, adecuado para manejar información estructurada como productos, categorías, usuarios y movimientos de inventario.
+
+**Alternativas consideradas:**
+
+* **MySQL:** Es una alternativa relacional ampliamente utilizada, pero se decidió utilizar PostgreSQL para el proyecto.
+* **MongoDB:** Es una base de datos NoSQL flexible, pero el modelo relacional de PostgreSQL se considera más apropiado para las relaciones entre las diferentes entidades del sistema de inventario.
+
+### Infraestructura
+
+**Render**
+
+Se selecciona Render como plataforma de infraestructura y despliegue debido a que permite publicar aplicaciones web y servicios backend de manera sencilla, facilitando el proceso de despliegue durante el desarrollo del proyecto.
+
+**Alternativas consideradas:**
+
+* **Vercel:** Es una opción muy adecuada para aplicaciones frontend, pero se decidió utilizar Render como plataforma principal para el despliegue del proyecto.
+* **Railway:** Es una alternativa para desplegar aplicaciones y bases de datos, pero el equipo seleccionó Render para este proyecto.
+
+### Control de versiones
+
+**Git + GitHub**
+
+Se utilizarán Git y GitHub para controlar las versiones del código fuente, registrar cambios y facilitar el trabajo colaborativo entre los integrantes del equipo.
+
+**Alternativas consideradas:**
+
+* **GitLab:** Ofrece funcionalidades similares para repositorios y colaboración, pero el equipo decidió utilizar GitHub.
+* **Bitbucket:** Es otra alternativa para alojar repositorios Git, pero no fue seleccionada para este proyecto.
+
+## Consecuencias
+
+### Consecuencias positivas
+
+* React permitirá construir una interfaz organizada mediante componentes reutilizables.
+* Node.js y Express permitirán desarrollar una API REST y mantener una separación entre frontend y backend.
+* PostgreSQL permitirá almacenar información estructurada y establecer relaciones entre las entidades del sistema.
+* El uso de JavaScript en frontend y backend reduce la cantidad de lenguajes que el equipo debe manejar.
+* Render facilitará el despliegue del proyecto y permitirá disponer de una aplicación accesible en línea.
+* Git y GitHub permitirán mantener un historial de cambios y facilitarán el trabajo colaborativo.
+* El stack seleccionado cuenta con tecnologías ampliamente utilizadas y con disponibilidad de documentación y recursos de aprendizaje.
+
+### Consecuencias negativas
+
+* El equipo deberá aprender y coordinar varias tecnologías diferentes.
+* Será necesario establecer una correcta comunicación entre React, la API desarrollada con Express y PostgreSQL.
+* El uso de diferentes servicios y herramientas introduce configuraciones adicionales para el despliegue.
+* El equipo deberá aprender buenas prácticas de manejo de ramas, commits y resolución de conflictos en Git.
+* La utilización de Render puede implicar limitaciones propias del servicio dependiendo del plan utilizado.
+* Node.js y Express requieren que el equipo establezca una estructura adecuada para mantener organizado el backend a medida que el proyecto crezca.
+
+---
+
+## Resumen de la decisión
+
+Se adopta **React + Node.js/Express + PostgreSQL + Render + Git/GitHub** como stack tecnológico para el sistema de inventario para Pymes, buscando un equilibrio entre facilidad de aprendizaje, integración entre tecnologías, mantenibilidad, colaboración y facilidad de despliegue.
