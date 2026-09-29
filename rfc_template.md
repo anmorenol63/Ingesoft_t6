@@ -9,13 +9,6 @@ Autores:
 párrafo corto que explica qué estas proponiendo
 -->
 
-Stack tecnológico:
-
-- Fronted: React
-- Backend: Node.js + Express
-- Base de datos: PostgreSQL
-- Infraestructura: Render
-- Control de versiones: Git + Github
 
 ## 2 Motivación
 
