@@ -7,7 +7,7 @@
 
 ### Descripción
 
-El sistema debe permitir al usuario exportar la información del inventario en formato PDF, incluyendo el nombre del producto, lote, cantidad disponible y fecha de vencimiento.
+El sistema debe permitir al regente de farmacia o auxiliar exportar la información del inventario en formato PDF, incluyendo el nombre del producto, lote, cantidad disponible y fecha de vencimiento.
 
 ---
 
