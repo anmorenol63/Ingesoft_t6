@@ -45,7 +45,7 @@ El sistema debe permitir al usuario exportar la información del inventario en f
 
 ## CA-01. Generación del archivo PDF
 
-**Dado que** el usuario se encuentra consultando el inventario,
+**Dado que** el regente de farmacia o el auxiliar de farmacia se encuentra consultando el inventario,
 **cuando** solicita exportar la información del inventario,
 **entonces** el sistema deberá generar un archivo en formato PDF.
 
@@ -53,7 +53,7 @@ El sistema debe permitir al usuario exportar la información del inventario en f
 
 ## CA-02. Nombre del producto
 
-**Dado que** el sistema genera el archivo PDF,
+**Dado que** el regente de farmacia o el auxiliar de farmacia sistema genera el archivo PDF,
 **cuando** se consulta el contenido del documento,
 **entonces** el PDF deberá incluir el nombre de cada producto registrado en el inventario.
 
@@ -108,7 +108,7 @@ El sistema es responsable de consultar la información registrada del inventario
 
 ### 4.3 Objetivo
 
-Permitir al usuario exportar la información del inventario en formato PDF, incluyendo el nombre del producto, lote, cantidad disponible y fecha de vencimiento, con el propósito de facilitar su consulta, seguimiento y realización de informes.
+Permitir al regente de farmacia o el auxiliar de farmacia exportar la información del inventario en formato PDF, incluyendo el nombre del producto, lote, cantidad disponible y fecha de vencimiento, con el propósito de facilitar su consulta, seguimiento y realización de informes.
 
 ---
 
@@ -120,22 +120,22 @@ Permitir al usuario exportar la información del inventario en formato PDF, incl
 
 Antes de ejecutar el caso de uso:
 
-1. El usuario debe haber ingresado al sistema.
-2. El usuario debe tener acceso al módulo de inventario.
+1. El regente de farmacia o el auxiliar de farmacia debe haber ingresado al sistema.
+2. El regente de farmacia o el auxiliar de farmacia debe tener acceso al módulo de inventario.
 3. Debe existir información registrada en el inventario.
-4. El usuario debe encontrarse consultando el inventario.
+4. El regente de farmacia o el auxiliar de farmacia debe encontrarse consultando el inventario.
 
 ### Flujo principal
 
 | Paso | Actor                                                             | Sistema                                                                                                      |
 | ---- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 1    | El usuario consulta el inventario.                                | El sistema muestra la información disponible del inventario.                                                 |
-| 2    | El usuario selecciona la opción **"Exportar inventario en PDF"**. | El sistema recibe la solicitud de exportación.                                                               |
+| 1    | El regente de farmacia o el auxiliar de farmacia consulta el inventario.                                | El sistema muestra la información disponible del inventario.                                                 |
+| 2    | El regente de farmacia o el auxiliar de farmacia selecciona la opción **"Exportar inventario en PDF"**. | El sistema recibe la solicitud de exportación.                                                               |
 | 3    | —                                                                 | El sistema consulta la información registrada del inventario.                                                |
 | 4    | —                                                                 | El sistema organiza la información de los productos y sus respectivos lotes.                                 |
 | 5    | —                                                                 | El sistema genera el archivo en formato PDF.                                                                 |
 | 6    | —                                                                 | El sistema incluye en el documento el nombre del producto, lote, cantidad disponible y fecha de vencimiento. |
-| 7    | El usuario dispone del archivo generado.                          | El sistema permite al usuario obtener el archivo PDF.                                                        |
+| 7    | El regente de farmacia o el auxiliar de farmacia dispone del archivo generado.                          | El sistema permite al regente de farmacia o el auxiliar de farmacia obtener el archivo PDF.                                                        |
 
 ### Resultado esperado
 
@@ -146,7 +146,7 @@ El sistema genera correctamente un archivo PDF que contiene la información del 
 * Cantidad disponible.
 * Fecha de vencimiento.
 
-El usuario puede disponer del documento para su consulta, seguimiento y realización de informes.
+El regente de farmacia o el auxiliar de farmacia puede disponer del documento para su consulta, seguimiento y realización de informes.
 
 ---
 
@@ -182,4 +182,4 @@ No contempla:
 * Facturación.
 * Procesos contables.
 
-El objetivo es proporcionar al usuario un documento con la información registrada del inventario para facilitar su consulta, seguimiento y elaboración de informes.
+El objetivo es proporcionar al regente de farmacia o el auxiliar de farmacia un documento con la información registrada del inventario para facilitar su consulta, seguimiento y elaboración de informes.
