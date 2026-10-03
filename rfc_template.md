@@ -2,6 +2,7 @@
 
 Autores:
  - @githubusername
+ - Edgar Mauricio Montufar Molano
 
 ## 1 TL;DR
 
