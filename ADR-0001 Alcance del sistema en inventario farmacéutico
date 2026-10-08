@@ -89,9 +89,3 @@ Desarrollar el sistema específicamente para el control del inventario de produc
 - El sistema estará orientado específicamente al inventario de productos farmacéuticos.
 - No se contemplarán procesos externos al control del inventario.
 - Las funcionalidades deberán mantenerse dentro del alcance definido para el proyecto.
-
-## Diferencia con un RFC (referencia rápida)
-
-Este ADR documenta una **decisión de arquitectura y alcance del sistema**, dejando constancia del contexto, las alternativas consideradas y las consecuencias de la decisión.
-
-Un RFC se utilizaría para **presentar y discutir una propuesta antes de tomar una decisión definitiva**.
