@@ -13,7 +13,6 @@ HOW TO USE THIS TEMPLATE
    reference before you start.
 -->
 
-# [REQ-ID] — [Short Requirement Title]
 # REQ-RNF-01 — Bloquear acceso tras intentos fallidos
 
 | Campo | Detalle |
@@ -91,9 +90,6 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 
 ---
 
-
----------------
-
 ## 4. Representaciones — El requisito no es la representación
 
 ### 4.1 Historia de usuario
@@ -156,9 +152,6 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 > El acceso del usuario permanece bloqueado durante cinco minutos después de alcanzar cinco intentos consecutivos de autenticación fallidos. Una vez finalizado el período, el sistema permite que el usuario vuelva a intentar autenticarse.
 
 
-
-
-
 **Diagrama de flujo**
 
 ```mermaid
@@ -192,86 +185,6 @@ flowchart TD
     class A,B,F,G,J,K,M,N principal
     class D,H alternativo
     class L excepcion
-```
-
-
-
-
-
-----------------_______________________________-----
-
-## 4. Representations — Requirement ≠ Representation
-
-*(Class 9. Each representation reveals different information. Fill in all three below — for this capstone requirement, all three are required.)*
-
-### 4.1 User Story
-
-> As a **[role]**,
-> I want **[capability]**,
-> so that **[value]**.
-
-*Check yourself: is the "I want" describing the need, or already prescribing a solution?*
-
-### 4.2 Acceptance Criteria
-
-*(At least two scenarios: one normal path, one alternative or exception.)*
-
-**Scenario 1 — [short name]**
-> **Given** [context]
-> **When** [event/stimulus]
-> **Then** [observable outcome]
-
-**Scenario 2 — [short name, alternative or exception]**
-> **Given** [context]
-> **When** [event/stimulus]
-> **Then** [observable outcome]
-
-### 4.3 Use Case
-
-| Field | |
-|---|---|
-| **Use Case name** | |
-| **Actor** | |
-| **Goal** | |
-| **Trigger** | |
-| **Precondition** | |
-
-**Main Flow**
-1.
-2.
-3.
-4.
-
-**Alternative Flow**
-> [Condition] → [what happens instead]
-
-**Exception**
-> [Condition] → [what happens instead]
-
-**Postcondition**
->
-
-**Flow Diagram**
-*(Replace the labels below with your own steps. Keep Main Flow, Alternative, and Exception visually distinct — delete whichever branch doesn't apply to your use case. This renders automatically on GitHub.)*
-
-```mermaid
-flowchart TD
-    A([Trigger: what starts this use case]) --> B["1. Main flow step"]
-    B --> C["2. Main flow step"]
-    C --> D{"Decision point, if any"}
-    D -- "Normal path" --> G["3. Main flow step"]
-    G --> H(["Postcondition / goal reached"])
-    D -- "Alternative condition" --> E["ALTERNATIVE: what happens instead"]
-    E --> H
-    D -- "Exception condition" --> F["EXCEPTION: what happens instead"]
-    F --> H
-
-    classDef mainflow fill:#1E2761,color:#ffffff,stroke:#1E2761;
-    classDef alt fill:#F2A541,color:#1E2761,stroke:#F2A541;
-    classDef exception fill:#B3261E,color:#ffffff,stroke:#B3261E;
-    class B,C,G mainflow;
-    class E alt;
-    class F exception;
 ```
 
 ---
