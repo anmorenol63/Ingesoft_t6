@@ -69,7 +69,7 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 
 | Riesgo | Probabilidad | Impacto | Mitigación (opcional) |
 |---|---|---|---|
-| **Ataque de Denegación de Servicio (DoS) dirigido a usuarios legítimos:** Un atacante puede forzar intencionadamente 5 intentos fallidos con el correo de un usuario válido para denegarle el acceso. | Media | Alto | Implementar validación tipo CAPTCHA después del 3.ᵉʳ intento fallido y enviar una notificación por correo electrónico al usuario informando sobre el bloqueo. |
+| **Ataque de Denegación de Servicio (DoS) dirigido a usuarios legítimos:** Un atacante puede forzar intencionadamente 5 intentos fallidos con el correo de un usuario válido para denegarle el acceso. | Media | Alto |  Evaluar la implementación de un CAPTCHA desde el primer intento para dificultar los intentos automatizados. |
 | **Inconsistencia en el tiempo de bloqueo por almacenamiento en caché:** Que el estado de bloqueo no se actualice de inmediato en la sesión del usuario tras cumplir los 5 minutos. | Baja | Medio | Manejar la expiración del bloqueo directamente con marcas de tiempo en formato UTC en la base de datos o almacenamiento en memoria (Redis). |
 
 **Preguntas abiertas (Open Questions)**
