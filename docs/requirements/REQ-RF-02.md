@@ -53,6 +53,7 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 
 **Reglas de negocio (Business Rules)**
 > **BR-01 (Límite de autenticación de usuario):** Una cuenta de usuario solo puede acumular un máximo de 5 intentos fallidos de autenticación consecutivos antes de ser restringida temporalmente para evitar accesos no autorizados.
+
 > **BR-02 (Reinicio del conteo por evento exitoso):** Un intento de autenticación exitoso restablece inmediatamente a cero el contador de intentos fallidos acumulados previamente por el usuario.
 
 **Restricciones (Constraints)**
@@ -70,7 +71,8 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 | Riesgo | Probabilidad | Impacto | Mitigación (opcional) |
 |---|---|---|---|
 | **Ataque de Denegación de Servicio (DoS) dirigido a usuarios legítimos:** Un atacante puede forzar intencionadamente 5 intentos fallidos con el correo de un usuario válido para denegarle el acceso. | Media | Alto |  Evaluar la implementación de un CAPTCHA desde el primer intento para dificultar los intentos automatizados. |
-| **Inconsistencia en el tiempo de bloqueo por almacenamiento en caché:** Que el estado de bloqueo no se actualice de inmediato en la sesión del usuario tras cumplir los 5 minutos. | Baja | Medio | Manejar la expiración del bloqueo directamente con marcas de tiempo en formato UTC en la base de datos o almacenamiento en memoria (Redis). |
+| **Finalización incorrecta del bloqueo temporal:** El sistema podría mantener una cuenta bloqueada después de que hayan transcurrido los cinco minutos establecido, impidiendo que el usuario vuelva a intentar autenticarse | Baja | Alto | Validar en el backend el tiempo transcurrido desde el inicio del bloqueo y permitir nuevos intentos cuando haya finalizado el período establecido. |
+| **Perdida del contador de intentos fallidos:** Si el contador se almacena únicamente en la memoria temporal, un reinicio del servidor o un cambio de instancia podría hacer que se pierdan los intentos acumulados | Media | Alto | Almacenar el contador en un mecanismo de mayor persistencia y comprobar su estado después del reinicio. |
 
 **Preguntas abiertas (Open Questions)**
 > N/A — Ninguna identificada.
