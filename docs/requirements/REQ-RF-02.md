@@ -144,7 +144,7 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 
 **Flujo alternativo**
 
-> **Autenticación exitosa antes de alcanzar cinco intentos fallidos:** si el usuario ingresa credenciales válidas antes de alcanzar el quinto intento fallido, el sistema permite continuar con el proceso de autenticación. El comportamiento de reinicio del contador debe confirmarse con el equipo.
+> **Autenticación exitosa antes de alcanzar cinco intentos fallidos: si el usuario ingresa credenciales válidas antes de alcanzar cinco intentos consecutivos fallidos, el sistema permite el acceso y reinicia el contador de intentos fallidos a cero.
 
 **Excepción**
 
