@@ -15,12 +15,12 @@ HOW TO USE THIS TEMPLATE
 
 # [REQ-ID] — [Short Requirement Title]
 
-| | |
+| Campo | Detalle |
 |---|---|
-| **Status** | Propuesto |
-| **Team / Author(s)** | Junior Andrés Arrieta Tabaco, Kevin Alexis Bermúdez Caicedo, Edgar Mauricio Montufar Molano y Antonio José Moreno López |
-| **Date** | 2026-10-10 |
-| **Linked User Story / AC** | HU-04, CA-01, CA-02, CA-03, CA-04 |
+| **Estado** | Propuesto |
+| **Equipo / Autores** | Junior Andrés Arrieta Tabaco, Edgar Mauricio Montufar Molano, Kevin Alexis Bermúdez Caicedo y Antonio José Moreno López |
+| **Fecha** | 2026-10-10 |
+| **Historia de usuario / Criterios de aceptación vinculados** | HU-04, CA-01, CA-02, CA-03, CA-04 |
 
 ---
 
