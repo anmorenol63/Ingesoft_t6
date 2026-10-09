@@ -30,6 +30,17 @@ HOW TO USE THIS TEMPLATE
 ----
 
 
+| Campo | Detalle |
+|---|---|
+| **Estado** | Propuesto |
+| **Equipo / Autores** | Junior Andrés Arrieta Tabaco, Edgar Mauricio Montufar Molano, Kevin Alexis Bermúdez Caicedo y Antonio José Moreno López |
+| **Fecha** | 2026-10-10 |
+| **Historia de usuario / Criterios de aceptación vinculados** | HU-04, CA-01, CA-02, CA-03, CA-04 |
+
+----
+
+
+
 
 
 ## 1. Descripción general
