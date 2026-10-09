@@ -49,34 +49,32 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 > Reducir el riesgo de intentos reiterados de acceso no autorizado mediante el bloqueo temporal de la autenticación después de cinco intentos consecutivos fallidos.
 
 ---
+## 2. Contexto (Context)
 
-## 2. Context — A Requirement Rarely Stands Alone
+**Reglas de negocio (Business Rules)**
+> **BR-01 (Límite de autenticación de usuario):** Una cuenta de usuario solo puede acumular un máximo de 5 intentos fallidos de autenticación consecutivos antes de ser restringida temporalmente para evitar accesos no autorizados.
+> **BR-02 (Reinicio del conteo por evento exitoso):** Un intento de autenticación exitoso restablece inmediatamente a cero el contador de intentos fallidos acumulados previamente por el usuario.
 
-*(Class 10. Fill honestly — "N/A — none identified" is a valid, expected answer for several of these.)*
+**Restricciones (Constraints)**
+> **CONS-01 (Gestión en el servidor / Backend):** La lógica del temporizador de 5 minutos, el contador de intentos y el bloqueo deben ser procesados y validados exclusivamente en el lado del servidor (*backend*) para evitar que el cliente o navegador pueda omitir la restricción alterando datos locales.
 
-**Business Rule(s)**
-> What rule(s) exist in the business/domain, independent of software, that this requirement supports or enforces? Remember: Business Rule ≠ Software Requirement — not every rule needs one.
+**Supuestos (Assumptions)**
+> **ASM-01 (Sincronización horaria del servidor):** Se asume que el servidor cuenta con un servicio de tiempo (NTP) activo y sincronizado para calcular con precisión la ventana de bloqueo de 5 minutos.
+> **ASM-02 (Existencia previa de la cuenta):** Se asume que los intentos de autenticación evaluados corresponden a usuarios previamente registrados y activos en el sistema farmacéutico.
 
-**Constraint(s)**
-> What limits how this requirement can be solved (regulation, existing technology, contract, interoperability, organizational policy)? A constraint reduces the available design space — it doesn't describe what must be satisfied, it describes what limits the solution.
+**Dependencias (Dependencies)**
+> **DEP-01 (Servicio de Autenticación):** El mecanismo de bloqueo depende directamente del servicio central de autenticación/login encargado de procesar y validar las credenciales de entrada.
 
-**Assumption(s)**
-> What are we currently treating as true, without full verification, to keep moving? (Assumption ≠ Fact.)
+**Riesgos (Risks)**
 
-**Dependenc(ies)**
-> What does this requirement rely on to be satisfied (another requirement, an external system/API, a data source, a third party, an organizational process)?
-
-**Risk(s)**
-> What uncertain event or condition could negatively affect this requirement or its delivery? For each risk, note a rough Likelihood and Impact (High / Medium / Low) and, if you have one, a brief mitigation note.
-
-| Risk | Likelihood | Impact | Mitigation (optional) |
+| Riesgo | Probabilidad | Impacto | Mitigación (opcional) |
 |---|---|---|---|
-| | | | |
+| **Ataque de Denegación de Servicio (DoS) dirigido a usuarios legítimos:** Un atacante puede forzar intencionadamente 5 intentos fallidos con el correo de un usuario válido para denegarle el acceso. | Media | Alto | Implementar validación tipo CAPTCHA después del 3.ᵉʳ intento fallido y enviar una notificación por correo electrónico al usuario informando sobre el bloqueo. |
+| **Inconsistencia en el tiempo de bloqueo por almacenamiento en caché:** Que el estado de bloqueo no se actualice de inmediato en la sesión del usuario tras cumplir los 5 minutos. | Baja | Medio | Manejar la expiración del bloqueo directamente con marcas de tiempo en formato UTC en la base de datos o almacenamiento en memoria (Redis). |
 
-**Open Questions**
-> Anything still unresolved — ambiguity, a question no stakeholder has answered yet, a missing piece of evidence. List it here instead of guessing.
+**Preguntas abiertas (Open Questions)**
+> N/A — Ninguna identificada.
 
----
 
 ## 3. Priority & Estimation
 
