@@ -186,48 +186,44 @@ flowchart TD
 ```
 
 ---
-## 5. Traceability & Impact
+## 5. Trazabilidad e impacto
 
-*(Class 10. Conceptual, not a formal matrix.)*
-
-**Backward — why does this requirement exist?**
+**Trazabilidad hacia atras — ¿Por qué existe este requisito?**
 
 > HU-04 — Necesidad de proteger el acceso a la cuenta frente a múltiples intentos fallidos → RNF-01 — Bloquear acceso tras intentos fallidos → CA-01, CA-02, CA-03 y CA-04 → CU-03 — Bloquear acceso tras intentos fallidos.
 
 La trazabilidad hacia atrás se considera documentada porque la historia de usuario explica el propósito de seguridad, los criterios de aceptación detallan el comportamiento esperado y el caso de uso describe el flujo del bloqueo. El ADR-0001 establece el alcance del sistema de inventario farmacéutico, pero no menciona directamente el mecanismo de bloqueo. Por eso, no se utiliza como evidencia específica del origen de esta necesidad.
 
-**Forward — what will this affect?**
+**Trazabilidad hacia adelante — ¿Que va a afectar esto?**
 
 > RNF-01 → Diseño futuro (mecanismo de autenticación, contador de intentos fallidos y control temporal del bloqueo) → Implementación futura (lógica de autenticación y gestión del estado de bloqueo) → Pruebas (verificación de los cinco intentos fallidos, el bloqueo durante cinco minutos y la recuperación del acceso).
 
 **Impact Analysis — if this requirement changes, what else might need to change?**
 
-- [x] Business Rules
-- [x] Constraints
-- [x] Dependencies
-- [x] Risks
-- [x] Acceptance Criteria
-- [ ] Estimate
-- [ ] Priority
-- [x] Future Design
-- [x] Future Tests
+- [x] Reglas de negocio
+- [x] Restricciones
+- [x] Dependencias
+- [x] Riesgos
+- [x] Criterios de aceptacion
+- [ ] Estimacion
+- [ ] Prioridad
+- [x] Diseño futuro
+- [x] Pruebas futuras
 
 > Si cambia el mecanismo de autenticación o la política de bloqueo temporal, las reglas de negocio, las restricciones, las dependencias y los riesgos deberán revisarse. También podrían cambiar los criterios de aceptación si se modifica el número de intentos fallidos o la duración del bloqueo. El diseño futuro y las pruebas deberán actualizarse para mantener el comportamiento esperado. La estimación y la prioridad se dejan sin marcar porque no se cuenta con una estimación previa ni con una decisión de priorización documentada que permita afirmar que cambiarían.
 
 ---
 
-## 6. Validation — Quality Gate
+## 6. Validación — Criterios de calidad
 
-*(Class 9 + Class 10. Self-audit before you commit this file. Check honestly — a "no" here means the requirement isn't ready yet, not that you should force a checkmark.)*
-
-- [x] **Valid?** Does it reflect a real, evidenced need — not an invented one?
-- [x] **Clear / Unambiguous?** Is there only one reasonable interpretation?
-- [x] **Atomic?** Is this one independently testable expectation, not several bundled together?
-- [x] **Necessary?** Does removing it actually break something real?
-- [x] **Feasible?** Can this realistically be built with what the team has?
-- [x] **Verifiable?** Can you demonstrate, concretely, whether it's satisfied?
-- [x] **Consistent?** Does it conflict with any other requirement in your set?
-- [x] **Complete enough?** Are there important functions or constraints still missing?
-- [x] **Traceable?** Can every part of this document be traced back to real evidence — not invented to fill a section?
+- [x] **¿Valido?** Refleja una necesidad real y evidenciada, y no una inventada?
+- [x] **¿Es claro y no ambiguo?** Solo hay una interpretación razonable?
+- [x] **¿Es atomico?** ¿Describe una expectativa que puede comprobarse de manera independiente, en lugar de agrupar varias funcionalidades distintas?
+- [x] **¿Es necesario?** ¿Removerla afectaría una necesidad real del sistema?
+- [x] **¿Es factible?** ¿Puede implementarse de manera realista con los recursos y la tecnología disponibles para el equipo?
+- [x] **¿Es verificable?** ¿Se puede demostrar de forma concreta si se cumple o no?
+- [x] **¿Es consistente?** ¿Evita entrar en conflicto con los demás requisitos definidos?
+- [x] **¿Esta suficientemente completo?** ¿Se han definido las funciones y restricciones importantes?
+- [x] **¿Es traceable?** ¿Cada parte del documento puede relacionarse con evidencia real, en lugar de haberse inventado para completar una sección?
 
 > El requisito cuenta con una necesidad documentada en la HU-04, un objetivo de seguridad explícito y una relación directa con los criterios de aceptación CA-01 a CA-04 y el caso de uso CU-03. Su comportamiento principal es claro, se concentra en una regla de seguridad y puede verificarse mediante pruebas basadas en los cinco intentos consecutivos fallidos y los cinco minutos de bloqueo. Además, la funcionalidad es técnicamente razonable, aunque su implementación definitiva dependerá de la arquitectura y del mecanismo de autenticación del sistema. Los elementos revisados mantienen coherencia entre sí y permiten seguir la trazabilidad interna del requisito. Se recomienda revisar los casos límite durante el diseño, como el tratamiento de intentos exitosos y el manejo del bloqueo entre sesiones, y comprobar la consistencia con el conjunto completo de requisitos antes de cerrar la validación.
