@@ -51,22 +51,22 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 ---
 ## 2. Contexto
 
-**Reglas de negocio (Business Rules)**
-> **BR-01 (Límite de autenticación de usuario):** Una cuenta de usuario solo puede acumular un máximo de 5 intentos fallidos de autenticación consecutivos antes de ser restringida temporalmente para evitar accesos no autorizados.
+**Reglas de negocio**
+> **RN-01 (Límite de autenticación de usuario):** Una cuenta de usuario solo puede acumular un máximo de 5 intentos fallidos de autenticación consecutivos antes de ser restringida temporalmente para evitar accesos no autorizados.
 
-> **BR-02 (Reinicio del conteo por evento exitoso):** Un intento de autenticación exitoso restablece inmediatamente a cero el contador de intentos fallidos acumulados previamente por el usuario.
+> **RN-02 (Reinicio del conteo por evento exitoso):** Un intento de autenticación exitoso restablece inmediatamente a cero el contador de intentos fallidos acumulados previamente por el usuario.
 
-**Restricciones (Constraints)**
-> **CONS-01 (Gestión en el servidor / Backend):** La lógica del temporizador de 5 minutos, el contador de intentos y el bloqueo deben ser procesados y validados exclusivamente en el lado del servidor (*backend*) para evitar que el cliente o navegador pueda omitir la restricción alterando datos locales.
+**Restricciones**
+> **REST-01 (Gestión en el servidor / Backend):** La lógica del temporizador de 5 minutos, el contador de intentos y el bloqueo deben ser procesados y validados exclusivamente en el lado del servidor (*backend*) para evitar que el cliente o navegador pueda omitir la restricción alterando datos locales.
 
-**Supuestos (Assumptions)**
-> **ASM-01 (Sincronización horaria del servidor):** Se asume que el servidor cuenta con un servicio de tiempo (NTP) activo y sincronizado para calcular con precisión la ventana de bloqueo de 5 minutos.
-> **ASM-02 (Existencia previa de la cuenta):** Se asume que los intentos de autenticación evaluados corresponden a usuarios previamente registrados y activos en el sistema farmacéutico.
+**Supuestos**
+> **SUP-01 (Sincronización horaria del servidor):** Se asume que el servidor cuenta con un servicio de tiempo (NTP) activo y sincronizado para calcular con precisión la ventana de bloqueo de 5 minutos.
+> **SUP-02 (Existencia previa de la cuenta):** Se asume que los intentos de autenticación evaluados corresponden a usuarios previamente registrados y activos en el sistema farmacéutico.
 
-**Dependencias (Dependencies)**
+**Dependencias**
 > **DEP-01 (Servicio de Autenticación):** El mecanismo de bloqueo depende directamente del servicio central de autenticación/login encargado de procesar y validar las credenciales de entrada.
 
-**Riesgos (Risks)**
+**Riesgos**
 
 | Riesgo | Probabilidad | Impacto | Mitigación (opcional) |
 |---|---|---|---|
