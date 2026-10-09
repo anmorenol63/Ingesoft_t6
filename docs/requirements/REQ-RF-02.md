@@ -158,10 +158,46 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 
 
 
+**Diagrama de flujo**
+
+```mermaid
+flowchart TD
+    A([Inicio: usuario intenta autenticarse]) --> B[El sistema verifica las credenciales]
+    B --> C{¿Credenciales válidas?}
+
+    C -- Sí --> D[El sistema permite continuar con la autenticación]
+    D --> E([Fin])
+
+    C -- No --> F[El sistema registra el intento fallido]
+    F --> G{¿Alcanza cinco intentos fallidos consecutivos?}
+
+    G -- No --> H[El sistema informa que las credenciales son incorrectas]
+    H --> I([Fin del intento])
+
+    G -- Sí --> J[El sistema bloquea el acceso durante cinco minutos]
+    J --> K{¿Han transcurrido cinco minutos?}
+
+    K -- No --> L[EXCEPCIÓN: el sistema impide la autenticación]
+    L --> K
+
+    K -- Sí --> M[El sistema finaliza el bloqueo temporal]
+    M --> N[El usuario puede intentar autenticarse nuevamente]
+    N --> E
+
+    classDef principal fill:#1f3a70,color:#ffffff,stroke:#14284d
+    classDef alternativo fill:#f0ad4e,color:#000000,stroke:#b87916
+    classDef excepcion fill:#c9302c,color:#ffffff,stroke:#8b1e1a
+
+    class A,B,F,G,J,K,M,N principal
+    class D,H alternativo
+    class L excepcion
+```
 
 
 
-----------------
+
+
+----------------_______________________________-----
 
 ## 4. Representations — Requirement ≠ Representation
 
