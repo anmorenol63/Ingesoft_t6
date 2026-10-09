@@ -14,6 +14,7 @@ HOW TO USE THIS TEMPLATE
 -->
 
 # [REQ-ID] — [Short Requirement Title]
+# REQ-RNF-01 — Bloquear acceso tras intentos fallidos
 
 | Campo | Detalle |
 |---|---|
