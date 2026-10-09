@@ -24,25 +24,6 @@ HOW TO USE THIS TEMPLATE
 
 ---
 
-
-
-
-----
-
-
-| Campo | Detalle |
-|---|---|
-| **Estado** | Propuesto |
-| **Equipo / Autores** | Junior Andrés Arrieta Tabaco, Edgar Mauricio Montufar Molano, Kevin Alexis Bermúdez Caicedo y Antonio José Moreno López |
-| **Fecha** | 2026-10-10 |
-| **Historia de usuario / Criterios de aceptación vinculados** | HU-04, CA-01, CA-02, CA-03, CA-04 |
-
-----
-
-
-
-
-
 ## 1. Descripción general
 
 **Declaración de requisitos**
@@ -66,56 +47,6 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 **Valor / Justificación**
 
 > Reducir el riesgo de intentos reiterados de acceso no autorizado mediante el bloqueo temporal de la autenticación después de cinco intentos consecutivos fallidos.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-
-
-## 1. Overview
-
-**Requirement Statement**
-> The system shall [capability/behavior] [under what condition, if applicable].
-
-**Type:** Functional / Non-functional
-*(Classified using the Perfect Technology Filter from Class 8: imagine a perfect computer — infinite speed, unlimited memory, zero failures, zero cost. Would this requirement still matter? Yes → likely functional. The limitation disappears with perfect technology → likely non-functional.)*
-
-**Source / Evidence**
-> Where did this come from? (stakeholder, interview, workshop, existing system, regulation — reference your Class 8 Discovery Sheet entry if you have one)
-
-**Need**
-> What is the underlying need, stated as a goal — not a solution? (e.g. "know when my order will arrive," not "build a GPS map")
-
-**Value / Rationale**
-> Why does this requirement matter? What becomes better for the user/business if it's satisfied? *(This is usually the same as the "so that" of your User Story below — write it once and reuse it, don't rewrite it from scratch.)*
 
 ---
 
