@@ -17,10 +17,10 @@ HOW TO USE THIS TEMPLATE
 
 | | |
 |---|---|
-| **Status** | Draft / Validated / Open Question |
-| **Team / Author(s)** | |
-| **Date** | |
-| **Linked User Story / AC** | |
+| **Status** | Propuesto |
+| **Team / Author(s)** | Junior Andrés Arrieta Tabaco, Kevin Alexis Bermúdez Caicedo, Edgar Mauricio Montufar Molano y Antonio José Moreno López |
+| **Date** | 2026-10-10 |
+| **Linked User Story / AC** | HU-04, CA-01, CA-02, CA-03, CA-04 |
 
 ---
 
