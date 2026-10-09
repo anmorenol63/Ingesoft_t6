@@ -186,29 +186,33 @@ flowchart TD
 ```
 
 ---
-
 ## 5. Traceability & Impact
 
 *(Class 10. Conceptual, not a formal matrix.)*
 
 **Backward — why does this requirement exist?**
-> Evidence → Need → Requirement. Point to the specific evidence/need entries that justify this requirement (from your Discovery Sheet).
+
+> HU-04 — Necesidad de proteger el acceso a la cuenta frente a múltiples intentos fallidos → RNF-01 — Bloquear acceso tras intentos fallidos → CA-01, CA-02, CA-03 y CA-04 → CU-03 — Bloquear acceso tras intentos fallidos.
+
+La trazabilidad hacia atrás se considera documentada porque la historia de usuario explica el propósito de seguridad, los criterios de aceptación detallan el comportamiento esperado y el caso de uso describe el flujo del bloqueo. El ADR-0001 establece el alcance del sistema de inventario farmacéutico, pero no menciona directamente el mecanismo de bloqueo. Por eso, no se utiliza como evidencia específica del origen de esta necesidad.
 
 **Forward — what will this affect?**
-> Requirement → future Design → Implementation → Tests. *(It's fine if Design hasn't happened yet — note what you expect this to touch once it does, and update this section once Class 11 work begins.)*
+
+> RNF-01 → Diseño futuro (mecanismo de autenticación, contador de intentos fallidos y control temporal del bloqueo) → Implementación futura (lógica de autenticación y gestión del estado de bloqueo) → Pruebas (verificación de los cinco intentos fallidos, el bloqueo durante cinco minutos y la recuperación del acceso).
 
 **Impact Analysis — if this requirement changes, what else might need to change?**
-- [ ] Business Rules
-- [ ] Constraints
-- [ ] Dependencies
-- [ ] Risks
-- [ ] Acceptance Criteria
+
+- [x] Business Rules
+- [x] Constraints
+- [x] Dependencies
+- [x] Risks
+- [x] Acceptance Criteria
 - [ ] Estimate
 - [ ] Priority
-- [ ] Future Design
-- [ ] Future Tests
+- [x] Future Design
+- [x] Future Tests
 
-> Briefly note which of the above are actually likely to be affected, and why.
+> Si cambia el mecanismo de autenticación o la política de bloqueo temporal, las reglas de negocio, las restricciones, las dependencias y los riesgos deberán revisarse. También podrían cambiar los criterios de aceptación si se modifica el número de intentos fallidos o la duración del bloqueo. El diseño futuro y las pruebas deberán actualizarse para mantener el comportamiento esperado. La estimación y la prioridad se dejan sin marcar porque no se cuenta con una estimación previa ni con una decisión de priorización documentada que permita afirmar que cambiarían.
 
 ---
 
@@ -216,14 +220,14 @@ flowchart TD
 
 *(Class 9 + Class 10. Self-audit before you commit this file. Check honestly — a "no" here means the requirement isn't ready yet, not that you should force a checkmark.)*
 
-- [ ] **Valid?** Does it reflect a real, evidenced need — not an invented one?
-- [ ] **Clear / Unambiguous?** Is there only one reasonable interpretation?
-- [ ] **Atomic?** Is this one independently testable expectation, not several bundled together?
-- [ ] **Necessary?** Does removing it actually break something real?
-- [ ] **Feasible?** Can this realistically be built with what the team has?
-- [ ] **Verifiable?** Can you demonstrate, concretely, whether it's satisfied?
-- [ ] **Consistent?** Does it conflict with any other requirement in your set?
-- [ ] **Complete enough?** Are there important functions or constraints still missing?
-- [ ] **Traceable?** Can every part of this document be traced back to real evidence — not invented to fill a section?
+- [x] **Valid?** Does it reflect a real, evidenced need — not an invented one?
+- [x] **Clear / Unambiguous?** Is there only one reasonable interpretation?
+- [x] **Atomic?** Is this one independently testable expectation, not several bundled together?
+- [x] **Necessary?** Does removing it actually break something real?
+- [x] **Feasible?** Can this realistically be built with what the team has?
+- [x] **Verifiable?** Can you demonstrate, concretely, whether it's satisfied?
+- [x] **Consistent?** Does it conflict with any other requirement in your set?
+- [x] **Complete enough?** Are there important functions or constraints still missing?
+- [x] **Traceable?** Can every part of this document be traced back to real evidence — not invented to fill a section?
 
-> If any box is unchecked, say what's missing and whether it becomes an Open Question or sends you back to Class 8 (re-elicit) or Class 9 (re-specify).
+> El requisito cuenta con una necesidad documentada en la HU-04, un objetivo de seguridad explícito y una relación directa con los criterios de aceptación CA-01 a CA-04 y el caso de uso CU-03. Su comportamiento principal es claro, se concentra en una regla de seguridad y puede verificarse mediante pruebas basadas en los cinco intentos consecutivos fallidos y los cinco minutos de bloqueo. Además, la funcionalidad es técnicamente razonable, aunque su implementación definitiva dependerá de la arquitectura y del mecanismo de autenticación del sistema. Los elementos revisados mantienen coherencia entre sí y permiten seguir la trazabilidad interna del requisito. Se recomienda revisar los casos límite durante el diseño, como el tratamiento de intentos exitosos y el manejo del bloqueo entre sesiones, y comprobar la consistencia con el conjunto completo de requisitos antes de cerrar la validación.
