@@ -24,6 +24,76 @@ HOW TO USE THIS TEMPLATE
 
 ---
 
+
+
+
+----
+
+
+
+# 1. Descripción general
+
+### Declaración de requisitos
+
+El sistema debe bloquear temporalmente el acceso de un usuario durante cinco minutos después de cinco intentos consecutivos de autenticación fallidos. Durante este período, el sistema debe impedir que el usuario vuelva a autenticarse.
+
+### Tipo: No funcional (*Seguridad*)
+
+Este requisito busca proteger el acceso al sistema mediante un mecanismo de bloqueo temporal después de múltiples intentos consecutivos de autenticación fallidos. Aunque establece un comportamiento específico que puede verificarse mediante pruebas, su propósito principal es fortalecer la seguridad del sistema.
+
+### Fuente / evidencia
+
+Documentación de requisitos del proyecto — RNF-01: «Bloquear acceso tras intentos fallidos», HU-04 y criterios de aceptación CA-01, CA-02, CA-03 y CA-04.
+
+El requisito fue definido por el equipo durante la elaboración de los requisitos del sistema como una medida de seguridad para proteger el acceso de los usuarios. No se realizaron entrevistas para identificar esta necesidad.
+
+### Necesidad
+
+Proteger el acceso a las cuentas de usuario y limitar los intentos de autenticación después de cinco intentos consecutivos fallidos.
+
+### Valor / Justificación
+
+Reducir el riesgo de intentos reiterados de acceso no autorizado mediante el bloqueo temporal de la autenticación después de cinco intentos consecutivos fallidos, estableciendo una medida de seguridad clara y verificable para el sistema de gestión y control de inventario para productos farmacéuticos.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+
+
 ## 1. Overview
 
 **Requirement Statement**
