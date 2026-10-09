@@ -90,6 +90,79 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 
 ---
 
+
+---------------
+
+## 4. Representaciones — El requisito no es la representación
+
+### 4.1 Historia de usuario
+
+> Como usuario del sistema, quiero que mi acceso sea bloqueado temporalmente después de cinco intentos consecutivos de autenticación fallidos, para proteger el acceso a mi cuenta ante múltiples intentos fallidos.
+
+*Verificación:* La historia de usuario expresa el objetivo de seguridad que necesita el usuario, mientras que el bloqueo durante cinco minutos después de cinco intentos fallidos establece el comportamiento esperado del sistema.
+
+### 4.2 Criterios de aceptación
+
+**Escenario 1 — Bloqueo después de cinco intentos fallidos**
+
+> Dado que un usuario intenta autenticarse en el sistema, cuando alcanza cinco intentos consecutivos de autenticación fallidos, entonces el sistema bloquea temporalmente su acceso durante cinco minutos.
+
+**Escenario 2 — Intento de autenticación durante el bloqueo**
+
+> Dado que el acceso de un usuario se encuentra bloqueado, cuando intenta autenticarse durante el período de bloqueo, entonces el sistema impide temporalmente el acceso.
+
+**Escenario 3 — Finalización del bloqueo**
+
+> Dado que el acceso de un usuario se encuentra bloqueado, cuando transcurren cinco minutos desde el inicio del bloqueo, entonces el sistema finaliza el período de bloqueo temporal y permite que el usuario vuelva a intentar autenticarse.
+
+**Escenario 4 — Persistencia del bloqueo durante el período establecido**
+
+> Dado que un usuario ha alcanzado cinco intentos consecutivos de autenticación fallidos, cuando intenta autenticarse antes de que finalicen los cinco minutos de bloqueo, entonces el sistema mantiene la restricción de acceso.
+
+### 4.3 Caso de uso
+
+| **Campo** | **Descripción** |
+|---|---|
+| **Nombre del caso de uso** | Bloquear acceso tras intentos fallidos |
+| **Actor** | Usuario del sistema |
+| **Objetivo** | Proteger el acceso al sistema mediante un bloqueo temporal después de cinco intentos consecutivos de autenticación fallidos. |
+| **Desencadenante** | El usuario realiza un intento de autenticación. |
+| **Precondición** | El usuario se encuentra registrado en el sistema y está intentando autenticarse. |
+
+**Flujo principal**
+
+1. El usuario ingresa sus credenciales de autenticación.
+2. El sistema recibe las credenciales ingresadas.
+3. El sistema verifica las credenciales y determina que la autenticación es fallida.
+4. El sistema registra el intento fallido consecutivo.
+5. El usuario continúa realizando intentos de autenticación fallidos.
+6. El sistema registra los intentos fallidos consecutivos.
+7. El usuario realiza el quinto intento consecutivo de autenticación fallido.
+8. El sistema identifica que se han alcanzado cinco intentos consecutivos fallidos.
+9. El sistema bloquea temporalmente el acceso del usuario durante cinco minutos.
+10. El sistema informa que el acceso se encuentra temporalmente bloqueado.
+
+**Flujo alternativo**
+
+> **Autenticación exitosa antes de alcanzar cinco intentos fallidos:** si el usuario ingresa credenciales válidas antes de alcanzar el quinto intento fallido, el sistema permite continuar con el proceso de autenticación. El comportamiento de reinicio del contador debe confirmarse con el equipo.
+
+**Excepción**
+
+> **Intento de autenticación durante el bloqueo:** si el usuario intenta autenticarse antes de que transcurran los cinco minutos, el sistema impide el acceso y mantiene el bloqueo temporal.
+
+**Postcondición**
+
+> El acceso del usuario permanece bloqueado durante cinco minutos después de alcanzar cinco intentos consecutivos de autenticación fallidos. Una vez finalizado el período, el sistema permite que el usuario vuelva a intentar autenticarse.
+
+
+
+
+
+
+
+
+----------------
+
 ## 4. Representations — Requirement ≠ Representation
 
 *(Class 9. Each representation reveals different information. Fill in all three below — for this capstone requirement, all three are required.)*
