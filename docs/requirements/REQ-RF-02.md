@@ -194,13 +194,13 @@ flowchart TD
 
 > HU-04 — Necesidad de proteger el acceso a la cuenta frente a múltiples intentos fallidos → RNF-01 — Bloquear acceso tras intentos fallidos → CA-01, CA-02, CA-03 y CA-04 → CU-03 — Bloquear acceso tras intentos fallidos.
 
-La trazabilidad hacia atrás se considera documentada porque la historia de usuario explica el propósito de seguridad, los criterios de aceptación detallan el comportamiento esperado y el caso de uso describe el flujo del bloqueo. El ADR-0001 establece el alcance del sistema de inventario farmacéutico, pero no menciona directamente el mecanismo de bloqueo. Por eso, no se utiliza como evidencia específica del origen de esta necesidad.
+La historia de usuario expresa la necesidad de seguridad que origina el requisito. Los criterios de aceptación especifican las condiciones que permiten verificar su cumplimiento, mientras que el caso de uso describe el flujo de interacción relacionado con el bloqueo temporal. El ADR-0001 establece el alcance general del sistema de inventario farmacéutico, pero no constituye evidencia específica del origen de este requisito.
 
 **Trazabilidad hacia adelante — ¿Que va a afectar esto?**
 
 > RNF-01 → Diseño futuro (mecanismo de autenticación, contador de intentos fallidos y control temporal del bloqueo) → Implementación futura (lógica de autenticación y gestión del estado de bloqueo) → Pruebas (verificación de los cinco intentos fallidos, el bloqueo durante cinco minutos y la recuperación del acceso).
 
-**Impact Analysis — if this requirement changes, what else might need to change?**
+**Análisis de impacto: si este requisito cambia, ¿qué más podría tener que cambiar?**
 
 - [x] Reglas de negocio
 - [x] Restricciones
