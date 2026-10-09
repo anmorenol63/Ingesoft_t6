@@ -15,7 +15,7 @@ HOW TO USE THIS TEMPLATE
 
 # REQ-RNF-01 — Bloquear acceso tras intentos fallidos
 
-| Campo | Detalle |
+| Atributo | Detalle |
 |---|---|
 | **Estado** | Propuesto |
 | **Equipo / Autores** | Junior Andrés Arrieta Tabaco, Kevin Alexis Bermúdez Caicedo, Edgar Mauricio Montufar Molano y Antonio José Moreno López |
