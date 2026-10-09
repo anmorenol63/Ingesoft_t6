@@ -49,7 +49,7 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 > Reducir el riesgo de intentos reiterados de acceso no autorizado mediante el bloqueo temporal de la autenticación después de cinco intentos consecutivos fallidos.
 
 ---
-## 2. Contexto (Context)
+## 2. Contexto
 
 **Reglas de negocio (Business Rules)**
 > **BR-01 (Límite de autenticación de usuario):** Una cuenta de usuario solo puede acumular un máximo de 5 intentos fallidos de autenticación consecutivos antes de ser restringida temporalmente para evitar accesos no autorizados.
