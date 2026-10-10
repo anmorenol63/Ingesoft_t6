@@ -1,4 +1,4 @@
-# RF-01. Bloqueo temporal de acceso por intentos fallidos.
+# RF-03. Bloqueo temporal de acceso por intentos fallidos.
 
 ## 1. Requisito funcional
 
