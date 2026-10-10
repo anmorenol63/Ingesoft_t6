@@ -1,9 +1,9 @@
-# RNF-01. Bloquear acceso tras intentos fallidos
+# RF-01. Bloqueo temporal de acceso por intentos fallidos.
 
 ## 1. Requisito no funcional
 
-**Código:** RNF-01  
-**Nombre:** Bloquear acceso tras intentos fallidos
+**Código:** RF-03. 
+**Nombre:** Bloqueo temporal de acceso por intentos fallidos.
 
 ### Descripción
 
