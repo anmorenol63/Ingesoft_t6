@@ -77,8 +77,8 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 **Preguntas abiertas (Open Questions)**
 > N/A — Ninguna identificada.
 
-
-## 3. Prioridad y estimación (Priority & Estimation)
+---
+## 3. Prioridad y estimación
 
 **Modelo de priorización utilizado:** MoSCoW
 
@@ -92,7 +92,7 @@ Consideramos la categoría **Should have (Debería tener)**, pero la descartamos
 
 El requisito define claramente las condiciones principales del bloqueo: cinco intentos consecutivos de autenticación fallidos y una duración de cinco minutos. La confianza de la estimación es media porque, aunque el comportamiento esperado está delimitado, su implementación requiere considerar el registro de intentos fallidos, el control del tiempo de bloqueo y la verificación de que el acceso vuelva a estar disponible al finalizar dicho período.
 
-
+---
 ## 4. Representaciones — El requisito no es la representación
 
 ### 4.1 Historia de usuario
