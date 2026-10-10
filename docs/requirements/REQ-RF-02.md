@@ -78,17 +78,20 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 > N/A — Ninguna identificada.
 
 
-## 3. Priority & Estimation
+## 3. Prioridad y estimación (Priority & Estimation)
 
-**Priority model used:** MoSCoW / Kano / RICE / WSJF / Value-Effort *(pick the one that fits the decision you're actually making — see Class 10's comparison if you need to decide which)*
+**Modelo de priorización utilizado:** MoSCoW
 
-**Priority assigned:**
-> Because [the situation/signal from your project], we assigned [priority value], accepting the trade-off of [what you're giving up by not prioritizing it higher/lower]. We considered [alternative priority] and didn't use it because [reason].
+**Prioridad asignada:**
 
-**Estimate (confidence):** High / Medium / Low
-> How sure are we about the size and shape of this work? *(This is a confidence tag, not a technique-based number — named estimation techniques like story points are Ingeniería de Software II content, not this course.)*
+Debido a que el sistema gestiona el acceso a la información del inventario farmacéutico, asignamos la prioridad **Must have (Imprescindible)** al bloqueo temporal después de cinco intentos consecutivos de autenticación fallidos. Esta funcionalidad establece una medida de protección frente a intentos repetidos de acceso y contribuye a la seguridad del sistema.
 
----
+Consideramos la categoría **Should have (Debería tener)**, pero la descartamos porque aplazar esta funcionalidad dejaría sin implementar la medida de protección definida para la autenticación. Por esta razón, priorizamos el bloqueo temporal y las pruebas necesarias para verificar su funcionamiento frente a mejoras secundarias que no afecten directamente al control de acceso.
+
+**Estimación (confianza): Media (Medium)**
+
+El requisito define claramente las condiciones principales del bloqueo: cinco intentos consecutivos de autenticación fallidos y una duración de cinco minutos. La confianza de la estimación es media porque, aunque el comportamiento esperado está delimitado, su implementación requiere considerar el registro de intentos fallidos, el control del tiempo de bloqueo y la verificación de que el acceso vuelva a estar disponible al finalizar dicho período.
+
 
 ## 4. Representaciones — El requisito no es la representación
 
