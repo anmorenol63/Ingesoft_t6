@@ -1,6 +1,6 @@
 # RF-01. Bloqueo temporal de acceso por intentos fallidos.
 
-## 1. Requisito no funcional
+## 1. Requisito funcional
 
 **Código:** RF-03. 
 **Nombre:** Bloqueo temporal de acceso por intentos fallidos.
@@ -106,7 +106,7 @@ El bloqueo tiene una duración de 5 minutos y durante este período el usuario n
 
 | Elemento | Código | Descripción |
 |---|---|---|
-| Requisito no funcional | RF-01 | Bloqueo temporal de acceso por intentos fallidos |
+| Requisito funcional | RF-03 | Bloqueo temporal de acceso por intentos fallidos |
 | Historia de usuario | HU-04 | Bloqueo temporal del acceso después de cinco intentos consecutivos fallidos |
 | Criterio de aceptación | CA-01 | Bloqueo después de cinco intentos fallidos |
 | Criterio de aceptación | CA-02 | Duración del bloqueo durante 5 minutos |
