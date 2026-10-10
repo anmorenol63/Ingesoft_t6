@@ -154,6 +154,43 @@ El requisito fue definido por el equipo durante la elaboración de los requisito
 
 > El acceso del usuario permanece bloqueado durante cinco minutos después de alcanzar cinco intentos consecutivos de autenticación fallidos. Una vez finalizado el período, el sistema permite que el usuario vuelva a intentar autenticarse.
 
+---
+
+```mermaid
+flowchart TD
+    A([Inicio: usuario intenta autenticarse]) --> B[El sistema verifica<br/>las credenciales]
+    B --> C{¿Credenciales<br/>válidas?}
+
+    C -- Sí --> D[El sistema permite continuar<br/>con la autenticación]
+    D --> E([Fin])
+
+    C -- No --> F[El sistema registra<br/>el intento fallido]
+    F --> G{¿Alcanza cinco intentos<br/>fallidos consecutivos?}
+
+    G -- No --> H[El sistema informa que las<br/>credenciales son incorrectas]
+    H --> I([Fin del intento])
+
+    G -- Sí --> J[El sistema bloquea el acceso<br/>durante cinco minutos]
+    J --> K{¿Han transcurrido<br/>cinco minutos?}
+
+    K -- No --> L[EXCEPCIÓN: el sistema<br/>impide la autenticación]
+    L --> K
+
+    K -- Sí --> M[El sistema finaliza<br/>el bloqueo temporal]
+    M --> N[El usuario puede intentar<br/>autenticarse nuevamente]
+    N --> E
+
+    classDef principal fill:#1f3a70,color:#ffffff,stroke:#14284d
+    classDef alternativo fill:#f0ad4e,color:#000000,stroke:#b87916
+    classDef excepcion fill:#c9302c,color:#ffffff,stroke:#8b1e1a
+
+    class A,B,F,G,J,K,M,N principal
+    class D,H alternativo
+    class L excepcion
+```
+
+---
+
 
 **Diagrama de flujo**
 
