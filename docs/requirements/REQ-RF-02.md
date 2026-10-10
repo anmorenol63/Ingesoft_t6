@@ -13,7 +13,7 @@ HOW TO USE THIS TEMPLATE
    reference before you start.
 -->
 
-# REQ-RNF-01 — Bloquear acceso tras intentos fallidos
+# REQ-RF-03 — Bloquear acceso tras intentos fallidos
 
 | Atributo | Detalle |
 |---|---|
@@ -30,13 +30,13 @@ HOW TO USE THIS TEMPLATE
 
 > El sistema debe bloquear temporalmente el acceso de un usuario durante cinco minutos después de cinco intentos consecutivos de autenticación fallidos. Durante este período, el sistema debe impedir que el usuario vuelva a autenticarse.
 
-**Tipo:** No funcional (*Seguridad*).
+**Tipo:** Funcional (*Seguridad*).
 
 Este requisito busca proteger el acceso al sistema mediante un mecanismo de bloqueo temporal después de múltiples intentos consecutivos de autenticación fallidos. Aunque establece un comportamiento específico que puede verificarse mediante pruebas, su propósito principal es fortalecer la seguridad del sistema.
 
 **Fuente / evidencia**
 
-> Documentación de requisitos del proyecto — RNF-01: «Bloquear acceso tras intentos fallidos», HU-04 y criterios de aceptación CA-01, CA-02, CA-03 y CA-04.
+> Documentación de requisitos del proyecto — RF-03: «Bloqueo temporal de acceso por intentos fallidos», HU-04 y criterios de aceptación CA-01, CA-02, CA-03 y CA-04.
 
 El requisito fue definido por el equipo durante la elaboración de los requisitos del sistema como una medida de seguridad para proteger el acceso de los usuarios. No se realizaron entrevistas para identificar esta necesidad.
 
@@ -195,13 +195,13 @@ flowchart TD
 
 **Trazabilidad hacia atras — ¿Por qué existe este requisito?**
 
-> HU-04 — Necesidad de proteger el acceso a la cuenta frente a múltiples intentos fallidos → RNF-01 — Bloquear acceso tras intentos fallidos → CA-01, CA-02, CA-03 y CA-04 → CU-03 — Bloquear acceso tras intentos fallidos.
+> HU-04 — Necesidad de proteger el acceso a la cuenta frente a múltiples intentos fallidos → RF-03 — Bloqueo temporal de acceso por intentos fallidos → CA-01, CA-02, CA-03 y CA-04 → CU-03 — Bloquear acceso tras intentos fallidos.
 
 La historia de usuario expresa la necesidad de seguridad que origina el requisito. Los criterios de aceptación especifican las condiciones que permiten verificar su cumplimiento, mientras que el caso de uso describe el flujo de interacción relacionado con el bloqueo temporal. El ADR-0001 establece el alcance general del sistema de inventario farmacéutico, pero no constituye evidencia específica del origen de este requisito.
 
 **Trazabilidad hacia adelante — ¿Que va a afectar esto?**
 
-> RNF-01 → Diseño futuro (mecanismo de autenticación, contador de intentos fallidos y control temporal del bloqueo) → Implementación futura (lógica de autenticación y gestión del estado de bloqueo) → Pruebas (verificación de los cinco intentos fallidos, el bloqueo durante cinco minutos y la recuperación del acceso).
+> RF-03 → Diseño futuro (mecanismo de autenticación, contador de intentos fallidos y control temporal del bloqueo) → Implementación futura (lógica de autenticación y gestión del estado de bloqueo) → Pruebas (verificación de los cinco intentos fallidos, el bloqueo durante cinco minutos y la recuperación del acceso).
 
 **Análisis de impacto: si este requisito cambia, ¿qué más podría tener que cambiar?**
 
