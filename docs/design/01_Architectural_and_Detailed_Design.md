@@ -129,7 +129,8 @@ la interfaz"| FE
     A -->|"Interacción mediante
 la interfaz"| FE
 
-    PERSIST -->|"Consultas y operaciones de datos"| DB
+    PERSIST -->|"Consultas y operaciones
+de datos"| DB
 
 
 ```
