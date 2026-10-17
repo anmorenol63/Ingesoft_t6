@@ -120,7 +120,8 @@ flowchart TB
 
         PERSIST["Capa de persistencia"]
 
-        AUTH -->|"Acceso a datos de autenticación"| PERSIST
+        AUTH -->|"Acceso a datos de
+autenticación"| PERSIST
         PROD -->|"Acceso a datos de productos"| PERSIST
         LOT -->|"Acceso a datos de lotes"| PERSIST
         INV -->|"Acceso a datos de inventario"| PERSIST
@@ -128,8 +129,8 @@ flowchart TB
 
     DB[("PostgreSQL")]
 
-    R -->|"Interacción mediante la interfaz"| FE
-    A -->|"Interacción mediante la interfaz"| FE
+    R -->|"Interacción con la interfaz"| FE
+    A -->|"Interacción con la interfaz"| FE
 
     PERSIST -->|"Consultas y operaciones de datos"| DB
 
