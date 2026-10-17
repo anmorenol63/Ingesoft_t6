@@ -80,7 +80,7 @@ flowchart LR
 
 ### 2.2 Componentes, responsabilidades y capacidades
 
-El sistema contempla los requisitos funcionales RF-02 y RF-03. Su arquitectura conserva los componentes definidos en el diagrama del equipo y distribuye las responsabilidades entre la aplicación web, el controlador de API, los módulos funcionales y la capa de persistencia.
+El sistema contempla los requisitos funcionales RF-02 (bloqueo de lotes) y RF-03 (bloqueo temporal de acceso por intentos fallidos de autenticación). Su arquitectura cuenta con dos actores externos: el regente de farmacia y el auxiliar de farmacia. Ambos interactúan con el sistema mediante un **frontend (aplicación web)**, que se comunica con una **API** encargada de dirigir las solicitudes a los módulos. Estos módulos se conectan con una **capa de persistencia**, responsable de gestionar el acceso a la base de datos PostgreSQL.
 
 #### Diagrama de componentes
 
