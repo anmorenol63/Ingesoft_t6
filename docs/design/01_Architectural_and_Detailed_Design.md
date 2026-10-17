@@ -1,12 +1,14 @@
 # [Project Name] — Architectural & Detailed Design v1.0
 
-| | |
+# Sistema de gestión y control de inventario farmacéutico — Diseño arquitectónico y detallado v1.0
+
+| Campo | Información |
 |---|---|
-| **Team** | |
-| **Members** | |
-| **Status** | Draft / Ready for review |
-| **Date** | |
-| **Inputs** | `docs/requirements/`, Architectural Hypothesis v0.1 (Class 11), Detailed Design v0.1 (Class 12) |
+| **Equipo** | Equipo 6 |
+| **Integrantes** | Junior Andrés Arrieta Tabaco, Edgar Mauricio Montufar Molano, Kevin Alexis Bermúdez Caicedo y Antonio José Moreno López |
+| **Estado** | Listo para revisión |
+| **Fecha** | 17/10/2026 |
+| **Fuentes de entrada** | docs/req/, docs/requirements/ (REQ-RF-03.md) y los apuntes y materiales de las clases 11 y 12 proporcionados por el profesor. |
 
 ---
 
