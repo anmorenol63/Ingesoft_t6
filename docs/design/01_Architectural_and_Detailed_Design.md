@@ -26,8 +26,6 @@
 
 ## 2. Diseño arquitectónico
 
-*(Visión externa: ¿cuáles son las partes principales, de qué es responsable cada una y cómo interactúan?)*
-
 ### 2.1 Contexto y límites del sistema
 
 | Elemento externo al sistema | Tipo (actor / sistema externo / hardware) | Cómo interactúa el sistema con él |
