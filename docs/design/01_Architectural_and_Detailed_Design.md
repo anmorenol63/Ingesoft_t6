@@ -119,7 +119,7 @@ de datos"| DB
 
 ---
 
-## 3. Detailed Design
+## 3. Diseño detallado
 
 ### 3.1 Componentes seleccionados
 
