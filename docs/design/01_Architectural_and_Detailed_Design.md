@@ -23,48 +23,6 @@
 
 ---
 
-## 2. Architectural Design
-
-*(Outward-facing: what are the major parts, what is each responsible for, how do they interact?)*
-
-### 2.1 System Context & Boundary
-
-| Outside the system | Type (actor / external system / hardware) | How the system interacts with it |
-|---|---|---|
-| | | |
-
-### 2.2 Components, Responsibilities & Capabilities
-
-Cover the principal functional scope of your whole system.
-
-```mermaid
-flowchart LR
-    Actor([User or external actor])
-    subgraph SYS["System name"]
-        C1["Component 1"]
-        C2["Component 2"]
-        C3["Component 3"]
-    end
-    Ext[("External system")]
-
-    Actor --> C1
-    C1 -->|"capability requested"| C2
-    C2 -->|"capability requested"| C3
-    C3 -->|"capability requested"| Ext
-```
-
-*(Everything inside `SYS` is what you build and control. Everything outside is what you only interact with. Label each arrow with the capability being requested.)*
-
-| Component | Main responsibility | Requirements / use cases supported | Provided capabilities | Required capabilities | Main dependencies |
-|---|---|---|---|---|---|
-| | | | | | |
-
-*Checks: is every component named by responsibility, not technology ("the component that persists orders", not "the database")? Does any component exist only to make the diagram look more complex?*
-
----
-
-
-
 ---
 
 ## 2. Diseño arquitectónico
