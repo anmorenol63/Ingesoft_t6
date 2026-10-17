@@ -10,16 +10,20 @@
 
 ---
 
-## 1. System Overview & Design Drivers
+## 1. Visión general del sistema y controladores de diseño
 
-**System purpose** (2–3 sentences, in terms of the need it satisfies)
->
+**Propósito del sistema**
+> El sistema satisface la necesidad de mantener un control preciso, trazable y confiable del inventario en operaciones farmacéuticas mediante la gestión estructurada de productos, lotes y sus respectivas fechas de vencimiento[cite: 5]. Permite registrar los movimientos de entrada y salida de existencias[cite: 5], restringir la disponibilidad de lotes bloqueados para evitar salidas no autorizadas[cite: 8] y exportar reportes de inventario en formato PDF[cite: 9]. Asimismo, protege el acceso a la información mediante el bloqueo temporal de cuentas de usuario ante múltiples intentos fallidos de autenticación[cite: 7, 10].
 
-**Requirements that shape the structure** *(the ones that most influence the design, not all of them)*
+**Requisitos que me dan forma a la estructura**
 
-| Requirement / Use Case ID | Why it shapes the structure | Quality attribute, constraint or business rule involved |
+| Requisito / ID de Caso de Uso | Por qué da forma a la estructura | Atributo de calidad, restricción o regla de negocio implicada |
 |---|---|---|
-| | | |
+| **RF-03 / CU-03** (Bloqueo temporal por intentos fallidos) | Requiere aislar la lógica de autenticación en un componente/módulo dedicado (`Módulo de autenticación y autorización`) capaz de gestionar el estado del temporizador de 5 minutos y el contador de intentos persistido a nivel de backend[cite: 7, 10]. | **Seguridad** / **REST-01** (Gestión en servidor/backend)[cite: 10], **RN-01** (Límite de 5 intentos)[cite: 10] y **RN-02** (Reinicio de conteo por éxito)[cite: 10]. |
+| **RF-02 / CU-02** (Bloquear lotes de inventario) | Define una dependencia obligatoria de validación entre la consulta de estado de un lote (`Módulo de lotes`) y el registro de salidas de inventario (`Módulo de control de inventario`), impidiendo operar con unidades no disponibles[cite: 8]. | **Integridad de datos** / **Regla de negocio:** Un lote bloqueado no puede registrar unidades disponibles para salida[cite: 8]. |
+| **RF-01 / CU-01** (Exportar inventario en PDF) | Exige una capacidad de consulta y consolidación de datos de productos, lotes y existencias para la generación de documentos estructurados de solo lectura desde el sistema[cite: 9]. | **Usabilidad / Trazabilidad** / Formato PDF exportable con datos obligatorios (producto, lote, cantidad y vencimiento)[cite: 9]. |
+| **ADR-0001** (Alcance del inventario farmacéutico) | Delimita las fronteras del sistema únicamente al control operativo de inventario y lotes farmacéuticos, excluyendo explícitamente módulos externos de ventas, compras, proveedores, facturación y contabilidad[cite: 5]. | **Restricción de alcance** / Mantener una arquitectura enfocada estrictamente en el dominio del inventario[cite: 5]. |
+| **ADR-0002** (Stack tecnológico) | Condiciona la separación física y lógica entre el cliente web, la API REST del servidor y la base de datos relacional para el manejo del estado[cite: 6]. | **Restricción técnica** / Frontend en React[cite: 6], Backend en Node.js + Express[cite: 6] y Persistencia en PostgreSQL[cite: 6]. |
 
 ---
 
