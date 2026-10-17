@@ -98,11 +98,19 @@ flowchart TB
         FE -->|"Solicitudes de la aplicación"| API
 
         subgraph MOD["Módulos funcionales"]
-            direction LR
-            AUTH["Módulo de autenticación y autorización"]
-            PROD["Módulo de productos"]
-            LOT["Módulo de lotes"]
-            INV["Módulo de control de inventario"]
+            direction TB
+
+            subgraph FILA1[" "]
+                direction LR
+                AUTH["Módulo de autenticación y autorización"]
+                PROD["Módulo de productos"]
+            end
+
+            subgraph FILA2[" "]
+                direction LR
+                LOT["Módulo de lotes"]
+                INV["Módulo de control de inventario"]
+            end
         end
 
         API -->|"Solicitudes de autenticación"| AUTH
