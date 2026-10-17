@@ -112,10 +112,14 @@ flowchart TB
 
         PERSIST["Capa de persistencia"]
 
-        AUTH -->|"Acceso a datos de autenticación"| PERSIST
-        PROD -->|"Acceso a datos de productos"| PERSIST
-        LOT -->|"Acceso a datos de lotes"| PERSIST
-        INV -->|"Acceso a datos de inventario"| PERSIST
+        AUTH -->|"Acceso a datos de
+autenticación"| PERSIST
+        PROD -->|"Acceso a datos de
+productos"| PERSIST
+        LOT -->|"Acceso a datos de
+lotes"| PERSIST
+        INV -->|"Acceso a datos de
+inventario"| PERSIST
     end
 
     DB[("PostgreSQL")]
