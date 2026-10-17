@@ -121,13 +121,16 @@ de datos"| DB
 
 ## 3. Detailed Design
 
-*(Inward-facing: how is each selected component designed internally?)*
-
 ### 3.1 Components selected (at least two)
 
-| Component | Why it was selected (risk, complexity, centrality to the drivers) |
+### 3.1 Componentes seleccionados
+
+| Componente | Justificación de la selección (riesgo, complejidad, importancia para los objetivos de diseño) |
 |---|---|
-| | |
+| **Módulo de autenticación y autorización** | Se selecciona porque es responsable de verificar la identidad de los usuarios y controlar el acceso a las funcionalidades según sus permisos. Su complejidad se relaciona con la gestión de los roles Regente de Farmacia y Auxiliar de Farmacia, así como con el bloqueo temporal del acceso después de cinco intentos consecutivos de autenticación fallidos durante cinco minutos. Un error en este componente podría permitir accesos no autorizados o impedir el acceso legítimo al sistema. |
+| **Módulo de lotes** | Se selecciona porque administra la información y el estado de los lotes asociados a los productos farmacéuticos. Es fundamental para implementar el requisito de bloqueo de lotes, garantizando que un lote bloqueado permanezca identificado como tal y no pueda utilizarse para registrar salidas de inventario. Un error en esta responsabilidad podría ocasionar movimientos de inventario sobre lotes que no están disponibles para su salida. |
+| **Módulo de control de inventario** | Se selecciona porque coordina el registro de entradas y salidas de unidades y la creación de los movimientos de inventario correspondientes. Su importancia radica en mantener la coherencia entre las cantidades disponibles y los movimientos registrados. Debe validar que exista una cantidad suficiente para una salida y que el lote no esté bloqueado antes de registrar el movimiento. Un error podría producir cantidades inconsistentes o salidas no permitidas. |
+| **Capa de persistencia** | Se selecciona porque es responsable de proporcionar acceso a los datos almacenados en la base de datos PostgreSQL mediante repositorios especializados. Su importancia radica en conservar la información de productos, lotes, movimientos de inventario, usuarios y estados de autenticación. Un error en esta capa podría ocasionar pérdida de información, inconsistencias o fallos al recuperar los datos necesarios para ejecutar las operaciones del sistema. |
 
 ### 3.2 Class Diagram(s)
 
