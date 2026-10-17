@@ -69,42 +69,28 @@ flowchart LR
 
 ## 2. Diseño arquitectónico
 
-La arquitectura del sistema se organiza mediante una aplicación web, un controlador de API, módulos funcionales y una capa de persistencia conectada a PostgreSQL. Esta organización separa la interacción con los usuarios, el procesamiento de las solicitudes, las responsabilidades funcionales y el almacenamiento de los datos.
-
-Para este diseño se considera únicamente el requisito funcional **RF-03: Bloqueo temporal de acceso por intentos fallidos de autenticación**. El sistema debe bloquear temporalmente el acceso después de cinco intentos consecutivos fallidos de autenticación, durante un período de cinco minutos.
+*(Visión externa: ¿cuáles son las partes principales, de qué es responsable cada una y cómo interactúan?)*
 
 ### 2.1 Contexto y límites del sistema
 
-| Elemento externo al sistema | Tipo (actor / sistema externo / hardware) | Forma de interacción con el sistema |
+| Elemento externo al sistema | Tipo (actor / sistema externo / hardware) | Cómo interactúa el sistema con él |
 |---|---|---|
-| Regente de farmacia | Actor | Accede a la aplicación web para autenticarse y utilizar las funcionalidades autorizadas. Si alcanza cinco intentos consecutivos fallidos de autenticación, el acceso queda bloqueado temporalmente durante cinco minutos. |
-| Auxiliar de farmacia | Actor | Accede a la aplicación web para autenticarse y utilizar las funcionalidades autorizadas. Si alcanza cinco intentos consecutivos fallidos de autenticación, el acceso queda bloqueado temporalmente durante cinco minutos. |
-
-**Límites del sistema:** el sistema comprende la aplicación web (frontend), el controlador de API, el módulo de autenticación y autorización, los módulos de productos, lotes y control de inventario, y la capa de persistencia. PostgreSQL constituye el sistema de almacenamiento de datos utilizado por la capa de persistencia.
-
-Los usuarios interactúan con el sistema mediante la aplicación web. Las solicitudes se envían al controlador de API, que las dirige al módulo correspondiente. Para el requisito RF-03, el módulo de autenticación y autorización valida las credenciales, controla los intentos fallidos y aplica el bloqueo temporal. La capa de persistencia permite acceder a los datos necesarios para gestionar la autenticación y el estado del bloqueo.
-
-Aunque el diagrama conserva los módulos de productos, lotes y control de inventario, este entregable no desarrolla sus requisitos funcionales. El alcance funcional documentado en este punto se limita al bloqueo temporal de acceso por intentos fallidos de autenticación.
-
-No se incluyen integraciones con sistemas externos ni dispositivos de hardware específicos, ya que no forman parte del alcance definido.
+| Regente de farmacia | Actor | Se autentica en la aplicación web y puede marcar un lote como bloqueado. El sistema controla sus intentos fallidos de autenticación y bloquea temporalmente su acceso cuando alcanza el límite establecido. |
+| Auxiliar de farmacia | Actor | Se autentica en la aplicación web y utiliza las funcionalidades que tiene autorizadas. El sistema controla sus intentos fallidos de autenticación y bloquea temporalmente su acceso cuando alcanza el límite establecido. |
 
 ### 2.2 Componentes, responsabilidades y capacidades
 
-La arquitectura conserva los componentes y las relaciones representados en el diagrama del equipo. Cada componente cumple una responsabilidad específica dentro de la estructura general del sistema. Para el alcance actual, el componente central es el módulo de autenticación y autorización, responsable de implementar el requisito RF-03.
+El sistema contempla los requisitos funcionales RF-02 y RF-03. Su arquitectura conserva los componentes definidos en el diagrama del equipo y distribuye las responsabilidades entre la aplicación web, el controlador de API, los módulos funcionales y la capa de persistencia.
 
 #### Diagrama de componentes
 
-El siguiente diagrama corresponde a la arquitectura definida por el equipo. Se conservan sus componentes y su organización, sin añadir componentes independientes que no estén contemplados en el diseño original.
-
 ```mermaid
 flowchart TB
-    subgraph USUARIOS["Actores externos"]
-        R["Regente de farmacia"]
-        A["Auxiliar de farmacia"]
-    end
+    R["Regente de farmacia"]
+    A["Auxiliar de farmacia"]
 
-    subgraph SISTEMA["Sistema de gestión y control de inventario farmacéutico"]
-        UI["Frontend (aplicación web)"]
+    subgraph SYS["Sistema de gestión y control de inventario farmacéutico"]
+        FE["Frontend (aplicación web)"]
         API["Controlador de API"]
 
         AUTH["Módulo de autenticación y autorización"]
@@ -113,55 +99,52 @@ flowchart TB
         INV["Módulo de control de inventario"]
 
         PERSIST["Capa de persistencia"]
+
+        FE -->|"Solicitudes de la aplicación"| API
+
+        API -->|"Solicitudes de autenticación"| AUTH
+        API -->|"Solicitudes de productos"| PROD
+        API -->|"Solicitudes de lotes"| LOT
+        API -->|"Operaciones de inventario"| INV
+
+        AUTH -->|"Acceso a datos de autenticación"| PERSIST
+        PROD -->|"Acceso a datos de productos"| PERSIST
+        LOT -->|"Acceso a datos de lotes"| PERSIST
+        INV -->|"Acceso a datos de inventario"| PERSIST
     end
 
     DB[("PostgreSQL")]
 
-    R --> UI
-    A --> UI
+    R -->|"Interacción mediante la interfaz"| FE
+    A -->|"Interacción mediante la interfaz"| FE
 
-    UI --> API
-
-    API --> AUTH
-    API --> PROD
-    API --> LOT
-    API --> INV
-
-    AUTH --> PERSIST
-    PROD --> PERSIST
-    LOT --> PERSIST
-    INV --> PERSIST
-
-    PERSIST --> DB
+    PERSIST -->|"Consultas y operaciones de datos"| DB
 ```
 
-**Descripción del diagrama:** el frontend permite la interacción con los usuarios y se comunica con el controlador de API. Este último distribuye las solicitudes entre los módulos funcionales. El módulo de autenticación y autorización se encarga de validar las credenciales y aplicar las reglas de bloqueo temporal. La capa de persistencia centraliza el acceso a PostgreSQL.
+*Todo lo que está dentro del límite del sistema corresponde a los componentes que el equipo desarrolla y controla. Los actores se encuentran fuera de ese límite e interactúan con el sistema mediante la aplicación web.*
 
-Las conexiones representan las relaciones de comunicación y dependencia entre los componentes. El diagrama muestra la estructura general de la arquitectura; el orden detallado de las operaciones se especificará posteriormente en el diseño de los casos de uso y las interacciones.
-
-#### Responsabilidades y capacidades de los componentes
+#### Responsabilidades y capacidades
 
 | Componente | Responsabilidad principal | Requisitos / casos de uso que soporta | Capacidades proporcionadas | Capacidades requeridas | Dependencias principales |
 |---|---|---|---|---|---|
-| Frontend (aplicación web) | Proporcionar la interfaz para la interacción de los usuarios con el sistema. | RF-03; CU-03. | Presentación del formulario de autenticación y de mensajes sobre el resultado del acceso o el bloqueo temporal. | Envío de solicitudes de autenticación y recepción de respuestas. | Controlador de API. |
-| Controlador de API | Recibir las solicitudes del frontend y dirigirlas al módulo correspondiente. | RF-03; CU-03. | Recepción y distribución de las solicitudes de autenticación. | Operaciones de autenticación y consulta o actualización de los datos necesarios. | Módulo de autenticación y autorización. |
-| Módulo de autenticación y autorización | Validar las credenciales y controlar los intentos consecutivos fallidos de autenticación. | RF-03; CU-03. | Validación de credenciales, control del contador de intentos fallidos y aplicación de un bloqueo temporal de cinco minutos al alcanzar cinco intentos consecutivos fallidos. | Acceso a los datos necesarios para la autenticación y para conservar el estado de los intentos y del bloqueo. | Capa de persistencia. |
-| Módulo de productos | Gestionar la información de los productos del sistema. | Fuera del alcance funcional de este entregable. | Capacidades relacionadas con la información de los productos. | Acceso a los datos de productos. | Capa de persistencia. |
-| Módulo de lotes | Gestionar la información de los lotes del sistema. | Fuera del alcance funcional de este entregable. | Capacidades relacionadas con la información de los lotes. | Acceso a los datos de lotes. | Capa de persistencia. |
-| Módulo de control de inventario | Gestionar las operaciones relacionadas con el control del inventario. | Fuera del alcance funcional de este entregable. | Capacidades relacionadas con el control del inventario. | Acceso a los datos de inventario. | Capa de persistencia. |
-| Capa de persistencia | Centralizar las operaciones de acceso a los datos almacenados. | Soporte técnico a RF-03. | Acceso a los datos necesarios para la autenticación y el control de los intentos fallidos. | Operaciones de almacenamiento y consulta de datos. | PostgreSQL. |
-| PostgreSQL | Almacenar los datos persistentes utilizados por el sistema. | Soporte técnico a RF-03. | Conservación y recuperación de la información almacenada. | Solicitudes de acceso procedentes de la capa de persistencia. | Capa de persistencia. |
+| Frontend (aplicación web) | Proporcionar la interfaz de interacción entre los usuarios y el sistema. | RF-02, RF-03; CU-02, CU-03. | Presentar el formulario de autenticación, permitir solicitar el bloqueo de un lote cuando el usuario esté autorizado y mostrar los resultados de las operaciones o los mensajes de acceso bloqueado. | Servicios de autenticación y operaciones de inventario mediante la API. | Controlador de API. |
+| Controlador de API | Recibir las solicitudes del frontend y dirigirlas al módulo funcional correspondiente. | RF-02, RF-03; CU-02, CU-03. | Gestionar las solicitudes de autenticación, bloqueo de lotes y operaciones relacionadas. | Operaciones ofrecidas por los módulos funcionales. | Módulo de autenticación y autorización, módulo de productos, módulo de lotes y módulo de control de inventario. |
+| Módulo de autenticación y autorización | Validar las credenciales, controlar los intentos fallidos y aplicar las restricciones de acceso. | RF-03; CU-03. | Validar credenciales, controlar los intentos consecutivos fallidos y bloquear temporalmente el acceso durante cinco minutos después de cinco intentos fallidos consecutivos. | Consulta y actualización de los datos necesarios para la autenticación y el control del estado del bloqueo. | Capa de persistencia. |
+| Módulo de productos | Gestionar la información de los productos registrados en el sistema. | RF-02; CU-02, como soporte a la identificación del producto asociado al lote. | Consultar la información de los productos relacionados con los lotes del inventario. | Acceso a los datos de productos. | Capa de persistencia. |
+| Módulo de lotes | Gestionar la información y el estado de los lotes de productos farmacéuticos. | RF-02; CU-02. | Consultar los lotes y registrar el estado de bloqueo de un lote solicitado por un regente autorizado. | Acceso a los datos de los lotes y actualización de su estado. | Capa de persistencia. |
+| Módulo de control de inventario | Aplicar las reglas relacionadas con las operaciones y las cantidades disponibles del inventario. | RF-02; CU-02. | Verificar el estado de bloqueo de los lotes e impedir que las unidades de un lote bloqueado se registren como disponibles para salida. | Consulta del estado de los lotes y acceso a los datos de inventario. | Módulo de lotes y capa de persistencia. |
+| Capa de persistencia | Centralizar el acceso y la actualización de los datos almacenados por el sistema. | Soporte a RF-02 y RF-03. | Consultar y almacenar información de productos, lotes, inventario y los datos necesarios para gestionar la autenticación y los bloqueos temporales. | Servicio de almacenamiento y recuperación de datos. | PostgreSQL. |
+| PostgreSQL | Almacenar de forma persistente la información del sistema. | Soporte a RF-02 y RF-03. | Conservar y recuperar los datos solicitados por la capa de persistencia. | Consultas y operaciones de lectura y escritura. | Capa de persistencia. |
 
-**Consideraciones de diseño:**
+*Verificaciones del diseño:*
 
-- El control de los intentos fallidos y la aplicación del bloqueo temporal deben implementarse en el backend, no exclusivamente en el frontend.
-- Después de una autenticación exitosa, el contador de intentos fallidos consecutivos debe reiniciarse.
-- Al alcanzar cinco intentos consecutivos fallidos, el acceso debe permanecer bloqueado durante cinco minutos.
-- La lógica de autenticación debe impedir nuevos intentos de acceso mientras el bloqueo esté vigente.
-- La implementación debe definir cómo conservar el estado de los intentos y del bloqueo ante un reinicio del servidor. Esta decisión se documentará en el diseño detallado.
-- La capa de persistencia debe encapsular el acceso a PostgreSQL para reducir el acoplamiento entre el módulo de autenticación y la tecnología de almacenamiento.
-- Los módulos de productos, lotes y control de inventario se conservan porque forman parte del diagrama aprobado por el profesor, pero sus funcionalidades no se desarrollan en este entregable.
-
+- Cada componente tiene una responsabilidad identificable y relacionada con el funcionamiento del sistema.
+- El módulo de autenticación y autorización controla los intentos fallidos desde el backend, sin depender exclusivamente del navegador.
+- El contador de intentos fallidos consecutivos debe reiniciarse después de una autenticación exitosa.
+- El módulo de lotes administra el estado de bloqueo y el módulo de control de inventario aplica la restricción sobre las salidas de los lotes bloqueados.
+- La capa de persistencia separa el acceso a los datos de la lógica de los módulos funcionales.
+- Los módulos se comunican a través del controlador de API y la capa de persistencia según las responsabilidades definidas en la arquitectura.
+- La estrategia concreta para conservar el estado de los intentos fallidos y la duración del bloqueo ante un reinicio del servidor deberá definirse en el diseño detallado.
 
 ---
 
