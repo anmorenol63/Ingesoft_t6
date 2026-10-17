@@ -85,7 +85,8 @@ El sistema contempla los requisitos funcionales RF-02 (bloqueo de lotes) y RF-03
 #### Diagrama de componentes
 
 ```mermaid
-flowchart TB
+```mermaid
+flowchart LR
     R["Regente de farmacia"]
     A["Auxiliar de farmacia"]
 
@@ -119,6 +120,7 @@ flowchart TB
     A -->|"Interacción mediante la interfaz"| FE
 
     PERSIST -->|"Consultas y operaciones de datos"| DB
+
 ```
 
 *Todo lo que está dentro del límite del sistema corresponde a los componentes que el equipo desarrolla y controla. Los actores se encuentran fuera de ese límite e interactúan con el sistema mediante la aplicación web.*
