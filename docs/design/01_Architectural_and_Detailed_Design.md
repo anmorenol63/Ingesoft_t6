@@ -121,16 +121,14 @@ de datos"| DB
 
 ## 3. Detailed Design
 
-### 3.1 Components selected (at least two)
-
 ### 3.1 Componentes seleccionados
 
 | Componente | Justificación de la selección (riesgo, complejidad, importancia para los objetivos de diseño) |
 |---|---|
-| **Módulo de autenticación y autorización** | Se selecciona porque es responsable de verificar la identidad de los usuarios y controlar el acceso a las funcionalidades según sus permisos. Su complejidad se relaciona con la gestión de los roles Regente de Farmacia y Auxiliar de Farmacia, así como con el bloqueo temporal del acceso después de cinco intentos consecutivos de autenticación fallidos durante cinco minutos. Un error en este componente podría permitir accesos no autorizados o impedir el acceso legítimo al sistema. |
-| **Módulo de lotes** | Se selecciona porque administra la información y el estado de los lotes asociados a los productos farmacéuticos. Es fundamental para implementar el requisito de bloqueo de lotes, garantizando que un lote bloqueado permanezca identificado como tal y no pueda utilizarse para registrar salidas de inventario. Un error en esta responsabilidad podría ocasionar movimientos de inventario sobre lotes que no están disponibles para su salida. |
-| **Módulo de control de inventario** | Se selecciona porque coordina el registro de entradas y salidas de unidades y la creación de los movimientos de inventario correspondientes. Su importancia radica en mantener la coherencia entre las cantidades disponibles y los movimientos registrados. Debe validar que exista una cantidad suficiente para una salida y que el lote no esté bloqueado antes de registrar el movimiento. Un error podría producir cantidades inconsistentes o salidas no permitidas. |
-| **Capa de persistencia** | Se selecciona porque es responsable de proporcionar acceso a los datos almacenados en la base de datos PostgreSQL mediante repositorios especializados. Su importancia radica en conservar la información de productos, lotes, movimientos de inventario, usuarios y estados de autenticación. Un error en esta capa podría ocasionar pérdida de información, inconsistencias o fallos al recuperar los datos necesarios para ejecutar las operaciones del sistema. |
+| **Módulo de autenticación y autorización** | Se selecciona porque verifica la identidad de los usuarios y controla sus permisos según su rol. Debe gestionar el bloqueo temporal de cinco minutos después de cinco intentos consecutivos fallidos. Un error podría permitir accesos no autorizados o bloquear usuarios legítimos. |
+| **Módulo de lotes** | Se selecciona porque administra los lotes y sus estados. Es fundamental para garantizar que los lotes bloqueados no puedan utilizarse para registrar salidas de inventario. Un error podría permitir movimientos no autorizados. |
+| **Módulo de control de inventario** | Se selecciona porque gestiona las entradas, las salidas y los movimientos de inventario. Debe validar la cantidad disponible y comprobar que el lote no esté bloqueado antes de registrar una salida, evitando inconsistencias en las cantidades. |
+| **Capa de persistencia** | Se selecciona porque permite almacenar y recuperar los datos mediante repositorios especializados y PostgreSQL. Es esencial para conservar la información de productos, lotes, movimientos, usuarios y estados de autenticación, evitando pérdidas e inconsistencias. |
 
 ### 3.2 Class Diagram(s)
 
