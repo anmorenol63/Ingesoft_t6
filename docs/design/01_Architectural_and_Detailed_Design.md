@@ -154,7 +154,7 @@ de datos"| DB
 - Cada componente tiene una responsabilidad identificable y relacionada con el funcionamiento del sistema.
 - El módulo de autenticación y autorización controla los intentos fallidos desde el backend, sin depender exclusivamente del navegador.
 - El contador de intentos fallidos consecutivos debe reiniciarse después de una autenticación exitosa.
-- El módulo de lotes administra el estado de bloqueo y el módulo de control de inventario aplica la restricción sobre las salidas de los lotes bloqueados.
+- El módulo de lotes administra el estado de bloqueo, mientras que el módulo de control de inventario verifica dicho estado e impide registrar como disponibles para salida las unidades pertenecientes a lotes bloqueados.
 - La capa de persistencia separa el acceso a los datos de la lógica de los módulos funcionales.
 - Los módulos se comunican a través del controlador de API y la capa de persistencia según las responsabilidades definidas en la arquitectura.
 - La estrategia concreta para conservar el estado de los intentos fallidos y la duración del bloqueo ante un reinicio del servidor deberá definirse en el diseño detallado.
