@@ -13,7 +13,7 @@
 ## 1. Visión general del sistema y controladores de diseño
 
 **Propósito del sistema**
-> El sistema satisface la necesidad de mantener un control preciso, trazable y confiable del inventario en operaciones farmacéuticas mediante la gestión estructurada de productos, lotes y sus respectivas fechas de vencimiento[cite: 5]. Permite registrar los movimientos de entrada y salida de existencias[cite: 5], restringir la disponibilidad de lotes bloqueados para evitar salidas no autorizadas[cite: 8] y exportar reportes de inventario en formato PDF[cite: 9]. Asimismo, protege el acceso a la información mediante el bloqueo temporal de cuentas de usuario ante múltiples intentos fallidos de autenticación[cite: 7, 10].
+> El sistema satisface la necesidad de mantener un control preciso, trazable y confiable del inventario en operaciones farmacéuticas mediante la gestión estructurada de productos, lotes y sus respectivas fechas de vencimiento. Permite registrar los movimientos de entrada y salida de existencias, restringir la disponibilidad de lotes bloqueados para evitar salidas no autorizadas y exportar reportes de inventario en formato PDF. Asimismo, protege el acceso a la información mediante el bloqueo temporal de cuentas de usuario ante múltiples intentos fallidos de autenticación.
 
 **Requisitos que me dan forma a la estructura**
 
