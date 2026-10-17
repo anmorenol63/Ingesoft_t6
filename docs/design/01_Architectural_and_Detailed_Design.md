@@ -193,16 +193,17 @@ función registrarSalida(loteId, cantidad, usuario):
 
 ---
 
-## 4. Design Quality — Cohesion, Coupling, Information Hiding
+## 4. Calidad del diseño — Cohesión, acoplamiento y ocultamiento de información
 
-| Question | Your answer, with evidence from your design |
+| Pregunta | Respuesta, con evidencia del diseño |
 |---|---|
-| **Cohesion:** do the responsibilities inside each class or component belong together? | |
-| **Coupling:** how far does a change in one element spread? Where are the strongest dependencies? | |
-| **Information hiding:** what did you keep private or internal, and why? | |
+| **Cohesión:** ¿Las responsabilidades dentro de cada clase o componente están relacionadas entre sí? | Sí. Las responsabilidades están separadas por propósito: `ServicioAutenticacion` gestiona la autenticación y los permisos, `ServicioLote` administra los lotes y sus bloqueos, y `ServicioInventario` registra las entradas y salidas. Esta separación facilita comprender y mantener cada componente. |
+| **Acoplamiento:** ¿Hasta qué punto se propagan los cambios de un elemento? ¿Dónde están las dependencias más fuertes? | Los servicios dependen de interfaces de repositorio para acceder a los datos, lo que reduce su dependencia de la implementación de la base de datos. Sin embargo, `ServicioInventario` depende de varios elementos, como `ServicioLote`, los repositorios y `ServicioAutenticacion`, por lo que sus cambios pueden afectar varias colaboraciones. |
+| **Ocultamiento de información:** ¿Qué elementos se mantuvieron privados o internos y por qué? | Los atributos de las entidades, como `cantidadDisponible` en `Lote` y `credencialHash` en `Usuario`, se definen como privados. Así se evita su modificación directa desde otras clases y se centraliza el acceso mediante operaciones que protegen las reglas del sistema. |
 
-**At least one real finding** (a problem you found in your own design) **and what you changed or would change:**
->
+**Hallazgo real del diseño y qué se cambió o se cambiaría:**
+
+Se identificó que registrar una salida requiere validar el estado del lote, comprobar la cantidad disponible y guardar el movimiento. Si estas acciones se ejecutan por separado, podrían producirse inconsistencias en el inventario. Para evitarlo, se establece que la actualización de la cantidad y el registro del movimiento deben realizarse en una misma transacción, revirtiendo los cambios si ocurre un error.
 
 ---
 
