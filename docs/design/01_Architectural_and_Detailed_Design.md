@@ -215,27 +215,29 @@ Two decisions are required: one architectural (Class 11 level) and one detailed-
 
 | | |
 |---|---|
-| **Context** (requirement, constraint or problem that motivated it) | |
-| **Decision** | |
-| **Rationale** (why it is reasonable here) | |
-| **Trade-off accepted** | |
+| **Context** (requirement, constraint or problem that motivated it) | El requisito RF-03 exige que el contador de intentos fallidos y la restricción de acceso se gestionen centralizadamente en el backend. Además, se requiere definir una estrategia concreta para conservar el estado de los intentos fallidos y la duración del bloqueo ante un reinicio del servidor. |
+| **Decision** | Almacenar el estado de autenticación (contador de intentos y fecha/hora de bloqueo) de forma persistente en la base de datos PostgreSQL utilizando la capa de persistencia. |
+| **Rationale** (why it is reasonable here) | Guardar esta información en la base de datos permite que el módulo de autenticación y autorización mantenga el control estricto de accesos incluso si el servidor se reinicia, garantizando que el usuario no pueda saltarse la restricción REST-01. |
+| **Trade-off accepted** | Aumenta la carga de la base de datos, ya que cada intento fallido de autenticación requiere una operación de escritura para consultar o actualizar la cantidad de intentos fallidos. |
 
 ### Decision B — Detailed design
 
 | | |
 |---|---|
-| **Context** | |
-| **Decision** | |
-| **Rationale** | |
-| **Trade-off accepted** | |
+| **Context** | Para registrar una salida de inventario, se requiere validar el estado del lote, comprobar la cantidad disponible, descontar la cantidad y guardar el movimiento. Si estas acciones se ejecutan por separado, podrían producirse inconsistencias en el inventario. |
+| **Decision** | Establecer que la actualización de la cantidad en el lote y el registro del movimiento de salida se realicen dentro de una misma transacción en el sistema. |
+| **Rationale** | Realizar ambas operaciones en una sola transacción garantiza que, si ocurre un error en alguna parte del proceso, se puedan revertir los cambios, manteniendo la integridad de los datos entre los lotes y los movimientos registrados. |
+| **Trade-off accepted** | Se acepta que mantener la transacción abierta mientras se guardan los cambios del lote y se guarda el movimiento en el repositorio puede bloquear temporalmente los registros involucrados, lo que podría generar un leve impacto en la concurrencia si múltiples usuarios modifican el mismo lote simultáneamente. |
 
 ### ADR
 
 At least one of the two decisions above must also be recorded as an ADR (use `Plantilla_ADR_Nygard`) in `docs/decisions/`.
 
-**ADR file:** `docs/decisions/ADR-XXX-title.md` — records Decision [A / B].
+**ADR file:** `docs/decisions/ADR-001-Persistencia-Estado-Autenticacion.md` — records Decision A.
 
 ---
+
+
 
 ## 6. Traceability
 
