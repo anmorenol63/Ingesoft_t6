@@ -85,27 +85,32 @@ El sistema contempla los requisitos funcionales RF-02 (bloqueo de lotes) y RF-03
 #### Diagrama de componentes
 
 ```mermaid
-flowchart LR
+flowchart TB
     R["Regente de farmacia"]
     A["Auxiliar de farmacia"]
 
     subgraph SYS["Sistema de gestión y control de inventario farmacéutico"]
+        direction TB
+
         FE["Frontend (aplicación web)"]
         API["Controlador de API"]
 
-        AUTH["Módulo de autenticación y autorización"]
-        PROD["Módulo de productos"]
-        LOT["Módulo de lotes"]
-        INV["Módulo de control de inventario"]
-
-        PERSIST["Capa de persistencia"]
-
         FE -->|"Solicitudes de la aplicación"| API
+
+        subgraph MOD["Módulos funcionales"]
+            direction LR
+            AUTH["Módulo de autenticación y autorización"]
+            PROD["Módulo de productos"]
+            LOT["Módulo de lotes"]
+            INV["Módulo de control de inventario"]
+        end
 
         API -->|"Solicitudes de autenticación"| AUTH
         API -->|"Solicitudes de productos"| PROD
         API -->|"Solicitudes de lotes"| LOT
         API -->|"Operaciones de inventario"| INV
+
+        PERSIST["Capa de persistencia"]
 
         AUTH -->|"Acceso a datos de autenticación"| PERSIST
         PROD -->|"Acceso a datos de productos"| PERSIST
