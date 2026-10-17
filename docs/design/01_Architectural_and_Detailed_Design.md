@@ -85,7 +85,6 @@ El sistema contempla los requisitos funcionales RF-02 (bloqueo de lotes) y RF-03
 #### Diagrama de componentes
 
 ```mermaid
-```mermaid
 flowchart LR
     R["Regente de farmacia"]
     A["Auxiliar de farmacia"]
