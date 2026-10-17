@@ -98,19 +98,11 @@ flowchart TB
         FE -->|"Solicitudes de la aplicación"| API
 
         subgraph MOD["Módulos funcionales"]
-            direction TB
-
-            subgraph FILA1[" "]
-                direction LR
-                AUTH["Módulo de autenticación y autorización"]
-                PROD["Módulo de productos"]
-            end
-
-            subgraph FILA2[" "]
-                direction LR
-                LOT["Módulo de lotes"]
-                INV["Módulo de control de inventario"]
-            end
+            direction LR
+            AUTH["Módulo de autenticación y autorización"]
+            PROD["Módulo de productos"]
+            LOT["Módulo de lotes"]
+            INV["Módulo de control de inventario"]
         end
 
         API -->|"Solicitudes de autenticación"| AUTH
@@ -120,8 +112,7 @@ flowchart TB
 
         PERSIST["Capa de persistencia"]
 
-        AUTH -->|"Acceso a datos de
-autenticación"| PERSIST
+        AUTH -->|"Acceso a datos de autenticación"| PERSIST
         PROD -->|"Acceso a datos de productos"| PERSIST
         LOT -->|"Acceso a datos de lotes"| PERSIST
         INV -->|"Acceso a datos de inventario"| PERSIST
@@ -129,10 +120,11 @@ autenticación"| PERSIST
 
     DB[("PostgreSQL")]
 
-    R -->|"Interacción con la interfaz"| FE
-    A -->|"Interacción con la interfaz"| FE
+    R -->|"Interacción mediante la interfaz"| FE
+    A -->|"Interacción mediante la interfaz"| FE
 
     PERSIST -->|"Consultas y operaciones de datos"| DB
+
 
 ```
 
