@@ -241,7 +241,9 @@ At least one of the two decisions above must also be recorded as an ADR (use `Pl
 
 | Requirement ID | Use Case | Component(s) | Class(es) |
 |---|---|---|---|
-| | | | |
+| RF-01 | CU-01 | Frontend (aplicación web)[cite: 1], Controlador de API[cite: 1], Módulo de productos[cite: 1], Módulo de lotes[cite: 1], Módulo de control de inventario[cite: 1], Capa de persistencia[cite: 1] | `ServicioProducto`[cite: 1], `Producto`[cite: 1], `ServicioLote`[cite: 1], `Lote`[cite: 1], `ServicioInventario`[cite: 1], `ProductoRepository`[cite: 1], `LoteRepository`[cite: 1] |
+| RF-02 | CU-02 | Frontend (aplicación web)[cite: 1], Controlador de API[cite: 1], Módulo de lotes[cite: 1], Módulo de control de inventario[cite: 1], Capa de persistencia[cite: 1] | `ServicioLote`[cite: 1], `Lote`[cite: 1], `EstadoLote`[cite: 1], `ServicioInventario`[cite: 1], `MovimientoInventario`[cite: 1], `TipoMovimiento`[cite: 1], `LoteRepository`[cite: 1], `RepositorioMovimiento`[cite: 1] |
+| RF-03 | CU-03 | Frontend (aplicación web)[cite: 1], Controlador de API[cite: 1], Módulo de autenticación y autorización[cite: 1], Capa de persistencia[cite: 1] | `ServicioAutenticacion`[cite: 1], `Usuario`[cite: 1], `Rol`[cite: 1], `Permiso`[cite: 1], `EstadoAutenticacion`[cite: 1], `ResultadoAutenticacion`[cite: 1], `UsuarioRepository`[cite: 1], `RepositorioEstadoAutenticacion`[cite: 1] |
 
 *(Every requirement in Section 1 must appear. Every component and class should appear at least once. If an element traces to nothing, ask why it exists.)*
 
