@@ -120,8 +120,10 @@ flowchart TB
 
     DB[("PostgreSQL")]
 
-    R -->|"Interacción mediante la interfaz"| FE
-    A -->|"Interacción mediante la interfaz"| FE
+    R -->|"Interacción mediante
+la interfaz"| FE
+    A -->|"Interacción mediante
+la interfaz"| FE
 
     PERSIST -->|"Consultas y operaciones de datos"| DB
 
