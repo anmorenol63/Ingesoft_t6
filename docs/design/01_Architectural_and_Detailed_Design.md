@@ -130,7 +130,7 @@ de datos"| DB
 | **Módulo de control de inventario** | Se selecciona porque gestiona las entradas, las salidas y los movimientos de inventario. Debe validar la cantidad disponible y comprobar que el lote no esté bloqueado antes de registrar una salida, evitando inconsistencias en las cantidades. |
 | **Capa de persistencia** | Se selecciona porque permite almacenar y recuperar los datos mediante repositorios especializados y PostgreSQL. Es esencial para conservar la información de productos, lotes, movimientos, usuarios y estados de autenticación, evitando pérdidas e inconsistencias. |
 
-### 3.2 Class Diagram(s)
+### 3.2 Diagrama de clases
 
 ![Diagrama de clases del sistema de inventario farmacéutico](diagrama-clases.png)
 
