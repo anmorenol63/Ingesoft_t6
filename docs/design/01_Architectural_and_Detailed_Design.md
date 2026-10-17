@@ -132,25 +132,7 @@ de datos"| DB
 
 ### 3.2 Class Diagram(s)
 
-```mermaid
-classDiagram
-    class ClassA {
-        -attribute : Type
-        +operation(param : Type) ReturnType
-    }
-    class ClassB {
-        -attribute : Type
-        +operation() ReturnType
-    }
-    class ClassC {
-        +operation() ReturnType
-    }
-
-    ClassA "1" *-- "0..*" ClassB : contains
-    ClassA "1" --> "1" ClassC : uses
-```
-
-*(Visibility: `-` private, `+` public. Relationships: `-->` association, `*--` composition (the part cannot exist without the whole), `<|--` generalization (a specialized type of). Add multiplicity in quotes. Use composition or generalization only when their meaning is justified. Do not force them.)*
+![Diagrama de clases del sistema de inventario farmacéutico](diagrama-clases.png)
 
 ### 3.3 Class Responsibilities
 
