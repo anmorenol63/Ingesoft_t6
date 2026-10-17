@@ -135,7 +135,6 @@ de datos"| DB
 
 ```
 
-*Todo lo que está dentro del límite del sistema corresponde a los componentes que el equipo desarrolla y controla. Los actores se encuentran fuera de ese límite e interactúan con el sistema mediante la aplicación web.*
 
 #### Responsabilidades y capacidades
 
