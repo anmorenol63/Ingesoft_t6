@@ -1,5 +1,3 @@
-# [Project Name] — Architectural & Detailed Design v1.0
-
 # Sistema de gestión y control de inventario farmacéutico — Diseño arquitectónico y detallado v1.0
 
 | Campo | Información |
