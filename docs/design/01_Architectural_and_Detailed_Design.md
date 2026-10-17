@@ -20,7 +20,6 @@
 |---|---|---|
 | RF-03 / CU-03 | El contador de intentos fallidos, el temporizador de 5 minutos y la restricción de acceso deben gestionarse centralizadamente en el backend para evitar que el cliente se la salte. | Restricción REST-01: gestión en backend. Norma de negocio RN-01: máximo 5 intentos fallidos consecutivos. Calidad: seguridad de acceso. |
 | RF-02 / CU-02 | El estado de un lote debe ser verificado en un solo lugar antes de permitir cualquier movimiento de salida de inventario. | Norma de negocio: las unidades de un lote bloqueado no pueden registrarse como disponibles para salida. Calidad: integridad de datos. |
-| RF-01 / CU-01 | La exportación en PDF requiere consolidar datos de productos, lotes, existencias y fechas de vencimiento de forma consistente. | Calidad: usabilidad y disponibilidad de la información de inventario para reportes. |
 ---
 
 ---
