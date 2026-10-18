@@ -246,7 +246,7 @@ El modelo de datos incluirá el registro de la cantidad de intentos fallidos con
 * **Cumplimiento estricto de seguridad:** Garantiza que los bloqueos temporales se respeten sin importar si el servidor se reinicia o se cae, cumpliendo a cabalidad con el RF-03.
 * **Centralización:** El control de acceso queda fuertemente gestionado en el backend, evitando cualquier manipulación desde el lado del cliente (navegador).
 
-**Negativas (Trade-offs):**
+**Negativas:**
 * **Impacto en el rendimiento (leve):** Genera una carga adicional en la base de datos, ya que cada intento de inicio de sesión fallido requiere ejecutar consultas de lectura y escritura para actualizar el contador de intentos, en lugar de hacerlo instantáneamente en la memoria del servidor.
 
 ---
