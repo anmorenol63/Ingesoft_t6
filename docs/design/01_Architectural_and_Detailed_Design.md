@@ -235,14 +235,17 @@ At least one of the two decisions above must also be recorded as an ADR (use `Pl
 
 
 
-## 6. Trazabilidad
+## 6. Traceability
 
 A continuación, se muestra cómo los dos requisitos funcionales del sistema (Control de lotes e Inventario, y Seguridad) se conectan con las partes del código que los hacen funcionar. 
 
-| Requirement ID | Use Case | Component(s) implicados | Class(es) implicadas |
+
+| ID de Requisito | Caso de Uso | Componentes | Clases |
 |---|---|---|---|
 | **RF-02** | **CU-02** (Salida y bloqueo de lotes) | Frontend, API, **Módulo de Lotes**, **Módulo de Control de Inventario**, Persistencia | `ServicioLote`, `Lote`, `EstadoLote`, `ServicioInventario`, `MovimientoInventario`, `TipoMovimiento`, `LoteRepository`, `RepositorioMovimiento` |
 | **RF-03** | **CU-03** (Bloqueo por intentos fallidos) | Frontend, API, **Módulo de Autenticación y Autorización**, Persistencia | `ServicioAutenticacion`, `Usuario`, `Rol`, `Permiso`, `EstadoAutenticacion`, `ResultadoAutenticacion`, `UsuarioRepository`, `RepositorioEstadoAutenticacion` |
+
+
 
 ---
 
