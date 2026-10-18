@@ -239,8 +239,6 @@ At least one of the two decisions above must also be recorded as an ADR (use `Pl
 
 A continuación, se muestra cómo los dos requisitos funcionales del sistema (Control de lotes e Inventario, y Seguridad) se conectan con las partes del código que los hacen funcionar. 
 
-*(Nota: El requisito de exportación a PDF, CU-01, fue descartado del alcance de esta entrega).*
-
 | Requirement ID | Use Case | Component(s) implicados | Class(es) implicadas |
 |---|---|---|---|
 | **RF-02** | **CU-02** (Salida y bloqueo de lotes) | Frontend, API, **Módulo de Lotes**, **Módulo de Control de Inventario**, Persistencia | `ServicioLote`, `Lote`, `EstadoLote`, `ServicioInventario`, `MovimientoInventario`, `TipoMovimiento`, `LoteRepository`, `RepositorioMovimiento` |
