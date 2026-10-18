@@ -214,7 +214,7 @@ Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel d
 | **Contexto** | El sistema debe bloquear el acceso de un usuario durante 5 minutos si falla la contraseña 5 veces seguidas (RF-03). El problema es que, si esta cuenta de errores se guarda solo en la memoria del servidor, al reiniciarse el sistema los datos se borrarían y el usuario bloqueado podría volver a intentar entrar. |
 | **Decisión** | Guardar el registro de intentos fallidos y la fecha/hora de bloqueo permanentemente en la base de datos (PostgreSQL), utilizando la capa de persistencia. |
 | **Justificación** | Guardar estos datos en la base de datos garantiza que el castigo (bloqueo) se cumpla sin importar si el servidor se apaga o se reinicia. Esto asegura el cumplimiento estricto de la regla de negocio y centraliza la seguridad. |
-| **Concesión aceptada (Trade-off)** | El sistema será ligerísimamente más lento al iniciar sesión, ya que cada vez que un usuario se equivoque de contraseña, el sistema tendrá que conectarse a la base de datos para sumar un intento fallido, consumiendo más recursos. |
+| **Concesión aceptada** | El sistema será ligerísimamente más lento al iniciar sesión, ya que cada vez que un usuario se equivoque de contraseña, el sistema tendrá que conectarse a la base de datos para sumar un intento fallido, consumiendo más recursos. |
 
 ### Decisión B — Diseño detallado (Integridad del inventario)
 
@@ -223,7 +223,7 @@ Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel d
 | **Contexto** | Cuando el auxiliar registra una salida de medicamentos (RF-02), el sistema tiene que hacer dos cosas juntas: 1) Restar la cantidad de la caja (Lote) y 2) Crear el registro (Movimiento) de lo que salió. Si el paso 1 funciona pero el paso 2 falla (por un error de internet o del sistema), el inventario quedará descuadrado. |
 | **Decisión** | Agrupar el descuento de la cantidad del lote y el registro del movimiento de salida dentro de una única "transacción de base de datos". |
 | **Justificación** | Una transacción funciona bajo la regla de "todo o nada". Si ocurre un error al intentar guardar el comprobante de salida, el sistema deshace automáticamente el descuento del lote. Esto garantiza que las cantidades en el sistema siempre sean reales y exactas. |
-| **Concesión aceptada (Trade-off)** | Mientras la transacción se está guardando, ese lote específico queda bloqueado por unos milisegundos. Si dos auxiliares intentan sacar medicamentos del mismo lote exactamente al mismo tiempo, uno de ellos tendrá que esperar un instante, lo que afecta un poco la concurrencia. |
+| **Concesión aceptada** | Mientras la transacción se está guardando, ese lote específico queda bloqueado por unos milisegundos. Si dos auxiliares intentan sacar medicamentos del mismo lote exactamente al mismo tiempo, uno de ellos tendrá que esperar un instante, lo que afecta un poco la concurrencia. |
 
 ### ADR
 
@@ -237,13 +237,14 @@ At least one of the two decisions above must also be recorded as an ADR (use `Pl
 
 ## 6. Traceability
 
-| Requirement ID | Use Case | Component(s) | Class(es) |
-|---|---|---|---|
-| RF-01 | CU-01 | Frontend (aplicación web), Controlador de API, Módulo de productos, Módulo de lotes, Módulo de control de inventario, Capa de persistencia | `ServicioProducto`, `Producto`, `ServicioLote`, `Lote`, `ServicioInventario`, `ProductoRepository`, `LoteRepository` |
-| RF-02 | CU-02 | Frontend (aplicación web), Controlador de API, Módulo de lotes, Módulo de control de inventario, Capa de persistencia | `ServicioLote`, `Lote`, `EstadoLote`, `ServicioInventario`, `MovimientoInventario`, `TipoMovimiento`, `LoteRepository`, `RepositorioMovimiento` |
-| RF-03 | CU-03 | Frontend (aplicación web), Controlador de API, Módulo de autenticación y autorización, Capa de persistencia | `ServicioAutenticacion`, `Usuario`, `Rol`, `Permiso`, `EstadoAutenticacion`, `ResultadoAutenticacion`, `UsuarioRepository`, `RepositorioEstadoAutenticacion` |
+A continuación, se muestra cómo los dos requisitos funcionales del sistema (Control de lotes e Inventario, y Seguridad) se conectan con las partes del código que los hacen funcionar. 
 
-*(Every requirement in Section 1 must appear. Every component and class should appear at least once. If an element traces to nothing, ask why it exists.)*
+*(Nota: El requisito de exportación a PDF, CU-01, fue descartado del alcance de esta entrega).*
+
+| Requirement ID | Use Case | Component(s) implicados | Class(es) implicadas |
+|---|---|---|---|
+| **RF-02** | **CU-02** (Salida y bloqueo de lotes) | Frontend, API, **Módulo de Lotes**, **Módulo de Control de Inventario**, Persistencia | `ServicioLote`, `Lote`, `EstadoLote`, `ServicioInventario`, `MovimientoInventario`, `TipoMovimiento`, `LoteRepository`, `RepositorioMovimiento` |
+| **RF-03** | **CU-03** (Bloqueo por intentos fallidos) | Frontend, API, **Módulo de Autenticación y Autorización**, Persistencia | `ServicioAutenticacion`, `Usuario`, `Rol`, `Permiso`, `EstadoAutenticacion`, `ResultadoAutenticacion`, `UsuarioRepository`, `RepositorioEstadoAutenticacion` |
 
 ---
 
