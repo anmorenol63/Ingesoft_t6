@@ -19,7 +19,7 @@
 | Requisito / ID de Caso de Uso | Por qué da forma a la estructura | Atributo de calidad, restricción o regla de negocio implicada |
 |---|---|---|
 | RF-03 / CU-03 | El contador de intentos fallidos, el temporizador de 5 minutos y la restricción de acceso deben gestionarse centralizadamente en el backend para evitar que el cliente se la salte. | Restricción REST-01: gestión en backend. Norma de negocio RN-01: máximo 5 intentos fallidos consecutivos. Calidad: seguridad de acceso. |
-| RF-02 / CU-02 | El estado de un lote debe ser verificado en un solo lugar antes de permitir cualquier movimiento de salida de inventario. | Norma de negocio: las unidades de un lote bloqueado no pueden registrarse como disponibles para salida. Calidad: integridad de datos. |
+| RF-02 / CU-02 | El sistema puede controlar el inventario, registrar productos, añadir productos al inventario, registrar salidas de producto y al igual que las entradas de producto. Además es responsable de actualizar el estado del lote seleccionado y aplicar la restricción correspondiente para impedir que sus unidades sean registradas como disponibles para salida mientras el lote permanezca bloqueado. | Norma de negocio: las unidades de un lote bloqueado no pueden registrarse como disponibles para salida. Calidad: integridad de datos. |
 ---
 
 ---
