@@ -209,7 +209,7 @@ Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel d
 
 ### Decisión A — Arquitectura (Gestión de bloqueos de seguridad)
 
-| | |
+| Elemento | Descripción |
 |---|---|
 | **Contexto** | El sistema debe bloquear el acceso de un usuario durante 5 minutos si falla la contraseña 5 veces seguidas (RF-03). El problema es que, si esta cuenta de errores se guarda solo en la memoria del servidor, al reiniciarse el sistema los datos se borrarían y el usuario bloqueado podría volver a intentar entrar. |
 | **Decisión** | Guardar el registro de intentos fallidos y la fecha/hora de bloqueo permanentemente en la base de datos (PostgreSQL), utilizando la capa de persistencia. |
@@ -218,7 +218,7 @@ Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel d
 
 ### Decisión B — Diseño detallado (Integridad del inventario)
 
-| | |
+| Elemento | Descripción |
 |---|---|
 | **Contexto** | Cuando el auxiliar registra una salida de medicamentos (RF-02), el sistema tiene que hacer dos cosas juntas: 1) Restar la cantidad de la caja (Lote) y 2) Crear el registro (Movimiento) de lo que salió. Si el paso 1 funciona pero el paso 2 falla (por un error de internet o del sistema), el inventario quedará descuadrado. |
 | **Decisión** | Agrupar el descuento de la cantidad del lote y el registro del movimiento de salida dentro de una única "transacción de base de datos". |
