@@ -248,15 +248,14 @@ At least one of the two decisions above must also be recorded as an ADR (use `Pl
 
 ---
 
-## 7. Optional — AI-Assisted Design Reflection
 
-> ## 7. Reflexión sobre el diseño asistido por IA
+ ## 7. Reflexión sobre el diseño asistido por IA
 
 La IA recomendó revisar los riesgos asociados al requerimiento RF-03, especialmente la posibilidad de bloquear intencionalmente a usuarios legítimos, mantener el bloqueo más de cinco minutos o perder el contador de intentos tras un reinicio del servidor. El equipo evaluó estas recomendaciones y adaptó las mitigaciones al alcance del proyecto: considerar el uso de CAPTCHA, validar la duración del bloqueo desde el backend y almacenar el estado de autenticación en PostgreSQL. Se mantuvo el CAPTCHA como una medida por evaluar, mientras que la persistencia del contador y del bloqueo se incorporó a las decisiones de diseño.
 
 ---
 
-## 8. Consistency Checklist
+## 8. Lista de verificacion de consistencia
 
 - [x] Todos los componentes del diagrama aparecen en la tabla de responsabilidades y viceversa.
 - [x] Cada clase pertenece a un componente identificable.
