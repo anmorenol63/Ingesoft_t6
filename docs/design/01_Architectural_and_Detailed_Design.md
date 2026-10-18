@@ -235,8 +235,7 @@ At least one of the two decisions above must also be recorded as an ADR (use `Pl
 
 
 
-## 6. Traceability
-
+## 6. Trazabilidad
 A continuación, se muestra cómo los dos requisitos funcionales del sistema (Control de lotes e Inventario, y Seguridad) se conectan con las partes del código que los hacen funcionar. 
 
 
