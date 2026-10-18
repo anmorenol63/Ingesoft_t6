@@ -20,12 +20,12 @@ El sistema de gestión y control de inventario farmacéutico busca administrar l
 
 | ID del requisito / caso de uso | Por qué influye en la estructura | Atributo de calidad, restricción o regla de negocio involucrada |
 |---|---|---|
-| **RF-02 – Bloqueo de lotes** | Requiere separar la gestión de lotes de las operaciones de inventario, para validar que un lote bloqueado no permita registrar salidas. | Integridad del inventario y cumplimiento de reglas de negocio. |
-| **RF-03 – Bloqueo temporal por intentos fallidos** | Requiere centralizar la autenticación y gestionar el contador de intentos fallidos y el tiempo de bloqueo en el backend. | Seguridad: bloqueo después de cinco intentos consecutivos fallidos durante cinco minutos. |
-| **Registro de entradas y salidas de inventario** | Justifica un componente encargado de validar las operaciones y registrar los movimientos mediante repositorios. | Consistencia de los datos y trazabilidad de los movimientos. |
-| **Gestión de productos y lotes** | Requiere separar los datos generales del producto de la información específica de cada lote. | Organización del dominio y mantenibilidad. |
-| **Persistencia de la información** | Justifica una capa de persistencia con repositorios especializados para desacoplar los servicios del acceso directo a PostgreSQL. | Mantenibilidad, separación de responsabilidades y persistencia de los datos. |
-| **Control de acceso por roles** | Requiere verificar los permisos antes de ejecutar operaciones restringidas, como el bloqueo de lotes. | Seguridad y autorización según el rol del usuario. |
+| **RF-02 – Bloqueo de lotes** | Requiere separar la gestión de lotes de las operaciones de inventario, para validar que un lote bloqueado no permita registrar salidas. | Integridad del inventario. |
+| **RF-03 – Bloqueo temporal por intentos fallidos** | El sistema debe controlar desde el backend los intentos fallidos de inicio de sesión y bloquear temporalmente el acceso después de cinco intentos consecutivos incorrectos, durante cinco minutos. | Seguridad. El sistema debe bloquear el acceso durante cinco minutos después de cinco intentos consecutivos fallidos (RN-01). Si el usuario inicia sesión correctamente, el contador de intentos fallidos debe reiniciarse (RN-02). |
+| **Registro de entradas y salidas de inventario** | El sistema necesita un componente que valide las entradas y salidas de productos, compruebe las cantidades disponibles y registre cada movimiento utilizando los repositorios para guardar la información. | Consistencia de los datos y trazabilidad de los movimientos. |
+| **Gestión de productos y lotes** | El sistema debe diferenciar la información general de cada medicamento de los datos particulares de sus lotes, como el número de lote, la fecha de vencimiento y la cantidad disponible. | Permite mantener la información ordenada y facilita modificar o ampliar el sistema sin afectar otras funcionalidades. |
+| **Persistencia de la información** | El sistema debe contar con una capa de persistencia que organice el almacenamiento y la consulta de productos, lotes, movimientos y usuarios mediante repositorios. Así, los servicios no necesitan acceder directamente a PostgreSQL y resulta más fácil modificar la forma de guardar los datos sin afectar la lógica del sistema. | Facilidad para realizar cambios, responsabilidades bien definidas y conservación segura de la información del sistema. |
+| **Control de acceso por roles** | El sistema debe comprobar que cada usuario tenga los permisos necesarios antes de permitirle realizar acciones restringidas, como bloquear un lote. | Protección del sistema mediante permisos que determinan qué acciones puede realizar cada usuario según su rol. |
 
 ---
 
