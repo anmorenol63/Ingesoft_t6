@@ -205,26 +205,25 @@ Se identificó que registrar una salida requiere validar el estado del lote, com
 ---
 
 ## 5. Design Decisions & Decision Record
+Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel de arquitectura y otra a nivel de diseño detallado. 
 
-Two decisions are required: one architectural (Class 11 level) and one detailed-design (Class 12 level). Avoid "it is best practice", "it scales" or "it is cleaner" without project evidence.
-
-### Decision A — Architectural
-
-| | |
-|---|---|
-| **Context** (requirement, constraint or problem that motivated it) | El requisito RF-03 exige que el contador de intentos fallidos y la restricción de acceso se gestionen centralizadamente en el backend. Además, se requiere definir una estrategia concreta para conservar el estado de los intentos fallidos y la duración del bloqueo ante un reinicio del servidor. |
-| **Decision** | Almacenar el estado de autenticación (contador de intentos y fecha/hora de bloqueo) de forma persistente en la base de datos PostgreSQL utilizando la capa de persistencia. |
-| **Rationale** (why it is reasonable here) | Guardar esta información en la base de datos permite que el módulo de autenticación y autorización mantenga el control estricto de accesos incluso si el servidor se reinicia, garantizando que el usuario no pueda saltarse la restricción REST-01. |
-| **Trade-off accepted** | Aumenta la carga de la base de datos, ya que cada intento fallido de autenticación requiere una operación de escritura para consultar o actualizar la cantidad de intentos fallidos. |
-
-### Decision B — Detailed design
+### Decisión A — Arquitectura (Gestión de bloqueos de seguridad)
 
 | | |
 |---|---|
-| **Context** | Para registrar una salida de inventario, se requiere validar el estado del lote, comprobar la cantidad disponible, descontar la cantidad y guardar el movimiento. Si estas acciones se ejecutan por separado, podrían producirse inconsistencias en el inventario. |
-| **Decision** | Establecer que la actualización de la cantidad en el lote y el registro del movimiento de salida se realicen dentro de una misma transacción en el sistema. |
-| **Rationale** | Realizar ambas operaciones en una sola transacción garantiza que, si ocurre un error en alguna parte del proceso, se puedan revertir los cambios, manteniendo la integridad de los datos entre los lotes y los movimientos registrados. |
-| **Trade-off accepted** | Se acepta que mantener la transacción abierta mientras se guardan los cambios del lote y se guarda el movimiento en el repositorio puede bloquear temporalmente los registros involucrados, lo que podría generar un leve impacto en la concurrencia si múltiples usuarios modifican el mismo lote simultáneamente. |
+| **Contexto** | El sistema debe bloquear el acceso de un usuario durante 5 minutos si falla la contraseña 5 veces seguidas (RF-03). El problema es que, si esta cuenta de errores se guarda solo en la memoria del servidor, al reiniciarse el sistema los datos se borrarían y el usuario bloqueado podría volver a intentar entrar. |
+| **Decisión** | Guardar el registro de intentos fallidos y la fecha/hora de bloqueo permanentemente en la base de datos (PostgreSQL), utilizando la capa de persistencia. |
+| **Justificación** | Guardar estos datos en la base de datos garantiza que el castigo (bloqueo) se cumpla sin importar si el servidor se apaga o se reinicia. Esto asegura el cumplimiento estricto de la regla de negocio y centraliza la seguridad. |
+| **Concesión aceptada (Trade-off)** | El sistema será ligerísimamente más lento al iniciar sesión, ya que cada vez que un usuario se equivoque de contraseña, el sistema tendrá que conectarse a la base de datos para sumar un intento fallido, consumiendo más recursos. |
+
+### Decisión B — Diseño detallado (Integridad del inventario)
+
+| | |
+|---|---|
+| **Contexto** | Cuando el auxiliar registra una salida de medicamentos (RF-02), el sistema tiene que hacer dos cosas juntas: 1) Restar la cantidad de la caja (Lote) y 2) Crear el registro (Movimiento) de lo que salió. Si el paso 1 funciona pero el paso 2 falla (por un error de internet o del sistema), el inventario quedará descuadrado. |
+| **Decisión** | Agrupar el descuento de la cantidad del lote y el registro del movimiento de salida dentro de una única "transacción de base de datos". |
+| **Justificación** | Una transacción funciona bajo la regla de "todo o nada". Si ocurre un error al intentar guardar el comprobante de salida, el sistema deshace automáticamente el descuento del lote. Esto garantiza que las cantidades en el sistema siempre sean reales y exactas. |
+| **Concesión aceptada (Trade-off)** | Mientras la transacción se está guardando, ese lote específico queda bloqueado por unos milisegundos. Si dos auxiliares intentan sacar medicamentos del mismo lote exactamente al mismo tiempo, uno de ellos tendrá que esperar un instante, lo que afecta un poco la concurrencia. |
 
 ### ADR
 
