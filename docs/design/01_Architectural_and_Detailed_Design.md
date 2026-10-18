@@ -10,16 +10,22 @@
 
 ---
 
-## 1. Visión general del sistema y controladores de diseño
+## 1. Visión general del sistema y factores que guían el diseño
 
-**Propósito del sistema**
+### Propósito del sistema
 
-> Permite que el regente y auxiliar de farmacia gestionen el inventario de productos y lotes con sus fechas de vencimiento, garantizando el control estricto de entradas y salidas para evitar la distribución de medicamentos no disponibles o vencidos.
+El sistema de gestión y control de inventario farmacéutico busca administrar los productos, sus lotes y los movimientos de inventario, manteniendo información consistente sobre las cantidades disponibles. También permite controlar el acceso según los roles de los usuarios y bloquear lotes que no deben utilizarse para registrar salidas.
 
-| Requisito / ID de Caso de Uso | Por qué da forma a la estructura | Atributo de calidad, restricción o regla de negocio implicada |
+### Requisitos que influyen en la estructura
+
+| ID del requisito / caso de uso | Por qué influye en la estructura | Atributo de calidad, restricción o regla de negocio involucrada |
 |---|---|---|
-| RF-03 / CU-03 | El contador de intentos fallidos, el temporizador de 5 minutos y la restricción de acceso deben gestionarse centralizadamente en el backend para evitar que el cliente se la salte. | Restricción REST-01: gestión en backend. Norma de negocio RN-01: máximo 5 intentos fallidos consecutivos. Calidad: seguridad de acceso. |
-| RF-02 / CU-02 | El sistema puede controlar el inventario, registrar productos, añadir productos al inventario, registrar salidas de producto y al igual que las entradas de producto. Además es responsable de actualizar el estado del lote seleccionado y aplicar la restricción correspondiente para impedir que sus unidades sean registradas como disponibles para salida mientras el lote permanezca bloqueado. | Norma de negocio: las unidades de un lote bloqueado no pueden registrarse como disponibles para salida. Calidad: integridad de datos. |
+| **RF-02 – Bloqueo de lotes** | Requiere separar la gestión de lotes de las operaciones de inventario, para validar que un lote bloqueado no permita registrar salidas. | Integridad del inventario y cumplimiento de reglas de negocio. |
+| **RF-03 – Bloqueo temporal por intentos fallidos** | Requiere centralizar la autenticación y gestionar el contador de intentos fallidos y el tiempo de bloqueo en el backend. | Seguridad: bloqueo después de cinco intentos consecutivos fallidos durante cinco minutos. |
+| **Registro de entradas y salidas de inventario** | Justifica un componente encargado de validar las operaciones y registrar los movimientos mediante repositorios. | Consistencia de los datos y trazabilidad de los movimientos. |
+| **Gestión de productos y lotes** | Requiere separar los datos generales del producto de la información específica de cada lote. | Organización del dominio y mantenibilidad. |
+| **Persistencia de la información** | Justifica una capa de persistencia con repositorios especializados para desacoplar los servicios del acceso directo a PostgreSQL. | Mantenibilidad, separación de responsabilidades y persistencia de los datos. |
+| **Control de acceso por roles** | Requiere verificar los permisos antes de ejecutar operaciones restringidas, como el bloqueo de lotes. | Seguridad y autorización según el rol del usuario. |
 ---
 
 ---
