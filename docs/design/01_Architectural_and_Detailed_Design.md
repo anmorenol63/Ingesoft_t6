@@ -26,7 +26,6 @@ El sistema de gestión y control de inventario farmacéutico busca administrar l
 | **Gestión de productos y lotes** | Requiere separar los datos generales del producto de la información específica de cada lote. | Organización del dominio y mantenibilidad. |
 | **Persistencia de la información** | Justifica una capa de persistencia con repositorios especializados para desacoplar los servicios del acceso directo a PostgreSQL. | Mantenibilidad, separación de responsabilidades y persistencia de los datos. |
 | **Control de acceso por roles** | Requiere verificar los permisos antes de ejecutar operaciones restringidas, como el bloqueo de lotes. | Seguridad y autorización según el rol del usuario. |
----
 
 ---
 
