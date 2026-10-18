@@ -207,7 +207,7 @@ función registrarSalida(loteId, cantidad, usuario):
 
 **Hallazgo real del diseño y qué se cambió o se cambiaría:**
 
-Se identificó que registrar una salida requiere validar el estado del lote, comprobar la cantidad disponible y guardar el movimiento. Si estas acciones se ejecutan por separado, podrían producirse inconsistencias en el inventario. Para evitarlo, se establece que la actualización de la cantidad y el registro del movimiento deben realizarse en una misma transacción, revirtiendo los cambios si ocurre un error.
+Se identificó que, al registrar una salida, se debe revisar el lote y la cantidad disponible, y guardar el movimiento. Se propone que estos pasos se realicen juntos en una misma transacción, para evitar errores en el inventario. Si algo falla, los cambios se cancelan.
 
 ---
 
