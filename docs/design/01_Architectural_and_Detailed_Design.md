@@ -225,11 +225,29 @@ Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel d
 | **Justificación** | Una transacción funciona bajo la regla de "todo o nada". Si ocurre un error al intentar guardar el comprobante de salida, el sistema deshace automáticamente el descuento del lote. Esto garantiza que las cantidades en el sistema siempre sean reales y exactas. |
 | **Concesión aceptada** | Mientras la transacción se está guardando, ese lote específico queda bloqueado por unos milisegundos. Si dos auxiliares intentan sacar medicamentos del mismo lote exactamente al mismo tiempo, uno de ellos tendrá que esperar un instante, lo que afecta un poco la concurrencia. |
 
-### ADR
+# ADR 001: Persistencia del estado de autenticación y bloqueos de seguridad
 
-At least one of the two decisions above must also be recorded as an ADR (use `Plantilla_ADR_Nygard`) in `docs/decisions/`.
+## Estado
+Aceptada
 
-**ADR file:** `docs/decisions/ADR-001-Persistencia-Estado-Autenticacion.md` — records Decision A.
+## Contexto
+El sistema debe cumplir con el requisito de seguridad **RF-03**, el cual establece que se debe bloquear temporalmente el acceso de un usuario durante 5 minutos después de 5 intentos fallidos consecutivos de inicio de sesión. 
+
+Si el contador de intentos y el registro del tiempo de bloqueo se gestionan únicamente en la memoria volátil del servidor (RAM), un reinicio del sistema (intencional o por falla) borraría estos datos. Esto permitiría que un atacante o un usuario bloqueado evada la restricción de seguridad y vuelva a intentar iniciar sesión inmediatamente, violando la regla de negocio.
+
+## Decisión
+Se ha decidido **almacenar el estado de autenticación de forma persistente en la base de datos PostgreSQL**, utilizando la capa de persistencia del sistema. 
+
+El modelo de datos incluirá el registro de la cantidad de intentos fallidos consecutivos y la fecha y hora exacta hasta la cual el usuario se encuentra bloqueado. El `ServicioAutenticacion` deberá consultar y actualizar esta información en la base de datos en cada intento de inicio de sesión.
+
+## Consecuencias
+
+**Positivas:**
+* **Cumplimiento estricto de seguridad:** Garantiza que los bloqueos temporales se respeten sin importar si el servidor se reinicia o se cae, cumpliendo a cabalidad con el RF-03.
+* **Centralización:** El control de acceso queda fuertemente gestionado en el backend, evitando cualquier manipulación desde el lado del cliente (navegador).
+
+**Negativas (Trade-offs):**
+* **Impacto en el rendimiento (leve):** Genera una carga adicional en la base de datos, ya que cada intento de inicio de sesión fallido requiere ejecutar consultas de lectura y escritura para actualizar el contador de intentos, en lugar de hacerlo instantáneamente en la memoria del servidor.
 
 ---
 
