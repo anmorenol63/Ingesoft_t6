@@ -130,7 +130,9 @@ de datos"| DB
 | **Módulo de autenticación y autorización** | Se selecciona porque verifica la identidad de los usuarios y controla sus permisos según su rol. Debe gestionar el bloqueo temporal de cinco minutos después de cinco intentos consecutivos fallidos. Un error podría permitir accesos no autorizados o bloquear usuarios legítimos. |
 | **Módulo de lotes** | Se selecciona porque administra los lotes y sus estados. Es fundamental para garantizar que los lotes bloqueados no puedan utilizarse para registrar salidas de inventario. Un error podría permitir movimientos no autorizados. |
 | **Módulo de control de inventario** | Se selecciona porque gestiona las entradas, las salidas y los movimientos de inventario. Debe validar la cantidad disponible y comprobar que el lote no esté bloqueado antes de registrar una salida, evitando inconsistencias en las cantidades. |
+| **Módulo de productos** | Se selecciona porque permite registrar y consultar los productos farmacéuticos. Debe mantener organizados sus datos generales y diferenciarlos de la información específica de cada lote. Una separación incorrecta podría generar confusiones o inconsistencias en la información de los productos. |
 | **Capa de persistencia** | Se selecciona porque permite almacenar y recuperar los datos mediante repositorios especializados y PostgreSQL. Es esencial para conservar la información de productos, lotes, movimientos, usuarios y estados de autenticación, evitando pérdidas e inconsistencias. |
+
 
 ### 3.2 Diagrama de clases
 
