@@ -117,7 +117,7 @@ de datos"| DB
 - El módulo de lotes administra el estado de bloqueo, mientras que el módulo de control de inventario verifica dicho estado e impide registrar como disponibles para salida las unidades pertenecientes a lotes bloqueados.
 - La capa de persistencia separa el acceso a los datos de la lógica de los módulos funcionales.
 - Los módulos se comunican a través del controlador de API y la capa de persistencia según las responsabilidades definidas en la arquitectura.
-- La estrategia concreta para conservar el estado de los intentos fallidos y la duración del bloqueo ante un reinicio del servidor deberá definirse en el diseño detallado.
+- El estado de los intentos fallidos y el tiempo de bloqueo se guardarán en PostgreSQL mediante la capa de persistencia, de acuerdo con la decisión documentada en el ADR-0003.
 
 ---
 
