@@ -220,7 +220,7 @@ Se establecen dos decisiones técnicas para el diseño del sistema: una relacion
 | Elemento | Descripción |
 |---|---|
 | **Contexto** | El sistema debe bloquear el inicio de sesión durante 5 minutos después de 5 intentos fallidos consecutivos. Si estos intentos se guardan solo en la memoria del servidor, se pueden perder cuando este se reinicie. |
-| **Decisión** | Guardar los intentos fallidos y el tiempo de bloqueo en PostgreSQL, utilizando `AuthStateRepository` y `EstadoAutenticacion`, que ya están incluidos en el modelo de clases. |
+| **Decisión** |  Guardar los intentos fallidos y el tiempo de bloqueo en PostgreSQL, utilizando RepositorioEstadoAutenticacion y EstadoAutenticacion, que ya están incluidos en el modelo de clases. |
 | **Justificación** | Así, el sistema puede recordar los intentos fallidos y mantener el bloqueo aunque el servidor se reinicie. |
 | **Concesión aceptada** | Será necesario consultar y actualizar la base de datos durante el inicio de sesión. Esto añade trabajo al sistema, pero permite conservar la información del bloqueo. |
 
