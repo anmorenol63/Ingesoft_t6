@@ -225,7 +225,7 @@ Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel d
 | **Justificación** | Una transacción funciona bajo la regla de "todo o nada". Si ocurre un error al intentar guardar el comprobante de salida, el sistema deshace automáticamente el descuento del lote. Esto garantiza que las cantidades en el sistema siempre sean reales y exactas. |
 | **Concesión aceptada** | Mientras la transacción se está guardando, ese lote específico queda bloqueado por unos milisegundos. Si dos auxiliares intentan sacar medicamentos del mismo lote exactamente al mismo tiempo, uno de ellos tendrá que esperar un instante, lo que afecta un poco la concurrencia. |
 
-# ADR 001: Persistencia del estado de autenticación y bloqueos de seguridad
+# ADR: Persistencia del estado de autenticación y bloqueos de seguridad
 
 ## Estado
 Aceptada
