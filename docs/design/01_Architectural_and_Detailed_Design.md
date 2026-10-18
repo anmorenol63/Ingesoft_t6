@@ -233,7 +233,9 @@ Se establecen dos decisiones técnicas para el diseño del sistema: una relacion
 | **Justificación** | Si ocurre un error, la transacción permite deshacer los cambios para evitar que la cantidad del lote y los movimientos registrados queden inconsistentes. |
 | **Concesión aceptada** | Se debe controlar qué ocurre si hay errores o si dos usuarios intentan registrar salidas al mismo tiempo. Esto añade complejidad, pero ayuda a mantener las cantidades del inventario correctas. |
 
-**ADR:** [`ADR-0003-persistencia-bloqueos-seguridad.md`](../decisions/ADR-0003-persistencia-bloqueos-seguridad.md) — registra la decisión de guardar los intentos fallidos y el tiempo de bloqueo en PostgreSQL.
+ADR file: [ADR-0003-persistencia-bloqueos-seguridad.md](../decisions/ADR-0003-persistencia-bloqueos-seguridad.md)
+
+Registra la decisión de guardar los intentos fallidos y el tiempo de bloqueo en PostgreSQL.
 ---
 
 ## 6. Trazabilidad
