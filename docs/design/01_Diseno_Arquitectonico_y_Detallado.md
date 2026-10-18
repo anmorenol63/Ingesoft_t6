@@ -172,6 +172,7 @@ de datos"| DB
 **Pseudocódigo:**
 
 ```text
+**Pseudocódigo:**
 función registrarSalida(loteId, cantidad, usuario):
     si no autorizar(usuario, "REGISTRAR_SALIDA"):
         retornar error("Usuario sin permisos")
