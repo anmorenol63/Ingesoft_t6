@@ -204,7 +204,7 @@ Se identificó que registrar una salida requiere validar el estado del lote, com
 
 ---
 
-## 5. Design Decisions & Decision Record
+## 5. Decisiones de diseño y registro de decisiones
 Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel de arquitectura y otra a nivel de diseño detallado. 
 
 ### Decisión A — Arquitectura (Gestión de bloqueos de seguridad)
