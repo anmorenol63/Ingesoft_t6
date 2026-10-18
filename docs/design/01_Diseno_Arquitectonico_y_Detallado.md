@@ -95,6 +95,65 @@ de datos"| DB
 
 ```
 
+---
+
+```mermaid
+flowchart TB
+    R["Regente de farmacia"]
+    A["Auxiliar de farmacia"]
+
+    subgraph SYS["Sistema de gestión y control de inventario farmacéutico"]
+        direction TB
+
+        subgraph PRESENTACION["Capa de presentación"]
+            direction TB
+            FE["Frontend (aplicación web)"]
+        end
+
+        subgraph NEGOCIO["Capa de lógica de negocio"]
+            direction TB
+
+            API["Controlador de API"]
+
+            subgraph MOD["Módulos funcionales"]
+                direction LR
+                AUTH["Módulo de autenticación y autorización"]
+                PROD["Módulo de productos"]
+                LOT["Módulo de lotes"]
+                INV["Módulo de control de inventario"]
+            end
+
+            API -->|"Solicitudes de autenticación"| AUTH
+            API -->|"Solicitudes de productos"| PROD
+            API -->|"Solicitudes de lotes"| LOT
+            API -->|"Operaciones de inventario"| INV
+        end
+
+        subgraph DATOS["Capa de persistencia"]
+            direction TB
+            PERSIST["Capa de persistencia"]
+        end
+
+        FE -->|"Solicitudes de la aplicación"| API
+
+        AUTH -->|"Acceso a datos de autenticación"| PERSIST
+        PROD -->|"Acceso a datos de productos"| PERSIST
+        LOT -->|"Acceso a datos de lotes"| PERSIST
+        INV -->|"Acceso a datos de inventario"| PERSIST
+    end
+
+    DB[("PostgreSQL")]
+
+    R -->|"Interacción mediante la interfaz"| FE
+    A -->|"Interacción mediante la interfaz"| FE
+
+    PERSIST -->|"Consultas y operaciones de datos"| DB
+```
+
+
+---
+
+
 
 #### Responsabilidades y capacidades
 
