@@ -175,22 +175,48 @@ de datos"| DB
 función registrarSalida(loteId, cantidad, usuario):
     si no autorizar(usuario, "REGISTRAR_SALIDA"):
         retornar error("Usuario sin permisos")
+
     si cantidad <= 0:
         retornar error("Cantidad inválida")
+
     lote = consultarLote(loteId)
+
     si lote no existe:
         retornar error("Lote no encontrado")
+
     si lote.estaBloqueado():
         retornar error("El lote está bloqueado")
-    si lote.cantidadDisponible < cantidad:
-        retornar error("Cantidad insuficiente")
+
     iniciar transacción
-    descontar cantidad del lote
-    guardar cambios del lote
-    movimiento = crear movimiento SALIDA
-    guardar movimiento en el repositorio
-    confirmar transacción
-    retornar movimiento
+
+    intentar:
+        lote = consultarLoteParaActualizacion(loteId)
+
+        si lote no existe:
+            cancelar transacción
+            retornar error("Lote no encontrado")
+
+        si lote.estaBloqueado():
+            cancelar transacción
+            retornar error("El lote está bloqueado")
+
+        si lote.cantidadDisponible < cantidad:
+            cancelar transacción
+            retornar error("Cantidad insuficiente")
+
+        descontar cantidad del lote
+        guardar cambios del lote
+
+        movimiento = crear movimiento SALIDA
+        guardar movimiento en el repositorio
+
+        confirmar transacción
+        retornar movimiento
+
+    si ocurre un error:
+        cancelar transacción
+        retornar error("No se pudo registrar la salida")
+
 ```
 
 **Resultado esperado:** Si las validaciones se cumplen, se registra el movimiento de salida y se actualiza la cantidad disponible. Si alguna validación falla, se devuelve un error y no se registra la salida.
