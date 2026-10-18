@@ -259,17 +259,18 @@ El modelo de datos incluirá el registro de la cantidad de intentos fallidos con
 
 ---
 
-
-
 ## 6. Trazabilidad
-A continuación, se muestra cómo los dos requisitos funcionales del sistema (Control de lotes e Inventario, y Seguridad) se conectan con las partes del código que los hacen funcionar. 
 
+La siguiente tabla muestra cómo se relacionan los requisitos del sistema con los casos de uso, los componentes de la arquitectura y las clases del modelo UML. Esto permite identificar qué partes del diseño ayudan a cumplir cada requisito.
 
-| ID de Requisito | Caso de Uso | Componentes | Clases |
+| ID de requisito | Caso de uso | Componentes | Clases relacionadas |
 |---|---|---|---|
-| **RF-02** | **CU-02** (Salida y bloqueo de lotes) | Frontend, API, **Módulo de Lotes**, **Módulo de Control de Inventario**, Persistencia | `ServicioLote`, `Lote`, `EstadoLote`, `ServicioInventario`, `MovimientoInventario`, `TipoMovimiento`, `LoteRepository`, `RepositorioMovimiento` |
-| **RF-03** | **CU-03** (Bloqueo por intentos fallidos) | Frontend, API, **Módulo de Autenticación y Autorización**, Persistencia | `ServicioAutenticacion`, `Usuario`, `Rol`, `Permiso`, `EstadoAutenticacion`, `ResultadoAutenticacion`, `UsuarioRepository`, `RepositorioEstadoAutenticacion` |
-
+| **RF-02 – Bloqueo de lotes** | **CU-02 – Gestión de lotes e inventario** | Controlador de API, módulo de lotes, módulo de control de inventario y capa de persistencia. | `ServicioLote`, `Lote`, `EstadoLote`, `ServicioInventario`, `RepositorioLote`, `RepositorioMovimiento`, `MovimientoInventario` |
+| **RF-03 – Bloqueo temporal por intentos fallidos** | **CU-03 – Autenticación de usuarios** | Frontend, controlador de API, módulo de autenticación y autorización, capa de persistencia y PostgreSQL. | `ServicioAutenticacion`, `Usuario`, `Rol`, `Permiso`, `EstadoAutenticacion`, `ResultadoAutenticacion`, `RepositorioUsuario`, `RepositorioEstadoAutenticacion` |
+| **Registro y consulta de productos** | **CU-02 – Gestión de productos e inventario** | Controlador de API, módulo de productos y capa de persistencia. | `ServicioProducto`, `Producto`, `RepositorioProducto` |
+| **Registro de entradas y salidas de inventario** | **CU-02 – Gestión de productos e inventario** | Controlador de API, módulo de control de inventario, módulo de lotes y capa de persistencia. | `ServicioInventario`, `Lote`, `MovimientoInventario`, `TipoMovimiento`, `RepositorioLote`, `RepositorioMovimiento`, `ServicioLote` |
+| **Control de acceso por roles y permisos** | **CU-03 – Autenticación de usuarios** | Controlador de API y módulo de autenticación y autorización. | `ServicioAutenticacion`, `Usuario`, `Rol`, `Permiso`, `ServicioProducto`, `ServicioLote`, `ServicioInventario` |
+| **Persistencia de productos, lotes, movimientos y autenticación** | **CU-02 y CU-03** | Capa de persistencia y PostgreSQL. | `RepositorioProducto`, `RepositorioLote`, `RepositorioMovimiento`, `RepositorioUsuario`, `RepositorioEstadoAutenticacion` |
 
 
 ---
