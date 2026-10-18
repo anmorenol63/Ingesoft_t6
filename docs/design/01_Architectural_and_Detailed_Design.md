@@ -212,25 +212,26 @@ Se identificó que, al registrar una salida, se debe revisar el lote y la cantid
 ---
 
 ## 5. Decisiones de diseño y registro de decisiones
-Se requieren dos decisiones técnicas para el diseño del sistema: una a nivel de arquitectura y otra a nivel de diseño detallado. 
+
+Se establecen dos decisiones técnicas para el diseño del sistema: una relacionada con la autenticación y otra con el control del inventario.
 
 ### Decisión A — Arquitectura (Gestión de bloqueos de seguridad)
 
 | Elemento | Descripción |
 |---|---|
-| **Contexto** | El sistema debe bloquear el acceso de un usuario durante 5 minutos si falla la contraseña 5 veces seguidas (RF-03). El problema es que, si esta cuenta de errores se guarda solo en la memoria del servidor, al reiniciarse el sistema los datos se borrarían y el usuario bloqueado podría volver a intentar entrar. |
-| **Decisión** | Guardar el registro de intentos fallidos y la fecha/hora de bloqueo permanentemente en la base de datos (PostgreSQL), utilizando la capa de persistencia. |
-| **Justificación** | Guardar estos datos en la base de datos garantiza que el castigo (bloqueo) se cumpla sin importar si el servidor se apaga o se reinicia. Esto asegura el cumplimiento estricto de la regla de negocio y centraliza la seguridad. |
-| **Concesión aceptada** | El sistema será ligerísimamente más lento al iniciar sesión, ya que cada vez que un usuario se equivoque de contraseña, el sistema tendrá que conectarse a la base de datos para sumar un intento fallido, consumiendo más recursos. |
+| **Contexto** | El sistema debe bloquear el inicio de sesión durante 5 minutos después de 5 intentos fallidos consecutivos. Si estos intentos se guardan solo en la memoria del servidor, se pueden perder cuando este se reinicie. |
+| **Decisión** | Guardar los intentos fallidos y el tiempo de bloqueo en PostgreSQL, utilizando `AuthStateRepository` y `EstadoAutenticacion`, que ya están incluidos en el modelo de clases. |
+| **Justificación** | Así, el sistema puede recordar los intentos fallidos y mantener el bloqueo aunque el servidor se reinicie. |
+| **Concesión aceptada** | Será necesario consultar y actualizar la base de datos durante el inicio de sesión. Esto añade trabajo al sistema, pero permite conservar la información del bloqueo. |
 
-### Decisión B — Diseño detallado (Integridad del inventario)
+### Decisión B — Diseño detallado (Control de las salidas de inventario)
 
 | Elemento | Descripción |
 |---|---|
-| **Contexto** | Cuando el auxiliar registra una salida de medicamentos (RF-02), el sistema tiene que hacer dos cosas juntas: 1) Restar la cantidad de la caja (Lote) y 2) Crear el registro (Movimiento) de lo que salió. Si el paso 1 funciona pero el paso 2 falla (por un error de internet o del sistema), el inventario quedará descuadrado. |
-| **Decisión** | Agrupar el descuento de la cantidad del lote y el registro del movimiento de salida dentro de una única "transacción de base de datos". |
-| **Justificación** | Una transacción funciona bajo la regla de "todo o nada". Si ocurre un error al intentar guardar el comprobante de salida, el sistema deshace automáticamente el descuento del lote. Esto garantiza que las cantidades en el sistema siempre sean reales y exactas. |
-| **Concesión aceptada** | Mientras la transacción se está guardando, ese lote específico queda bloqueado por unos milisegundos. Si dos auxiliares intentan sacar medicamentos del mismo lote exactamente al mismo tiempo, uno de ellos tendrá que esperar un instante, lo que afecta un poco la concurrencia. |
+| **Contexto** | Al registrar una salida, el sistema debe descontar las unidades disponibles del lote y guardar el movimiento correspondiente. Si una de estas acciones falla, la información del inventario podría quedar incorrecta. |
+| **Decisión** | Realizar el descuento de las unidades del lote y el registro del movimiento dentro de una misma transacción de base de datos. |
+| **Justificación** | Si ocurre un error, la transacción permite deshacer los cambios para evitar que la cantidad del lote y los movimientos registrados queden inconsistentes. |
+| **Concesión aceptada** | Se debe controlar qué ocurre si hay errores o si dos usuarios intentan registrar salidas al mismo tiempo. Esto añade complejidad, pero ayuda a mantener las cantidades del inventario correctas. |
 
 # ADR: Persistencia del estado de autenticación y bloqueos de seguridad
 
