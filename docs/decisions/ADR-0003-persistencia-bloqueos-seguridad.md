@@ -23,7 +23,7 @@ Por esta razón, es necesario definir una forma de guardar los intentos fallidos
 
 Guardar en PostgreSQL los intentos fallidos y la fecha y hora hasta la que el usuario permanece bloqueado.
 
-Para ello, se utilizarán `AuthStateRepository` y `EstadoAutenticacion`, incluidos en el modelo de clases. `ServicioAutenticacion` consultará y actualizará esta información durante el proceso de inicio de sesión.
+Para ello, se utilizarán `RepositorioEstadoAutenticacion` y `EstadoAutenticacion`, incluidos en el modelo de clases.
 
 El sistema también deberá reiniciar el contador cuando la autenticación sea exitosa y comprobar si el usuario continúa bloqueado antes de permitir otro intento.
 
