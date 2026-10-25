@@ -214,7 +214,7 @@ sequenceDiagram
                 API-->>FE: Informar bloqueo exitoso
                 FE-->>R: Confirmar que el lote fue bloqueado
 
-                Note over R,BD: Paso 7. Verificación del estado (CA-02, CA-04)
+                Note over R,BD: Verificación del estado (CA-02, CA-04)
                 R->>FE: Consulta nuevamente el lote
                 FE->>API: Solicitar consulta de lote(loteId)
                 API->>SL: consultarLote(loteId)
