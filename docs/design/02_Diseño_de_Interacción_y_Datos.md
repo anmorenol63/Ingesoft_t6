@@ -354,7 +354,6 @@ erDiagram
 - `RolPermiso` es una tabla intermedia que permite representar la asignación de varios permisos a un rol y de un mismo permiso a distintos roles.
 - `EstadoAutenticacion` conserva el contador de intentos fallidos y la fecha y hora de finalización del bloqueo temporal.
 
-La columna `bloqueadoPorUsuarioId` representa en el modelo relacional la asociación `bloqueadoPor` del diagrama de clases. Es una decisión de representación de la base de datos, no un atributo que ya aparezca con ese nombre en la clase `Lote`.
 
 #### Entidades y restricciones
 
@@ -369,7 +368,6 @@ La columna `bloqueadoPorUsuarioId` representa en el modelo relacional la asociac
 | `RolPermiso` | Representa la asignación de permisos a los roles. | `rolId` y `permisoId` | Ambos campos deben referenciar registros existentes. La combinación de los dos identificadores debe ser única. |
 | `EstadoAutenticacion` | Representa el estado de seguridad asociado a un usuario. | `usuarioId` | Debe estar asociado a un usuario existente. El contador de intentos fallidos no puede ser negativo. El acceso debe bloquearse durante cinco minutos después de cinco intentos consecutivos fallidos. |
 
-Las claves foráneas, las restricciones de unicidad y las demás condiciones indicadas son reglas propuestas para la implementación de la base de datos y deberán aplicarse durante su desarrollo.
 
 ### 2.3 Propiedad de los datos
 
@@ -384,7 +382,6 @@ Las claves foráneas, las restricciones de unicidad y las demás condiciones ind
 | Usuario asociado al bloqueo del lote | Módulo de lotes, como parte de la información asociada al bloqueo | Frontend y componentes autorizados que necesiten consultar quién realizó el bloqueo | `ServicioLote`, que utiliza `RepositorioLote` y la relación con `Usuario`. |
 | Movimientos de inventario | Módulo de control de inventario | Frontend y otros componentes que necesitan consultar los movimientos | `ServicioInventario`, que utiliza `RepositorioMovimiento` para registrar los movimientos. |
 
-**Criterio de propiedad:** cada módulo es responsable de mantener los datos de su dominio. Los demás componentes consumen la información mediante los servicios correspondientes, sin acceder directamente a los repositorios internos de otros módulos. Los repositorios proporcionan a sus servicios las operaciones necesarias para consultar y persistir la información.
 
 ### 2.4 Reglas de negocio e invariantes aplicadas a los datos
 
@@ -410,7 +407,9 @@ Las claves foráneas, las restricciones de unicidad y las demás condiciones ind
 
 ## 3. Contrato de interfaz
 
-Se selecciona la operación de bloqueo de lotes, ya que permite implementar el requisito RF-02 y garantizar que un lote bloqueado no pueda utilizarse para registrar salidas de inventario.
+## 3. Contrato de interfaz
+
+Se selecciona la operación de bloqueo de lotes porque permite implementar el requisito RF-02, conservar la información del bloqueo y evitar que las unidades de un lote bloqueado se registren como disponibles para salida.
 
 **Interacción seleccionada (del diagrama 1.2, mensaje `bloquearLote(loteId, usuario, motivo)`):**
 
@@ -418,22 +417,22 @@ Se selecciona la operación de bloqueo de lotes, ya que permite implementar el r
 
 | Elemento | Especificación |
 |---|---|
-| **Operación y propósito** | `ServicioLote.bloquearLote(loteId, usuario, motivo)` permite al regente de farmacia solicitar el bloqueo de un lote registrado. El servicio verifica que el usuario tenga el permiso `BLOQUEAR_LOTE`, obtiene el lote, actualiza su estado a `BLOQUEADO` y guarda los cambios mediante `RepositorioLote`. |
-| **Entrada (parámetros y tipos)** | `loteId: Integer`: identificador del lote que se desea bloquear.<br>`usuario: Usuario`: usuario autenticado que solicita la operación.<br>`motivo: String`: motivo por el cual se solicita el bloqueo. |
-| **Salida (resultado exitoso y estructura de datos)** | Devuelve un objeto `Lote` con el estado actualizado a `BLOQUEADO`. El objeto conserva el motivo del bloqueo y la fecha y hora del bloqueo según los atributos definidos en el diseño. El resultado exitoso solo debe confirmarse después de guardar correctamente los cambios. |
-| **Precondiciones (qué debe cumplir quien invoca la operación)** | El usuario debe estar autenticado y su información debe ser proporcionada por el controlador de API. El identificador del lote y el motivo deben proporcionarse en la solicitud. El usuario debe contar con el permiso `BLOQUEAR_LOTE` para que la operación pueda completarse. La autorización se comprueba durante la ejecución del servicio. |
-| **Postcondiciones (qué se garantiza si la operación termina correctamente)** | El lote queda en estado `BLOQUEADO` y los cambios se guardan mediante `RepositorioLote`. El motivo y la fecha y hora del bloqueo quedan reflejados en los atributos correspondientes. El sistema confirma el bloqueo al usuario. Las unidades del lote no pueden registrarse como disponibles para salida mientras el lote permanezca bloqueado. |
-| **Resultados de fallo (cada fallo y estado posterior)** | **Usuario sin permiso:** se rechaza la solicitud y no se completa el bloqueo.<br>**Lote inexistente:** se informa que el lote no fue encontrado y no se realiza el bloqueo.<br>**Error de persistencia:** se informa que no fue posible guardar el cambio y no se confirma la operación como exitosa. La implementación debe garantizar que un fallo al guardar no deje un estado persistido parcialmente actualizado. |
-| **Invariantes y efectos secundarios (qué debe mantenerse y qué puede cambiar)** | Solo los usuarios autorizados pueden bloquear lotes. El estado del lote debe corresponder a los valores definidos en `EstadoLote`: `DISPONIBLE` o `BLOQUEADO`. El bloqueo modifica el estado del lote y registra la información asociada al bloqueo. No se registra una salida de inventario ni se modifican las cantidades disponibles por el solo hecho de bloquear el lote. |
+| **Operación y propósito** | `ServicioLote.bloquearLote(loteId, usuario, motivo)` permite al regente de farmacia solicitar el bloqueo de un lote. El servicio verifica que el usuario tenga el permiso `BLOQUEAR_LOTE`, consulta el lote, actualiza su estado a `BLOQUEADO` y guarda los cambios mediante `RepositorioLote`. |
+| **Entrada (parámetros y tipos)** | `loteId: Integer`: identificador del lote que se desea bloquear.<br>`usuario: Usuario`: usuario autenticado que solicita el bloqueo.<br>`motivo: String`: motivo del bloqueo. |
+| **Salida (resultado exitoso y estructura de datos)** | Devuelve el objeto `Lote` con el estado actualizado a `BLOQUEADO`, el motivo y la fecha del bloqueo. La información del usuario que realizó la operación se conserva mediante la relación entre `Lote` y `Usuario`, representada en el modelo relacional mediante la clave foránea `bloqueadoPorUsuarioId`. El sistema confirma el éxito únicamente después de guardar los cambios correctamente. |
+| **Precondiciones (qué debe cumplir quien invoca la operación)** | El usuario debe estar autenticado y ser identificado por el controlador de API. Deben proporcionarse el identificador del lote y el motivo del bloqueo. El lote debe estar registrado y el usuario debe contar con el permiso `BLOQUEAR_LOTE`. El servicio verifica la autorización antes de realizar la operación. |
+| **Postcondiciones (qué se garantiza si la operación termina correctamente)** | El lote queda en estado `BLOQUEADO` y la información actualizada se guarda mediante `RepositorioLote`. Se conservan el motivo, la fecha del bloqueo y la relación con el usuario que realizó la operación. Mientras permanezca bloqueado, el lote no puede utilizarse para registrar unidades como disponibles para salida. El bloqueo no modifica por sí mismo la cantidad disponible ni registra un movimiento de salida. |
+| **Resultados de fallo (cada fallo y estado posterior)** | **Usuario sin permiso:** se rechaza la solicitud y no se modifica el lote.<br>**Lote inexistente:** se informa que el lote no fue encontrado y no se modifica ningún lote.<br>**Error de persistencia:** se informa que no fue posible completar el bloqueo y no se confirma la operación como exitosa. La implementación debe evitar que un fallo de almacenamiento deje el estado persistido parcialmente actualizado. |
+| **Invariantes y efectos secundarios (qué debe mantenerse y qué puede cambiar)** | El estado del lote debe corresponder a los valores definidos en `EstadoLote`: `DISPONIBLE` o `BLOQUEADO`. Solo los usuarios autorizados pueden realizar el bloqueo. La información del bloqueo debe conservar la relación con el usuario que lo efectuó. El bloqueo no cambia la cantidad disponible ni registra una salida de inventario. Las salidas deben comprobar el estado del lote antes de registrarse. |
 
 ### Ejemplos verificables
 
 | Caso | Estado previo | Solicitud | Resultado esperado |
 |---|---|---|---|
-| Bloqueo exitoso | El lote existe, está `DISPONIBLE` y el usuario tiene permiso. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | Devuelve el lote con estado `BLOQUEADO`. El motivo y la fecha y hora del bloqueo quedan guardados y el sistema confirma la operación. |
-| Usuario sin permiso | El lote existe y está `DISPONIBLE`, pero el usuario no tiene permiso para bloquearlo. | `bloquearLote(15, usuarioSinPermiso, "Lote en revisión")` | La operación se rechaza por falta de autorización. El estado persistido del lote no cambia. |
-| Lote inexistente | No existe un lote con identificador `9999`. | `bloquearLote(9999, usuarioRegente, "Lote en revisión")` | El sistema informa que el lote no fue encontrado. No se modifica ningún lote. |
-| Error de persistencia | El lote existe, está `DISPONIBLE` y el usuario tiene permiso, pero falla el almacenamiento. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | El sistema informa que no pudo completar el bloqueo. No devuelve una confirmación de éxito y el estado persistido del lote debe mantenerse consistente. |
+| Bloqueo exitoso | El lote existe, está `DISPONIBLE` y el usuario tiene el permiso correspondiente. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | El lote queda `BLOQUEADO`. Se guardan el motivo, la fecha del bloqueo y la relación con el usuario que realizó la operación. El sistema confirma el éxito. |
+| Usuario sin permiso | El lote existe y está `DISPONIBLE`, pero el usuario no tiene el permiso requerido. | `bloquearLote(15, usuarioSinPermiso, "Lote en revisión")` | La solicitud se rechaza y el estado persistido del lote permanece sin cambios. |
+| Lote inexistente | No existe un lote con identificador `9999`. | `bloquearLote(9999, usuarioRegente, "Lote en revisión")` | El sistema informa que el lote no fue encontrado y no modifica ningún lote. |
+| Error de persistencia | El lote existe, está `DISPONIBLE` y el usuario tiene permiso, pero falla el almacenamiento. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | El sistema informa que no pudo completar el bloqueo. No confirma la operación como exitosa y el estado persistido del lote permanece consistente. |
 
 
 
@@ -443,25 +442,25 @@ Se selecciona la operación de bloqueo de lotes, ya que permite implementar el r
 
 ### 4.1 Lista de comprobación de consistencia
 
-| Comprobación | Resultado |
-|---|---|
-| Todos los participantes de los diagramas de secuencia son actores, componentes, clases o sistemas externos definidos en el Entregable 1. | **Cumple.** Los participantes de los diagramas CU-03 y CU-02 corresponden a los actores, componentes, clases y sistemas de la arquitectura y del diagrama de clases, incluidos `ServicioAutenticacion`, `ServicioLote`, `RepositorioUsuario`, `RepositorioEstadoAutenticacion`, `RepositorioLote`, `EstadoAutenticacion`, `Usuario`, `Lote`, el frontend, el controlador de API y PostgreSQL. |
-| Todos los mensajes corresponden a una capacidad, operación o contrato. | **Cumple con observación.** Las llamadas principales corresponden a las operaciones definidas en el diseño de clases, como `autenticar(...)`, `buscarEstado(...)`, `bloquearLote(...)`, `bloquear(...)` y `guardar(...)`. Los mensajes de respuesta y error representan el comportamiento de los componentes. Debe mantenerse la correspondencia entre los nombres de las operaciones y sus firmas en el Entregable 1. |
-| Todas las entidades o tipos de documento están reflejados en los diagramas de clases, o se explica por qué no aparecen en el modelo de datos. | **Cumple con observación.** El modelo representa las entidades persistentes principales: `Producto`, `Lote`, `Usuario`, `Rol`, `Permiso`, `MovimientoInventario` y `EstadoAutenticacion`. `ResultadoAutenticacion` no se modela como una entidad persistente porque representa el resultado de una operación. Los tipos `EstadoLote` y `TipoMovimiento` se representan mediante valores permitidos de sus respectivos atributos. |
-| Cada elemento de información persistente tiene exactamente un propietario autorizado. | **Cumple.** La sección 2.3 asigna la responsabilidad de mantener cada conjunto de datos a un único módulo: autenticación y autorización, productos, lotes o control de inventario. Los demás componentes consumen la información mediante los servicios correspondientes. |
-| El contrato coincide con el diagrama de secuencia y con el modelo de datos, manteniendo el mismo comportamiento en las tres representaciones. | **Cumple con observación.** El contrato de `ServicioLote.bloquearLote(loteId, usuario, motivo)`. |
+| Comprobación                                                                                                                                  | Resultado                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Todos los participantes de los diagramas de secuencia son actores, componentes, clases o sistemas externos definidos en el Entregable 1.      | **Cumple.** Los participantes de CU-02 y CU-03 corresponden a actores, componentes, clases y sistemas identificados en la arquitectura y el diagrama de clases, como `ServicioLote`, `ServicioAutenticacion`, `RepositorioLote`, `RepositorioUsuario`, `EstadoAutenticacion`, `Usuario`, `Lote`, el frontend, el controlador de API y PostgreSQL.                                                                                                                                 |
+| Todos los mensajes corresponden a una capacidad, operación o contrato.                                                                        | **Cumple con observación.** Las llamadas principales utilizan las operaciones definidas en el diseño, como `autenticar(...)`, `buscarEstado(...)`, `bloquearLote(...)`, `bloquear(...)` y `guardar(...)`. Los mensajes de respuesta y error describen el comportamiento de los componentes y no representan necesariamente operaciones nuevas.                                                                                                                                    |
+| Todas las entidades o tipos de documento están reflejados en los diagramas de clases, o se explica por qué no aparecen en el modelo de datos. | **Cumple.** Las entidades persistentes principales están representadas en el modelo relacional. `ResultadoAutenticacion` no se persiste como entidad independiente porque representa el resultado de una operación. `EstadoLote` y `TipoMovimiento` se representan mediante los valores permitidos de los atributos `estado` y `tipo`. La tabla `ROL_PERMISO` representa la relación entre roles y permisos en el modelo relacional, sin requerir una clase de dominio adicional. |
+| Cada elemento de información persistente tiene exactamente un propietario autorizado.                                                         | **Cumple.** La sección 2.3 asigna la responsabilidad de mantener cada conjunto de datos a un único módulo: autenticación y autorización, productos, lotes o control de inventario. Los demás componentes acceden a la información mediante los servicios correspondientes.                                                                                                                                                                                                        |
+| El contrato coincide con el diagrama de secuencia y con el modelo de datos, manteniendo el mismo comportamiento en las tres representaciones. | **Cumple con observación.** El contrato de `ServicioLote.bloquearLote(loteId, usuario, motivo)` coincide con el flujo de bloqueo del CU-02 y con el modelo relacional actualizado. La relación con el usuario que realizó el bloqueo se representa mediante `bloqueadoPorUsuarioId`.                                     |
 
 ### 4.2 Cambios realizados al Entregable 1 a partir de este entregable
 
-No se han realizado modificaciones directas al diagrama de clases ni se han añadido nuevas clases u operaciones al Entregable 1. Se conservaron las clases, responsabilidades y operaciones existentes para documentar las interacciones y los contratos de los requisitos RF-02 y RF-03.
+No se han realizado modificaciones directas al diagrama de clases del Entregable 1 ni se han añadido nuevas operaciones a sus clases. Este entregable permitió precisar el comportamiento de los casos de uso, los contratos entre componentes y la representación relacional de la información.
 
-Este entregable hizo explícitos los siguientes aspectos del diseño:
+Los principales ajustes y precisiones son los siguientes:
 
-- **Comportamiento de RF-02:** se detalló la comprobación de permisos, la consulta del lote, el cambio a estado `BLOQUEADO`, la persistencia y la consulta posterior para verificar el estado.
-- **Comportamiento de RF-03:** se documentó el control de intentos fallidos, el bloqueo temporal de cinco minutos, el reinicio del contador después de una autenticación exitosa y la persistencia del estado de autenticación.
-- **Propiedad de los datos:** se identificó un único módulo responsable de mantener cada conjunto de información y se precisó el acceso mediante los servicios correspondientes.
-- **Reglas de integridad:** se especificaron las condiciones que debe respetar el inventario, especialmente la prohibición de registrar salidas de lotes bloqueados.
-
+- **Comportamiento de RF-02:** se detallaron la verificación de permisos, la consulta del lote, la actualización a estado `BLOQUEADO`, la persistencia y la consulta posterior para verificar que el estado se mantenga.
+- **Representación relacional del bloqueo:** se incorporó `bloqueadoPorUsuarioId` en `LOTE` para representar la asociación existente entre `Lote` y `Usuario` que identifica quién realizó el bloqueo. También se incorporó la tabla intermedia `ROL_PERMISO` para representar la relación entre roles y permisos.
+- **Comportamiento de RF-03:** se documentaron la verificación de credenciales, el control de intentos fallidos, el bloqueo temporal de cinco minutos, el reinicio del contador después de una autenticación exitosa y la persistencia del estado de autenticación.
+- **Propiedad de los datos:** se precisó qué módulo mantiene cada conjunto de información y cómo acceden los demás componentes mediante los servicios correspondientes.
+- **Reglas de integridad:** se especificaron las condiciones que deben respetarse, especialmente la prohibición de registrar salidas de lotes bloqueados y la conservación del estado de autenticación.
 
 
 ---
