@@ -220,70 +220,149 @@ sequenceDiagram
 
 ---
 
-## 2. Data Design
+## 2. Diseño de datos (Data Design)
 
-### 2.1 Principal information the system needs
+### 2.1 Información principal que necesita el sistema
 
-| Information | Needed by (use cases) | Persisted? | Why (or why not) |
+| Información | Necesitada por (casos de uso) | ¿Persistida? | ¿Por qué (o por qué no)? |
 |---|---|---|---|
-| | | Yes / No | |
+| Datos de los usuarios | CU-02, CU-03 | Sí | Permiten identificar al usuario que realiza las operaciones y verificar sus credenciales y permisos. |
+| Roles y permisos | CU-02, CU-03 | Sí | Permiten controlar las acciones autorizadas para cada usuario, incluyendo el bloqueo de lotes. |
+| Estado de autenticación | CU-03 | Sí | Permite conservar el número de intentos fallidos consecutivos y la fecha y hora hasta la que permanece bloqueado el acceso, incluso si el servidor se reinicia. |
+| Datos de los productos | CU-02 | Sí | Permiten identificar los productos farmacéuticos y consultar su información general. |
+| Datos de los lotes | CU-02 | Sí | Permiten identificar cada lote, consultar su fecha de vencimiento y cantidad disponible, y conocer su estado. |
+| Estado de bloqueo del lote | CU-02 | Sí | Permite conservar el estado disponible o bloqueado de cada lote y evitar que las unidades de un lote bloqueado se registren como disponibles para salida. |
+| Motivo y fecha de bloqueo del lote | CU-02 | Sí | Permiten conservar la información asociada al bloqueo del lote, de acuerdo con los atributos definidos en la clase `Lote`. |
+| Movimientos de inventario | CU-02 | Sí | Permiten conservar el historial de entradas, salidas y ajustes realizados sobre los lotes. |
+| Resultado de una autenticación | CU-03 | No, como registro independiente | El resultado de cada intento se representa mediante `ResultadoAutenticacion`. El estado persistente necesario para controlar los intentos fallidos se almacena en `EstadoAutenticacion`. |
+| Información del lote mostrada en pantalla | CU-02 | No, como copia independiente | Se obtiene mediante la consulta del lote almacenado. El frontend presenta la información recibida sin convertirse en propietario de esos datos. |
 
-*(Data owned by an external system, or recomputable on demand, is often better not persisted. If that is your decision, say so.)*
+### 2.2 Modelo de datos
 
-### 2.2 Data model
+Se utiliza un modelo relacional porque el sistema necesita conservar información estructurada sobre productos, lotes, usuarios y movimientos de inventario, además de mantener relaciones e integridad entre esos datos. PostgreSQL permite almacenar esta información de forma persistente y aplicar restricciones que contribuyen a mantener la consistencia del inventario y la seguridad de la autenticación.
 
-Choose the representation that fits your persistence approach and **justify it in one or two sentences**:
->
-
-**Option A — Relational:** an Entity-Relationship diagram with entities, relevant attributes, primary identifiers, relationships, cardinalities and constraints.
+#### Opción A — Modelo relacional
 
 ```mermaid
 erDiagram
-    ENTITY_A ||--o{ ENTITY_B : "relationship"
-    ENTITY_A {
-        int entity_a_id PK
-        string attribute
+    PRODUCTO ||--o{ LOTE : tiene
+    LOTE ||--o{ MOVIMIENTO_INVENTARIO : registra
+    USUARIO ||--o{ MOVIMIENTO_INVENTARIO : realiza
+    USUARIO ||--|| ESTADO_AUTENTICACION : posee
+    ROL ||--o{ USUARIO : asignado
+    ROL }o--o{ PERMISO : concede
+
+    PRODUCTO {
+        int productoId PK
+        string codigo
+        string nombre
+        string presentacion
+        boolean controlado
+        boolean activo
     }
-    ENTITY_B {
-        int entity_b_id PK
-        int entity_a_id FK
-        string attribute
+
+    LOTE {
+        int loteId PK
+        int productoId FK
+        string numeroLote
+        date fechaVencimiento
+        int cantidadDisponible
+        string estado
+        string motivoBloqueo
+        timestamp fechaBloqueo
+    }
+
+    MOVIMIENTO_INVENTARIO {
+        int movimientoId PK
+        int loteId FK
+        int usuarioId FK
+        string tipo
+        int cantidad
+        timestamp fechaHora
+        string observacion
+    }
+
+    USUARIO {
+        int usuarioId PK
+        int rolId FK
+        string nombre
+        string nombreUsuario
+        string credencialHash
+        boolean activo
+    }
+
+    ROL {
+        int rolId PK
+        string nombre
+        string descripcion
+    }
+
+    PERMISO {
+        int permisoId PK
+        string nombre
+        string descripcion
+    }
+
+    ESTADO_AUTENTICACION {
+        int usuarioId PK, FK
+        int intentosFallidos
+        timestamp bloqueoHasta
     }
 ```
 
-*(Cardinality: `||` exactly one, `o|` zero or one, `}o` zero or many, `}|` one or many.)*
+**Descripción del modelo:**
 
-**Option B — Document-oriented:** collections or document types, structure, identifiers, embedded structures, references and constraints.
+- `Producto` almacena la información general de cada producto farmacéutico.
+- `Lote` almacena la información específica de cada lote, incluida su cantidad disponible y su estado. El atributo `estado` utiliza los valores definidos por `EstadoLote`: `DISPONIBLE` y `BLOQUEADO`.
+- `MovimientoInventario` conserva los movimientos asociados a los lotes y a los usuarios que los realizan.
+- `Usuario`, `Rol` y `Permiso` permiten representar a los usuarios y controlar sus autorizaciones.
+- `EstadoAutenticacion` conserva el contador de intentos fallidos y la fecha y hora de finalización del bloqueo temporal.
 
-```json
-{
-  "collection_name": {
-    "id": "identifier",
-    "embedded_structure": [ { "field": "value" } ],
-    "reference_to_other_collection": "identifier"
-  }
-}
-```
+Los identificadores y relaciones del modelo representan las entidades y asociaciones del diseño de clases. Las claves foráneas, restricciones de unicidad y demás restricciones de base de datos deberán concretarse durante la implementación.
 
-**Other representation:** allowed if you justify why it suits your project. The goal is not to force a relational or document database. The goal is to design the information the software needs.
+#### Entidades y restricciones
 
-| Entity / document type | Meaning in the system | Identifier | Constraints (required, unique, allowed values) |
+| Entidad / tipo de documento | Significado en el sistema | Identificador | Restricciones (requeridos, únicos, valores permitidos) |
 |---|---|---|---|
-| | | | |
+| `Producto` | Representa un producto farmacéutico. | `productoId` | El identificador es obligatorio. El código del producto debe permitir identificarlo de forma inequívoca. |
+| `Lote` | Representa un lote perteneciente a un producto. | `loteId` | Debe estar asociado a un producto existente. La cantidad disponible no puede ser negativa. El estado debe corresponder a `DISPONIBLE` o `BLOQUEADO`. |
+| `MovimientoInventario` | Representa una entrada, salida o ajuste de inventario. | `movimientoId` | Debe estar asociado a un lote y al usuario que realiza la operación. La cantidad debe ser válida para el movimiento. El tipo debe corresponder a los valores de `TipoMovimiento`. |
+| `Usuario` | Representa a una persona autorizada para utilizar el sistema. | `usuarioId` | El nombre de usuario debe ser único. Las credenciales deben conservarse mediante su hash, no como contraseña en texto plano. |
+| `Rol` | Representa un conjunto de permisos asignados a los usuarios. | `rolId` | Debe tener un identificador y nombre válidos. |
+| `Permiso` | Representa una acción autorizada dentro del sistema. | `permisoId` | Debe tener un identificador y nombre válidos. Los nombres de permisos deben identificar inequívocamente cada autorización. |
+| `EstadoAutenticacion` | Representa el estado de seguridad asociado a un usuario. | `usuarioId` | Debe asociarse a un usuario existente. El contador de intentos fallidos no puede ser negativo. El bloqueo debe durar cinco minutos después de alcanzar cinco intentos consecutivos fallidos. |
 
-### 2.3 Data Ownership
+### 2.3 Propiedad de los datos (Data Ownership)
 
-| Information | Authoritative owner (component responsible for maintaining it) | Consumed by (uses it without owning it) | Access through |
+| Información | Propietario autorizado (componente responsable de mantenerla) | Consumido por (lo utiliza sin ser propietario) | Acceso a través de |
 |---|---|---|---|
-| | | | |
+| Datos de los usuarios | Módulo de autenticación y autorización | Módulo de lotes y módulo de control de inventario, cuando necesitan identificar o autorizar al usuario | `RepositorioUsuario` y servicios correspondientes |
+| Roles y permisos | Módulo de autenticación y autorización | Módulo de lotes, módulo de productos y módulo de control de inventario | `ServicioAutenticacion` |
+| Estado de autenticación | Módulo de autenticación y autorización | Frontend y controlador de API, para comunicar el resultado de la autenticación | `RepositorioEstadoAutenticacion` |
+| Datos de los productos | Módulo de productos | Módulo de lotes y frontend | `RepositorioProducto` y `ServicioProducto` |
+| Datos y estado de los lotes | Módulo de lotes | Módulo de control de inventario y frontend | `RepositorioLote` y `ServicioLote` |
+| Motivo y fecha de bloqueo del lote | Módulo de lotes | Frontend y módulo de control de inventario, cuando necesitan consultar el estado del lote | `RepositorioLote` y `ServicioLote` |
+| Movimientos de inventario | Módulo de control de inventario | Frontend y otros componentes que necesitan consultar los movimientos | `RepositorioMovimiento` y `ServicioInventario` |
 
-*(Do not assume every component needs its own database. Sharing information does not mean sharing ownership. No component reads or writes another component's data directly.)*
+**Criterio de propiedad:** cada módulo es responsable de mantener los datos de su dominio. Los demás componentes acceden a la información mediante los servicios y repositorios definidos en la arquitectura, sin modificar directamente los datos que pertenecen a otro módulo. PostgreSQL proporciona el almacenamiento persistente, pero no sustituye la responsabilidad funcional de los módulos.
 
-### 2.4 Business rules and invariants enforced in data
+### 2.4 Reglas de negocio e invariantes aplicadas a los datos
 
-| Business rule or invariant | Where it is enforced (component logic / data constraint / both) | How |
+| Regla de negocio o invariante | Dónde se aplica (lógica del componente, restricción de datos o ambas) | Cómo se aplica |
 |---|---|---|
-| | | |
+| Un lote debe estar asociado a un producto existente. | Ambas | `ServicioLote` valida la operación y la base de datos debe garantizar la integridad referencial mediante una clave foránea. |
+| El estado de un lote solo puede ser `DISPONIBLE` o `BLOQUEADO`. | Ambas | `Lote` gestiona su estado mediante `EstadoLote`, y la persistencia debe impedir valores no permitidos. |
+| Un lote bloqueado no puede utilizarse para registrar salidas de inventario. | Lógica del componente | `ServicioInventario` consulta el estado del lote y comprueba `Lote.estaBloqueado()` antes de registrar la salida. |
+| Un lote debe permanecer bloqueado hasta que se realice una operación autorizada que cambie su estado. | Lógica del componente y persistencia | `ServicioLote` actualiza el estado mediante `Lote.bloquear(usuario, motivo)` y guarda el cambio a través de `RepositorioLote`. El alcance actual no contempla el desbloqueo. |
+| Solo un usuario con el permiso correspondiente puede bloquear un lote. | Lógica del componente | `ServicioLote` solicita a `ServicioAutenticacion` la verificación del permiso antes de ejecutar el bloqueo. |
+| La cantidad disponible de un lote no puede ser negativa. | Ambas | `ServicioInventario` valida las cantidades antes de registrar movimientos y la base de datos debe aplicar una restricción para impedir valores negativos. |
+| El registro de una salida debe respetar el estado del lote y la cantidad disponible. | Lógica del componente y persistencia | `ServicioInventario` comprueba el bloqueo y la cantidad disponible. El descuento y el registro del movimiento deben ejecutarse en una misma transacción. |
+| Después de cinco intentos fallidos consecutivos, el acceso debe bloquearse durante cinco minutos. | Lógica del componente | `EstadoAutenticacion.registrarFallo(ahora)` actualiza el contador y establece `bloqueoHasta` cuando se alcanza el límite. |
+| Una autenticación exitosa reinicia el contador de intentos fallidos. | Lógica del componente y persistencia | `EstadoAutenticacion.registrarExito()` reinicia el contador y `RepositorioEstadoAutenticacion.guardarEstado(...)` persiste el estado actualizado. |
+| El estado de autenticación debe conservarse entre reinicios del servidor. | Persistencia | `RepositorioEstadoAutenticacion` guarda y recupera el contador de intentos fallidos y la fecha de finalización del bloqueo en PostgreSQL. |
+| Los datos de los lotes, productos y movimientos deben mantener relaciones consistentes. | Ambas | Los servicios validan las operaciones y la base de datos utiliza claves foráneas y transacciones para mantener la integridad de la información. |
+
+
 
 ---
 
