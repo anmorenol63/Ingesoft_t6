@@ -434,7 +434,7 @@ Se selecciona la operación de bloqueo de lotes, ya que permite implementar el r
 | Todos los mensajes corresponden a una capacidad, operación o contrato. | **Cumple con observación.** Las llamadas principales corresponden a las operaciones definidas en el diseño de clases, como `autenticar(...)`, `buscarEstado(...)`, `bloquearLote(...)`, `bloquear(...)` y `guardar(...)`. Los mensajes de respuesta y error representan el comportamiento de los componentes. Debe mantenerse la correspondencia entre los nombres de las operaciones y sus firmas en el Entregable 1. |
 | Todas las entidades o tipos de documento están reflejados en los diagramas de clases, o se explica por qué no aparecen en el modelo de datos. | **Cumple con observación.** El modelo representa las entidades persistentes principales: `Producto`, `Lote`, `Usuario`, `Rol`, `Permiso`, `MovimientoInventario` y `EstadoAutenticacion`. `ResultadoAutenticacion` no se modela como una entidad persistente porque representa el resultado de una operación. Los tipos `EstadoLote` y `TipoMovimiento` se representan mediante valores permitidos de sus respectivos atributos. |
 | Cada elemento de información persistente tiene exactamente un propietario autorizado. | **Cumple.** La sección 2.3 asigna la responsabilidad de mantener cada conjunto de datos a un único módulo: autenticación y autorización, productos, lotes o control de inventario. Los demás componentes consumen la información mediante los servicios correspondientes. |
-| El contrato coincide con el diagrama de secuencia y con el modelo de datos, manteniendo el mismo comportamiento en las tres representaciones. | **Parcial.** El contrato de `ServicioLote.bloquearLote(loteId, usuario, motivo)` coincide con el flujo principal del CU-02 y con los atributos de bloqueo de `Lote`. Sin embargo, el modelo relacional todavía no representa explícitamente la relación entre el lote y el usuario que lo bloqueó. Además, en el CU-03 debe contemplarse qué ocurre si falla la persistencia al reiniciar el contador después de una autenticación exitosa. Estos puntos deben resolverse para garantizar la consistencia completa. |
+| El contrato coincide con el diagrama de secuencia y con el modelo de datos, manteniendo el mismo comportamiento en las tres representaciones. | **Cumple con observación.** El contrato de `ServicioLote.bloquearLote(loteId, usuario, motivo)`. |
 
 ### 4.2 Cambios realizados al Entregable 1 a partir de este entregable
 
@@ -446,8 +446,6 @@ Este entregable hizo explícitos los siguientes aspectos del diseño:
 - **Comportamiento de RF-03:** se documentó el control de intentos fallidos, el bloqueo temporal de cinco minutos, el reinicio del contador después de una autenticación exitosa y la persistencia del estado de autenticación.
 - **Propiedad de los datos:** se identificó un único módulo responsable de mantener cada conjunto de información y se precisó el acceso mediante los servicios correspondientes.
 - **Reglas de integridad:** se especificaron las condiciones que debe respetar el inventario, especialmente la prohibición de registrar salidas de lotes bloqueados.
-
-Antes de cerrar el entregable, se deben completar los ajustes de consistencia identificados en la sección 4.1. En particular, el modelo relacional debe reflejar la asociación entre `Lote` y `Usuario` para representar quién bloqueó el lote, y el diagrama CU-03 debe contemplar el fallo de persistencia al guardar el estado después de una autenticación exitosa.
 
 
 
