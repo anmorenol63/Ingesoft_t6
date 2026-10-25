@@ -30,7 +30,7 @@ HOW TO USE THIS TEMPLATE
 
 ## 1. Comportamiento — Casos de Uso Seleccionados
 
-### 1.1 [Nombre del caso de uso] — del requisito [REQ-XX]
+### CU-03. Autenticación de usuarios — RF-03: Bloqueo temporal del acceso después de cinco intentos fallidos
 
 ```mermaid
 
@@ -133,7 +133,7 @@ sequenceDiagram
 
 
 
-### 1.2 [Second Use Case name] — from requirement [REQ-YY]
+### CU-02. Bloquear lote de inventario — RF-02: Bloquear lotes de inventario
 
 ```mermaid
 
