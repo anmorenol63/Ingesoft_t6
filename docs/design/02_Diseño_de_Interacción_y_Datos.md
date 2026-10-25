@@ -35,20 +35,83 @@ Select **two** important use cases from your own project that involve meaningful
 ### 1.1 [Use Case name] — from requirement [REQ-XX]
 
 ```mermaid
-sequenceDiagram
-    actor User
-    participant A as Component A
-    participant B as Component B
 
-    User->>A: operation(param)
-    A->>B: operation(param)
-    alt normal condition
-        B-->>A: result
-        A-->>User: outcome
-    else alternative or failure condition
-        B-->>A: failure outcome
-        A-->>User: outcome
+sequenceDiagram
+    actor U as Usuario
+    participant FE as Frontend React
+    participant API as Controlador de API
+    participant SA as ServicioAutenticacion
+    participant RU as RepositorioUsuario
+    participant REA as RepositorioEstadoAutenticacion
+    participant EA as EstadoAutenticacion
+    participant CP as Capa de persistencia
+    participant DB as PostgreSQL
+
+    U->>FE: Ingresar credenciales
+    FE->>API: Solicitar autenticación(nombreUsuario, credencial)
+    API->>SA: autenticar(nombreUsuario, credencial)
+    SA->>REA: buscarEstado(usuarioId)
+    REA->>CP: Consultar estado de autenticación
+    CP->>DB: Consultar intentos y bloqueo
+    DB-->>CP: Estado almacenado
+    CP-->>REA: EstadoAutenticacion
+    REA-->>SA: EstadoAutenticacion
+
+    alt El usuario tiene un bloqueo vigente
+        SA->>EA: estaBloqueado(horaActual)
+        EA-->>SA: true
+        SA-->>API: ResultadoAutenticacion no autenticado por bloqueo
+        API-->>FE: Acceso temporalmente bloqueado
+        FE-->>U: Informar bloqueo de 5 minutos
+    else El usuario no tiene un bloqueo vigente
+        SA->>RU: buscarPorNombre(nombreUsuario)
+        RU->>CP: Consultar usuario
+        CP->>DB: Buscar usuario
+        DB-->>CP: Datos del usuario
+        CP-->>RU: Usuario
+        RU-->>SA: Usuario
+
+        alt Las credenciales son válidas
+            SA->>EA: registrarExito()
+            EA-->>SA: Contador reiniciado a cero
+            SA->>REA: guardarEstado(usuarioId, estado)
+            REA->>CP: Guardar estado actualizado
+            CP->>DB: Persistir contador reiniciado
+            DB-->>CP: Confirmación
+            CP-->>REA: Estado guardado
+            REA-->>SA: Confirmación
+            SA-->>API: ResultadoAutenticacion autenticado
+            API-->>FE: Autenticación exitosa
+            FE-->>U: Permitir acceso
+        else Las credenciales son incorrectas
+            SA->>EA: registrarFallo(horaActual)
+            EA-->>SA: Contador incrementado
+
+            alt Se alcanza el quinto intento fallido consecutivo
+                SA->>EA: Establecer bloqueo hasta horaActual + 5 minutos
+                SA->>REA: guardarEstado(usuarioId, estado)
+                REA->>CP: Guardar contador y bloqueo
+                CP->>DB: Persistir estado de autenticación
+                DB-->>CP: Confirmación
+                CP-->>REA: Estado guardado
+                REA-->>SA: Confirmación
+                SA-->>API: ResultadoAutenticacion bloqueado
+                API-->>FE: Bloqueo temporal aplicado
+                FE-->>U: Informar bloqueo de 5 minutos
+            else Aún no se alcanzan cinco intentos fallidos
+                SA->>REA: guardarEstado(usuarioId, estado)
+                REA->>CP: Guardar contador actualizado
+                CP->>DB: Persistir intentos fallidos
+                DB-->>CP: Confirmación
+                CP-->>REA: Estado guardado
+                REA-->>SA: Confirmación
+                SA-->>API: ResultadoAutenticacion no autenticado
+                API-->>FE: Credenciales incorrectas
+                FE-->>U: Informar error de autenticación
+            end
+        end
     end
+
 ```
 
 *(Participants are actors, components or external systems from Deliverable 1. Show the main successful flow and at least one alternative or exception flow with `alt` / `else` or `opt`. Avoid semicolons inside message text. Activation bars (`activate` / `deactivate`) are optional: use them only if you keep them balanced.)*
