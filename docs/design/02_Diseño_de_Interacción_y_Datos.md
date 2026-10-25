@@ -46,36 +46,23 @@ sequenceDiagram
     participant BD as PostgreSQL
 
     U->>FE: Ingresa nombre de usuario y contraseña
-    activate FE
     FE->>API: Solicitar autenticación(nombreUsuario, credencial)
-    activate API
     API->>SA: autenticar(nombreUsuario, credencial)
-    activate SA
 
     SA->>RU: buscarPorNombre(nombreUsuario)
-    activate RU
     RU->>BD: Consultar datos del usuario
-    activate BD
     BD-->>RU: Devolver datos del usuario
-    deactivate BD
     RU-->>SA: Devolver usuario
-    deactivate RU
 
-    Note over SA: Se asume que el usuario existe, según la precondición de CU-03
+    Note over SA: Se asume que el usuario existe según la precondición de CU-03
 
     SA->>REA: buscarEstado(usuarioId)
-    activate REA
     REA->>BD: Consultar intentos y fecha de bloqueo
-    activate BD
     BD-->>REA: Devolver estado almacenado
-    deactivate BD
     REA-->>SA: Devolver EstadoAutenticacion
-    deactivate REA
 
     SA->>EA: estaBloqueado(ahora)
-    activate EA
     EA-->>SA: true o false
-    deactivate EA
 
     alt El usuario tiene un bloqueo vigente
         Note over SA,BD: No se validan nuevamente las credenciales ni se modifica el estado
@@ -88,18 +75,12 @@ sequenceDiagram
 
         alt Las credenciales son correctas
             SA->>EA: registrarExito()
-            activate EA
             EA-->>SA: Contador de intentos reiniciado
-            deactivate EA
 
             SA->>REA: guardarEstado(usuarioId, estado)
-            activate REA
             REA->>BD: Guardar estado actualizado
-            activate BD
             BD-->>REA: Confirmar almacenamiento
-            deactivate BD
             REA-->>SA: Confirmar persistencia
-            deactivate REA
 
             SA-->>API: ResultadoAutenticacion(true, usuario)
             API-->>FE: Autenticación exitosa
@@ -107,41 +88,39 @@ sequenceDiagram
 
         else Las credenciales son incorrectas
             SA->>EA: registrarFallo(ahora)
-            activate EA
             Note over EA: Registrar el fallo y establecer bloqueoHasta al alcanzar cinco fallos consecutivos
             EA-->>SA: Estado actualizado
-            deactivate EA
 
             SA->>REA: guardarEstado(usuarioId, estado)
-            activate REA
             REA->>BD: Guardar contador y fecha de bloqueo
-            activate BD
-            BD-->>REA: Confirmar almacenamiento
-            deactivate BD
-            REA-->>SA: Confirmar persistencia
-            deactivate REA
 
-            SA->>EA: estaBloqueado(ahora)
-            activate EA
-            EA-->>SA: true o false
-            deactivate EA
+            alt Persistencia exitosa
+                BD-->>REA: Confirmar almacenamiento
+                REA-->>SA: Confirmar persistencia
 
-            alt Se alcanzan cinco intentos fallidos consecutivos
-                SA-->>API: ResultadoAutenticacion(false, acceso bloqueado por cinco minutos)
-                API-->>FE: Informar bloqueo temporal
-                FE-->>U: Mostrar mensaje de bloqueo
+                SA->>EA: estaBloqueado(ahora)
+                EA-->>SA: true o false
 
-            else No se alcanzan cinco intentos fallidos
-                SA-->>API: ResultadoAutenticacion(false, credenciales incorrectas)
-                API-->>FE: Informar error de autenticación
-                FE-->>U: Mostrar mensaje de credenciales incorrectas
+                alt Se alcanzan cinco intentos fallidos consecutivos
+                    SA-->>API: ResultadoAutenticacion(false, acceso bloqueado por cinco minutos)
+                    API-->>FE: Informar bloqueo temporal
+                    FE-->>U: Mostrar mensaje de bloqueo
+
+                else No se alcanzan cinco intentos fallidos
+                    SA-->>API: ResultadoAutenticacion(false, credenciales incorrectas)
+                    API-->>FE: Informar error de autenticación
+                    FE-->>U: Mostrar mensaje de credenciales incorrectas
+                end
+
+            else Excepción: error al guardar el estado
+                BD-->>REA: Error de almacenamiento
+                REA-->>SA: Informar error de persistencia
+                SA-->>API: Error interno de autenticación
+                API-->>FE: Informar error del sistema
+                FE-->>U: Mostrar que no es posible completar la autenticación
             end
         end
     end
-
-    deactivate SA
-    deactivate API
-    deactivate FE
 
 
 ```
