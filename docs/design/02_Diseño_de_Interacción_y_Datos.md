@@ -23,7 +23,7 @@ HOW TO USE THIS TEMPLATE
 | **Equipo** | Equipo 6 |
 | **Integrantes** | Junior Andrés Arrieta Tabaco, Edgar Mauricio Montufar Molano, Kevin Alexis Bermúdez Caicedo y Antonio José Moreno López |
 | **Estado** | Listo para revisión |
-| **Fecha** | |
+| **Fecha** | 25/10/2026 |
 | **Entradas** | `docs/design/01_Architectural_and_Detailed_Design.md`, casos de uso documentados en `docs/requirements/`, requisito funcional RF-02 (bloqueo de lotes de inventario), requisito funcional RF-03 (bloqueo temporal del acceso después de cinco intentos fallidos), diagrama de clases del Entregable 1 y materiales de la Clase 13 sobre diseño de interacción, datos y contratos. |
 
 ---
