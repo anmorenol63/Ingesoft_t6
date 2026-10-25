@@ -318,7 +318,6 @@ erDiagram
 - `Usuario`, `Rol` y `Permiso` permiten representar a los usuarios y controlar sus autorizaciones.
 - `EstadoAutenticacion` conserva el contador de intentos fallidos y la fecha y hora de finalización del bloqueo temporal.
 
-Los identificadores y relaciones del modelo representan las entidades y asociaciones del diseño de clases. Las claves foráneas, restricciones de unicidad y demás restricciones de base de datos deberán concretarse durante la implementación.
 
 #### Entidades y restricciones
 
@@ -344,7 +343,6 @@ Los identificadores y relaciones del modelo representan las entidades y asociaci
 | Motivo y fecha de bloqueo del lote | Módulo de lotes | Frontend y módulo de control de inventario, cuando necesitan consultar el estado del lote | `RepositorioLote` y `ServicioLote` |
 | Movimientos de inventario | Módulo de control de inventario | Frontend y otros componentes que necesitan consultar los movimientos | `RepositorioMovimiento` y `ServicioInventario` |
 
-**Criterio de propiedad:** cada módulo es responsable de mantener los datos de su dominio. Los demás componentes acceden a la información mediante los servicios y repositorios definidos en la arquitectura, sin modificar directamente los datos que pertenecen a otro módulo. PostgreSQL proporciona el almacenamiento persistente, pero no sustituye la responsabilidad funcional de los módulos.
 
 ### 2.4 Reglas de negocio e invariantes aplicadas a los datos
 
