@@ -407,8 +407,6 @@ erDiagram
 
 ## 3. Contrato de interfaz
 
-## 3. Contrato de interfaz
-
 Se selecciona la operación de bloqueo de lotes porque permite implementar el requisito RF-02, conservar la información del bloqueo y evitar que las unidades de un lote bloqueado se registren como disponibles para salida.
 
 **Interacción seleccionada (del diagrama 1.2, mensaje `bloquearLote(loteId, usuario, motivo)`):**
