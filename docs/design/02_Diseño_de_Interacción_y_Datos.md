@@ -279,6 +279,7 @@ erDiagram
     USUARIO ||--|| ESTADO_AUTENTICACION : posee
     ROL ||--o{ USUARIO : asignado
     ROL }o--o{ PERMISO : concede
+    USUARIO o|--o{ LOTE : bloquea
 
     PRODUCTO {
         int productoId PK
@@ -292,6 +293,7 @@ erDiagram
     LOTE {
         int loteId PK
         int productoId FK
+        int bloqueadoPorUsuarioId FK
         string numeroLote
         date fechaVencimiento
         int cantidadDisponible
