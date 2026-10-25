@@ -201,7 +201,7 @@ sequenceDiagram
 
         else El lote se encuentra
             SL->>LOT: bloquear(usuario, motivo)
-            Note over LOT: Fija estado BLOQUEADO, motivoBloqueo, fechaBloqueo y bloqueadoPor
+            Note over LOT: Fija estado BLOQUEADO, motivoBloqueo y fechaBloqueo
             LOT-->>SL: Lote con estado actualizado
 
             SL->>RL: guardar(lote)
