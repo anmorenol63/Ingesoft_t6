@@ -490,12 +490,12 @@ Decidimos **no aplicar** esa recomendación y optar por un control basado en tra
 
 ## 7. Consistency Checklist
 
-- [ ] Two use cases from the project, each traceable to a Use Case written in the requirements.
-- [ ] Each sequence diagram shows the main flow and at least one alternative or exception flow.
-- [ ] No business behavior is invented: anything unspecified is marked as an assumption or Open Question.
-- [ ] Section 2.1 explains what is NOT persisted as well as what is.
-- [ ] The data model has identifiers, relationships and constraints, not only boxes.
-- [ ] Every piece of principal information has one authoritative owner, and consumers are listed (Section 2.3).
-- [ ] The contract defines input, output, preconditions, postconditions and failure outcomes.
-- [ ] Sequence, data model and contract describe the same behavior.
-- [ ] Diagrams render correctly on GitHub (or the exported images are embedded).
+- [x] Two use cases from the project, each traceable to a Use Case written in the requirements.
+- [x] Each sequence diagram shows the main flow and at least one alternative or exception flow.
+- [x] No business behavior is invented: anything unspecified is marked as an assumption or Open Question.
+- [x] Section 2.1 explains what is NOT persisted as well as what is.
+- [x] The data model has identifiers, relationships and constraints, not only boxes.
+- [x] Every piece of principal information has one authoritative owner, and consumers are listed (Section 2.3).
+- [x] The contract defines input, output, preconditions, postconditions and failure outcomes.
+- [x] Sequence, data model and contract describe the same behavior.
+- [x] Diagrams render correctly on GitHub (or the exported images are embedded).
