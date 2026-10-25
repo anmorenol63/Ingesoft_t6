@@ -135,7 +135,81 @@ sequenceDiagram
 
 ### 1.2 [Second Use Case name] — from requirement [REQ-YY]
 
-*(Same structure as 1.1.)*
+```mermaid
+
+sequenceDiagram
+    actor R as Regente de farmacia
+    participant FE as Frontend (Aplicación web)
+    participant API as Controlador de API
+    participant SL as ServicioLote
+    participant SA as ServicioAutenticacion
+    participant RL as RepositorioLote
+    participant L as Lote
+    participant BD as PostgreSQL
+
+    R->>FE: Consultar inventario
+    FE->>API: Solicitar lotes registrados
+    API->>SL: consultarLotes(...)
+    SL->>RL: buscarPorProducto(productoId)
+    RL->>BD: Consultar lotes del producto
+    BD-->>RL: Devolver lotes registrados
+    RL-->>SL: Devolver lista de lotes
+    SL-->>API: Devolver lista de lotes
+    API-->>FE: Mostrar lotes registrados
+    FE-->>R: Presentar lotes disponibles para consulta
+
+    R->>FE: Seleccionar un lote
+    FE->>API: Solicitar información del lote(loteId)
+    API->>SL: consultarLote(loteId)
+    SL->>RL: buscarPorId(loteId)
+    RL->>BD: Consultar información del lote
+    BD-->>RL: Devolver información del lote
+    RL-->>SL: Devolver lote
+    SL-->>API: Devolver información del lote
+    API-->>FE: Mostrar información del lote
+    FE-->>R: Presentar información del lote seleccionado
+
+    R->>FE: Seleccionar opción Bloquear lote
+    FE->>API: Solicitar bloqueo(loteId, usuario, motivo)
+    API->>SL: bloquearLote(loteId, usuario, motivo)
+
+    SL->>SA: autorizar(usuario, permiso)
+    SA-->>SL: Resultado de autorización
+
+    alt El usuario tiene permiso para bloquear lotes
+        SL->>RL: buscarPorId(loteId)
+        RL->>BD: Consultar lote seleccionado
+        BD-->>RL: Devolver información del lote
+        RL-->>SL: Devolver lote
+
+        SL->>L: bloquear(usuario, motivo)
+        L-->>SL: Lote actualizado a estado BLOQUEADO
+
+        SL->>RL: guardar(lote)
+        RL->>BD: Guardar estado actualizado
+
+        alt Persistencia exitosa
+            BD-->>RL: Confirmar almacenamiento
+            RL-->>SL: Devolver lote guardado
+            SL-->>API: Devolver lote bloqueado
+            API-->>FE: Confirmar bloqueo exitoso
+            FE-->>R: Mostrar lote en estado BLOQUEADO
+
+        else Excepción: error al guardar el lote
+            BD-->>RL: Error de almacenamiento
+            RL-->>SL: Informar fallo de persistencia
+            SL-->>API: Informar que no se pudo completar el bloqueo
+            API-->>FE: Mostrar error de operación
+            FE-->>R: Informar que no se pudo confirmar el bloqueo
+        end
+
+    else El usuario no tiene permiso
+        SL-->>API: Rechazar solicitud de bloqueo
+        API-->>FE: Informar falta de autorización
+        FE-->>R: Mostrar mensaje de acceso denegado
+    end
+
+```
 
 ---
 
