@@ -16,23 +16,21 @@ HOW TO USE THIS TEMPLATE
 7. Read Design_Deliverable_2_Example.md for the expected level of detail. Do not copy it.
 -->
 
-# [Project Name] — Interaction & Data Design v1.0
+# Sistema de gestión y control de inventario para la operación de productos farmacéuticos — Diseño de Interacción y Datos v1.0
 
 | | |
 |---|---|
-| **Team** | |
-| **Members** | |
-| **Status** | Draft / Ready for review |
-| **Date** | |
-| **Inputs** | `docs/design/01_Architectural_and_Detailed_Design.md`, Use Cases in `docs/requirements/`, Interaction & Contracts Design v0.1 (Class 13) |
+| **Equipo** | |
+| **Integrantes** | |
+| **Estado** | Borrador / Listo para revisión |
+| **Fecha** | |
+| **Entradas** | `docs/design/01_Architectural_and_Detailed_Design.md`, Casos de Uso en `docs/requirements/`, Diseño de Interacción y Contratos v0.1 (Clase 13) |
 
 ---
 
-## 1. Behavior — Selected Use Cases
+## 1. Comportamiento — Casos de Uso Seleccionados
 
-Select **two** important use cases from your own project that involve meaningful interaction between components. One of them should be the use case of your capstone requirement.
-
-### 1.1 [Use Case name] — from requirement [REQ-XX]
+### 1.1 [Nombre del caso de uso] — del requisito [REQ-XX]
 
 ```mermaid
 
