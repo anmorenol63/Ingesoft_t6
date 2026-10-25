@@ -495,7 +495,7 @@ Decidimos **no aplicar** esa recomendación y optar por un control basado en tra
 - [x] No se inventa ningún comportamiento de negocio: todo lo no especificado se marca como supuesto o pregunta abierta.
 - [x] La sección 2.1 explica qué información no se almacena de forma persistente, además de la que sí se almacena.
 - [x] El modelo de datos tiene identificadores, relaciones y restricciones, no solamente entidades representadas mediante cajas.
-- [x] Cada conjunto principal de información tiene un responsable definido y se indican sus consumidores en la sección 2.3..
+- [x] Cada conjunto principal de información tiene un responsable definido y se indican sus consumidores en la sección 2.3.
 - [x] El contrato define entradas, salidas, precondiciones, postcondiciones y resultados de error.
 - [x] Los diagramas de secuencia, el modelo de datos y el contrato describen el mismo comportamiento.
 - [x] Los diagramas se visualizan correctamente en GitHub o se incluyen imágenes exportadas.
