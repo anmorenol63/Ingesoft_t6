@@ -359,17 +359,18 @@ erDiagram
 | `Permiso` | Representa una acción autorizada dentro del sistema. | `permisoId` | Debe tener un identificador y nombre válidos. Los nombres de permisos deben identificar inequívocamente cada autorización. |
 | `EstadoAutenticacion` | Representa el estado de seguridad asociado a un usuario. | `usuarioId` | Debe asociarse a un usuario existente. El contador de intentos fallidos no puede ser negativo. El bloqueo debe durar cinco minutos después de alcanzar cinco intentos consecutivos fallidos. |
 
-### 2.3 Propiedad de los datos 
+
+### 2.3 Propiedad de los datos
 
 | Información | Propietario autorizado (componente responsable de mantenerla) | Consumido por (lo utiliza sin ser propietario) | Acceso a través de |
 |---|---|---|---|
-| Datos de los usuarios | Módulo de autenticación y autorización | Módulo de lotes y módulo de control de inventario, cuando necesitan identificar o autorizar al usuario | `RepositorioUsuario` y servicios correspondientes |
-| Roles y permisos | Módulo de autenticación y autorización | Módulo de lotes, módulo de productos y módulo de control de inventario | `ServicioAutenticacion` |
-| Estado de autenticación | Módulo de autenticación y autorización | Frontend y controlador de API, para comunicar el resultado de la autenticación | `RepositorioEstadoAutenticacion` |
-| Datos de los productos | Módulo de productos | Módulo de lotes y frontend | `RepositorioProducto` y `ServicioProducto` |
-| Datos y estado de los lotes | Módulo de lotes | Módulo de control de inventario y frontend | `RepositorioLote` y `ServicioLote` |
-| Motivo y fecha de bloqueo del lote | Módulo de lotes | Frontend y módulo de control de inventario, cuando necesitan consultar el estado del lote | `RepositorioLote` y `ServicioLote` |
-| Movimientos de inventario | Módulo de control de inventario | Frontend y otros componentes que necesitan consultar los movimientos | `RepositorioMovimiento` y `ServicioInventario` |
+| Datos de los usuarios | Módulo de autenticación y autorización | Módulo de lotes y módulo de control de inventario, cuando necesitan identificar o autorizar al usuario | `ServicioAutenticacion` y `RepositorioUsuario`, mediante las operaciones definidas en la arquitectura |
+| Roles y permisos | Módulo de autenticación y autorización | Módulo de lotes, módulo de productos y módulo de control de inventario | `ServicioAutenticacion`, que verifica los permisos solicitados |
+| Estado de autenticación | Módulo de autenticación y autorización | Frontend y controlador de API, para comunicar el resultado de la autenticación | `ServicioAutenticacion`, que utiliza `RepositorioEstadoAutenticacion` para consultar y persistir el estado |
+| Datos de los productos | Módulo de productos | Módulo de lotes y frontend | `ServicioProducto`, que utiliza `RepositorioProducto` para consultar y mantener los datos |
+| Datos y estado de los lotes | Módulo de lotes | Módulo de control de inventario y frontend | `ServicioLote`, que utiliza `RepositorioLote` para consultar y guardar los lotes |
+| Motivo y fecha de bloqueo del lote | Módulo de lotes | Frontend y módulo de control de inventario, cuando necesitan consultar el estado del lote | `ServicioLote`, mediante las operaciones de consulta de lotes |
+| Movimientos de inventario | Módulo de control de inventario | Frontend y otros componentes que necesitan consultar los movimientos | `ServicioInventario`, que utiliza `RepositorioMovimiento` para registrar los movimientos |
 
 
 ### 2.4 Reglas de negocio e invariantes aplicadas a los datos
