@@ -393,28 +393,34 @@ erDiagram
 
 ---
 
-## 3. Interface Contract
+## 3. Contrato de interfaz
 
-Select **one** important interaction from your sequence diagrams and specify the agreement between the two components. Technology (REST, JSON, OpenAPI) is not required.
+Se selecciona la operación de bloqueo de lotes, ya que permite implementar el requisito RF-02 y garantizar que un lote bloqueado no pueda utilizarse para registrar salidas de inventario.
 
-**Interaction chosen** (from diagram 1.X, message `...`):
->
+**Interacción seleccionada (del diagrama 1.2, mensaje `bloquearLote(loteId, usuario, motivo)`):**
 
-| Element | Specification |
+`Controlador de API → ServicioLote: bloquearLote(loteId, usuario, motivo)`
+
+| Elemento | Especificación |
 |---|---|
-| **Operation and purpose** | |
-| **Input** (parameters and types) | |
-| **Output** (successful result and data structure) | |
-| **Preconditions** (what the caller must satisfy before invoking) | |
-| **Postconditions** (what is guaranteed on successful completion) | |
-| **Failure outcomes** (each failure, and what state is left after it) | |
-| **Invariants and side effects** (what must stay true, what may change) | |
+| **Operación y propósito** | `ServicioLote.bloquearLote(loteId, usuario, motivo)` permite al regente de farmacia solicitar el bloqueo de un lote registrado. El servicio verifica que el usuario tenga el permiso `BLOQUEAR_LOTE`, obtiene el lote, actualiza su estado a `BLOQUEADO` y guarda los cambios mediante `RepositorioLote`. |
+| **Entrada (parámetros y tipos)** | `loteId: Integer`: identificador del lote que se desea bloquear.<br>`usuario: Usuario`: usuario autenticado que solicita la operación.<br>`motivo: String`: motivo por el cual se solicita el bloqueo. |
+| **Salida (resultado exitoso y estructura de datos)** | Devuelve un objeto `Lote` con el estado actualizado a `BLOQUEADO`. El objeto conserva el motivo del bloqueo y la fecha y hora del bloqueo según los atributos definidos en el diseño. El resultado exitoso solo debe confirmarse después de guardar correctamente los cambios. |
+| **Precondiciones (qué debe cumplir quien invoca la operación)** | El usuario debe estar autenticado y su información debe ser proporcionada por el controlador de API. El identificador del lote y el motivo deben proporcionarse en la solicitud. El usuario debe contar con el permiso `BLOQUEAR_LOTE` para que la operación pueda completarse. La autorización se comprueba durante la ejecución del servicio. |
+| **Postcondiciones (qué se garantiza si la operación termina correctamente)** | El lote queda en estado `BLOQUEADO` y los cambios se guardan mediante `RepositorioLote`. El motivo y la fecha y hora del bloqueo quedan reflejados en los atributos correspondientes. El sistema confirma el bloqueo al usuario. Las unidades del lote no pueden registrarse como disponibles para salida mientras el lote permanezca bloqueado. |
+| **Resultados de fallo (cada fallo y estado posterior)** | **Usuario sin permiso:** se rechaza la solicitud y no se completa el bloqueo.<br>**Lote inexistente:** se informa que el lote no fue encontrado y no se realiza el bloqueo.<br>**Error de persistencia:** se informa que no fue posible guardar el cambio y no se confirma la operación como exitosa. La implementación debe garantizar que un fallo al guardar no deje un estado persistido parcialmente actualizado. |
+| **Invariantes y efectos secundarios (qué debe mantenerse y qué puede cambiar)** | Solo los usuarios autorizados pueden bloquear lotes. El estado del lote debe corresponder a los valores definidos en `EstadoLote`: `DISPONIBLE` o `BLOQUEADO`. El bloqueo modifica el estado del lote y registra la información asociada al bloqueo. No se registra una salida de inventario ni se modifican las cantidades disponibles por el solo hecho de bloquear el lote. |
 
-**Testable examples** *(optional but recommended: concrete values make guarantees checkable)*
+### Ejemplos verificables
 
-| Case | Before | Request | Expected |
+| Caso | Estado previo | Solicitud | Resultado esperado |
 |---|---|---|---|
-| | | | |
+| Bloqueo exitoso | El lote existe, está `DISPONIBLE` y el usuario tiene permiso. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | Devuelve el lote con estado `BLOQUEADO`. El motivo y la fecha y hora del bloqueo quedan guardados y el sistema confirma la operación. |
+| Usuario sin permiso | El lote existe y está `DISPONIBLE`, pero el usuario no tiene permiso para bloquearlo. | `bloquearLote(15, usuarioSinPermiso, "Lote en revisión")` | La operación se rechaza por falta de autorización. El estado persistido del lote no cambia. |
+| Lote inexistente | No existe un lote con identificador `9999`. | `bloquearLote(9999, usuarioRegente, "Lote en revisión")` | El sistema informa que el lote no fue encontrado. No se modifica ningún lote. |
+| Error de persistencia | El lote existe, está `DISPONIBLE` y el usuario tiene permiso, pero falla el almacenamiento. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | El sistema informa que no pudo completar el bloqueo. No devuelve una confirmación de éxito y el estado persistido del lote debe mantenerse consistente. |
+
+
 
 ---
 
