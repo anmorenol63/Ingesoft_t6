@@ -211,6 +211,13 @@ sequenceDiagram
 
 ```
 
+| Paso o flujo del caso de uso | Mensaje(s) en el diagrama | Información intercambiada | Operación definida en el Entregable 1 |
+|---|---|---|---|
+| Flujo principal, paso 1 | `R → FE: Consultar inventario`<br>`FE → API: Solicitar lotes registrados`<br>`API → SL: consultarLotes(...)`<br>`SL → RL: buscarPorProducto(productoId)`<br>`RL → BD: Consultar lotes del producto` | Solicitud de consulta y lista de lotes registrados en el inventario. | `ServicioLote.consultarLotes(...)` y `RepositorioLote.buscarPorProducto(productoId)` |
+| Flujo alternativo | `SL → SA: autorizar(usuario, permiso)`<br>`SA → SL: Resultado de autorización`<br>`SL → API: Rechazar solicitud de bloqueo`<br>`API → FE: Informar falta de autorización`<br>`FE → R: Mostrar mensaje de acceso denegado` | Resultado de la verificación de permisos del regente para ejecutar el bloqueo del lote. Si no tiene el permiso requerido, el sistema rechaza la solicitud. | `ServicioAutenticacion.autorizar(usuario, permiso)` |
+| Excepción | `BD → RL: Error de almacenamiento`<br>`RL → SL: Informar fallo de persistencia`<br>`SL → API: Informar que no se pudo completar el bloqueo`<br>`API → FE: Mostrar error de operación`<br>`FE → R: Informar que no se pudo confirmar el bloqueo` | Error al guardar el lote con su estado actualizado en PostgreSQL. El sistema informa que no pudo confirmar la operación. | `RepositorioLote.guardar(lote)` |
+
+
 ---
 
 ## 2. Data Design
