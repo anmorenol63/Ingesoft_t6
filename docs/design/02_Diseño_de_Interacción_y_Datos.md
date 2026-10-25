@@ -38,7 +38,7 @@ Select **two** important use cases from your own project that involve meaningful
 
 
 sequenceDiagram
-    actor U as Usuario del sistema
+    actor U as Usuario registrado en el sistema
     participant FE as Frontend (Aplicación web)
     participant API as Controlador de API
     participant SA as ServicioAutenticacion
