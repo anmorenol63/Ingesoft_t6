@@ -488,7 +488,7 @@ Decidimos **no aplicar** esa recomendación y optar por un control basado en tra
 
 ---
 
-## 7. Consistency Checklist
+## 7. Lista de comprobación de consistencia
 
 - [x] Dos casos de uso del proyecto, cada uno trazable a un caso de uso documentado en los requisitos.
 - [x] Cada diagrama de secuencia muestra el flujo principal y al menos un flujo alternativo o de excepción.
