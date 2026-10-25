@@ -364,7 +364,7 @@ erDiagram
 
 | Información | Propietario autorizado (componente responsable de mantenerla) | Consumido por (lo utiliza sin ser propietario) | Acceso a través de |
 |---|---|---|---|
-| Datos de los usuarios | Módulo de autenticación y autorización | Módulo de lotes y módulo de control de inventario, cuando necesitan identificar o autorizar al usuario | `ServicioAutenticacion` y `RepositorioUsuario`, mediante las operaciones definidas en la arquitectura |
+| Datos de los usuarios | Módulo de autenticación y autorización | Módulo de lotes y módulo de control de inventario, cuando necesitan identificar o autorizar al usuario | `ServicioAutenticacion`, que utiliza `RepositorioUsuario` internamente para consultar los datos de los usuarios. |
 | Roles y permisos | Módulo de autenticación y autorización | Módulo de lotes, módulo de productos y módulo de control de inventario | `ServicioAutenticacion`, que verifica los permisos solicitados |
 | Estado de autenticación | Módulo de autenticación y autorización | Frontend y controlador de API, para comunicar el resultado de la autenticación | `ServicioAutenticacion`, que utiliza `RepositorioEstadoAutenticacion` para consultar y persistir el estado |
 | Datos de los productos | Módulo de productos | Módulo de lotes y frontend | `ServicioProducto`, que utiliza `RepositorioProducto` para consultar y mantener los datos |
