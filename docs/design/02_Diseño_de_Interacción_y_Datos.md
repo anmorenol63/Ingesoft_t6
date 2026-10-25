@@ -462,12 +462,10 @@ Los principales ajustes y precisiones son los siguientes:
 
 
 ---
-
-
 ## 5. Preguntas abiertas
 
 * **Concurrencia en salidas de inventario:** 
-  Aunque definimos que el descuento de unidades y el registro del movimiento se harán en una misma transacción de base de datos, ¿qué estrategia exacta de bloqueo a nivel de fila (por ejemplo, *pessimistic locking* o *optimistic locking*) usaremos en PostgreSQL para evitar errores si dos usuarios intentan sacar unidades del mismo lote exactamente al mismo tiempo?
+  Aunque definimos que el descuento de unidades y el registro del movimiento se harán en una misma transacción de base de datos, ¿qué estrategia exacta de bloqueo a nivel de fila (por ejemplo, *bloqueo pesimista* o *bloqueo optimista*) usaremos en PostgreSQL para evitar errores si dos usuarios intentan sacar unidades del mismo lote exactamente al mismo tiempo?
 
 * **Desbloqueo automático de usuarios:** 
   El modelo establece que guardaremos la fecha `bloqueoHasta` en PostgreSQL. ¿El sistema quitará este bloqueo automáticamente pasados los 5 minutos (usando un proceso en segundo plano o *cron job*), o simplemente validará el tiempo de forma dinámica cuando el usuario intente iniciar sesión de nuevo?
@@ -480,10 +478,12 @@ Los principales ajustes y precisiones son los siguientes:
 ## 6. Opcional — Reflexión sobre el diseño asistido por IA
 
 **Recomendación de la IA:** 
-Al diseñar el módulo de control de inventario, la IA sugirió implementar un patrón de "Bloqueo Optimista" (*Optimistic Locking*) agregando un campo de versión a la tabla `LOTE`. El objetivo era rechazar una salida si otro usuario modificaba la cantidad del lote un instante antes.
+Al diseñar el módulo de control de inventario, la IA sugirió implementar un patrón de "Bloqueo Optimista" (*bloqueo optimista*) agregando un campo de versión a la tabla `LOTE`. El objetivo era rechazar una salida si otro usuario modificaba la cantidad del lote un instante antes.
 
 **Decisión del equipo (Modificada/Rechazada):** 
 Decidimos **no aplicar** esa recomendación y optar por un control basado en transacciones de base de datos estrictas. Tal como documentamos, "el descuento y el registro del movimiento deben ejecutarse en una misma transacción". Consideramos que un bloqueo pesimista directo en PostgreSQL es más seguro para este dominio. Esto nos evita complejizar el código del backend con reintentos, asegurando la integridad del inventario de forma más directa y centralizada.
+
+
 
 
 ---
