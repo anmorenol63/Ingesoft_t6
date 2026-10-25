@@ -220,7 +220,7 @@ sequenceDiagram
 
 ---
 
-## 2. Diseño de datos (Data Design)
+## 2. Diseño de datos
 
 ### 2.1 Información principal que necesita el sistema
 
@@ -332,7 +332,7 @@ Los identificadores y relaciones del modelo representan las entidades y asociaci
 | `Permiso` | Representa una acción autorizada dentro del sistema. | `permisoId` | Debe tener un identificador y nombre válidos. Los nombres de permisos deben identificar inequívocamente cada autorización. |
 | `EstadoAutenticacion` | Representa el estado de seguridad asociado a un usuario. | `usuarioId` | Debe asociarse a un usuario existente. El contador de intentos fallidos no puede ser negativo. El bloqueo debe durar cinco minutos después de alcanzar cinco intentos consecutivos fallidos. |
 
-### 2.3 Propiedad de los datos (Data Ownership)
+### 2.3 Propiedad de los datos 
 
 | Información | Propietario autorizado (componente responsable de mantenerla) | Consumido por (lo utiliza sin ser propietario) | Acceso a través de |
 |---|---|---|---|
