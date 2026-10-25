@@ -468,7 +468,7 @@ Los principales ajustes y precisiones son los siguientes:
   Aunque definimos que el descuento de unidades y el registro del movimiento se harán en una misma transacción de base de datos, ¿qué estrategia exacta de bloqueo a nivel de fila (por ejemplo, *bloqueo pesimista* o *bloqueo optimista*) usaremos en PostgreSQL para evitar errores si dos usuarios intentan sacar unidades del mismo lote exactamente al mismo tiempo?
 
 * **Desbloqueo automático de usuarios:** 
-  El modelo establece que guardaremos la fecha `bloqueoHasta` en PostgreSQL. ¿El sistema quitará este bloqueo automáticamente pasados los 5 minutos (usando un proceso en segundo plano o *cron job*), o simplemente validará el tiempo de forma dinámica cuando el usuario intente iniciar sesión de nuevo?
+  El modelo establece que guardaremos la fecha `bloqueoHasta` en PostgreSQL. ¿El sistema quitará este bloqueo automáticamente pasados los 5 minutos (usando un proceso en segundo plano o *tarea programada*), o simplemente validará el tiempo de forma dinámica cuando el usuario intente iniciar sesión de nuevo?
 
 * **Auditoría estricta de bloqueos de lotes:** 
   Actualmente guardamos el `motivoBloqueo` y la `fechaBloqueo` directamente en la entidad `LOTE`. ¿Será necesario, por normativas farmacéuticas, crear una tabla adicional (ej. `HISTORIAL_BLOQUEO`) para tener un registro inmutable de quién y cuándo bloqueó o desbloqueó un lote en el tiempo?
