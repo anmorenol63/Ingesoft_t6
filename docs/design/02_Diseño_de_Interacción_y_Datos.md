@@ -88,7 +88,7 @@ sequenceDiagram
 
         else Las credenciales son incorrectas
             SA->>EA: registrarFallo(ahora)
-            Note over EA: Registrar el fallo y establecer bloqueo Hasta al alcanzar cinco fallos consecutivos
+            Note over EA: Registrar el fallo y establecer bloqueo hasta al alcanzar cinco fallos consecutivos
             EA-->>SA: Estado actualizado
 
             SA->>REA: guardarEstado(usuarioId, estado)
