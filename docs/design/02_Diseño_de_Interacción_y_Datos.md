@@ -447,6 +447,152 @@ Los ejemplos de bloqueo exitoso, usuario sin permiso y error de persistencia cor
 
 ---
 
+### Contratos de interfaz — CU-03: Autenticación de usuarios
+
+Estos contratos corresponden a las operaciones utilizadas en el diagrama de secuencia de CU-03 y mantienen los nombres, parámetros y tipos de retorno del diagrama de clases actualizado.
+
+Se conservan los tres escenarios seleccionados: bloqueo después del quinto fallo consecutivo, autenticación exitosa e intento durante un bloqueo vigente. Los errores técnicos se documentan como condiciones de fallo de las operaciones, sin añadir ramas al diagrama.
+
+#### 1. ServicioAutenticacion.autenticar
+
+**Interacción:** `Controlador de API → ServicioAutenticacion`
+
+**Firma:** `autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Coordinar la autenticación, comprobar el bloqueo y gestionar los intentos fallidos conforme a RF-03. |
+| **Entrada** | `nombreUsuario: String`: nombre del usuario que intenta autenticarse.<br>`credencial: String`: contraseña ingresada. |
+| **Salida** | Un objeto `ResultadoAutenticacion` con `autenticado: Boolean`, `mensaje: String` y una referencia opcional a `usuario: Usuario`. |
+| **Precondiciones** | Se proporcionan los parámetros con los tipos indicados. Los escenarios seleccionados corresponden a un usuario registrado y activo, con un estado de autenticación asociado. |
+| **Postcondiciones** | **Principal:** si existen cuatro fallos consecutivos previos y la contraseña es incorrecta, se registra el quinto fallo, se guarda el bloqueo de cinco minutos y se devuelve `autenticado=false`, mensaje de bloqueo y `usuario=null`.<br>**Alternativo:** si no existe bloqueo vigente y la contraseña es correcta, se reinicia el contador, se limpia el bloqueo, se guarda el estado y se devuelve `autenticado=true`, mensaje de éxito y el usuario autenticado.<br>**Excepción del caso de uso:** si existe un bloqueo vigente, se devuelve `autenticado=false`, mensaje de bloqueo y `usuario=null`, sin verificar nuevamente la contraseña ni modificar el estado. |
+| **Resultados de fallo** | Si no puede recuperarse o guardarse la información necesaria, se comunica un error técnico al controlador y no se concede el acceso. Un resultado de bloqueo o contraseña incorrecta es un rechazo previsto de autenticación, no un error de almacenamiento. |
+| **Invariantes y efectos secundarios** | El bloqueo se comprueba antes de verificar la contraseña. El contador y el tiempo se controlan en el backend. No se confirma una autenticación exitosa ni un nuevo bloqueo antes de guardar el estado correspondiente. No se modifica el inventario. La respuesta enviada al frontend no debe exponer `credencialHash`. |
+
+#### 2. RepositorioUsuario.buscarPorNombre
+
+**Interacción:** `ServicioAutenticacion → RepositorioUsuario`
+
+**Firma:** `buscarPorNombre(nombre: String): Usuario`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Recuperar al usuario correspondiente al nombre ingresado. |
+| **Entrada** | `nombre: String`: nombre de usuario que se buscará. El servicio proporciona el valor recibido como `nombreUsuario`. |
+| **Salida** | El objeto `Usuario` correspondiente. |
+| **Precondiciones** | Se proporciona un nombre de usuario válido para la consulta. En los escenarios seleccionados, la cuenta existe y está activa. |
+| **Postcondiciones** | Se obtiene el usuario con los datos necesarios para verificar la credencial y consultar su estado de autenticación. No se modifican sus datos. |
+| **Resultados de fallo** | Si falla la consulta, se comunica el error al servicio. Como decisión de este contrato, una búsqueda sin coincidencia comunica un error de usuario no encontrado, sin cambiar el retorno exitoso `Usuario`. Ese caso queda fuera de los tres escenarios seleccionados. |
+| **Invariantes y efectos secundarios** | La consulta no verifica la contraseña, no incrementa intentos y no concede acceso. El objeto recuperado se utiliza internamente y su hash no se envía al frontend. |
+
+#### 3. RepositorioEstadoAutenticacion.buscarEstado
+
+**Interacción:** `ServicioAutenticacion → RepositorioEstadoAutenticacion`
+
+**Firma:** `buscarEstado(usuarioId: Integer): EstadoAutenticacion`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Recuperar el contador de fallos y la fecha de finalización del bloqueo del usuario. |
+| **Entrada** | `usuarioId: Integer`: identificador del usuario recuperado previamente. |
+| **Salida** | Un objeto `EstadoAutenticacion` con `intentosFallidos` y `bloqueadoHasta`. |
+| **Precondiciones** | El identificador corresponde a un usuario existente. El modelo de datos establece un registro de estado por usuario. |
+| **Postcondiciones** | Se devuelve el estado almacenado del usuario solicitado, sin modificarlo. |
+| **Resultados de fallo** | Si no puede consultarse PostgreSQL o falta el registro de estado esperado, se comunica el error al servicio. No se interpreta la falta de información como ausencia de bloqueo. |
+| **Invariantes y efectos secundarios** | No reinicia el contador, no modifica fechas y no determina por sí mismo si el bloqueo continúa vigente. Esa comprobación corresponde a `estaBloqueado(ahora)`. |
+
+#### 4. EstadoAutenticacion.estaBloqueado
+
+**Interacción:** `ServicioAutenticacion → EstadoAutenticacion`
+
+**Firma:** `estaBloqueado(ahora: Timestamp): Boolean`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Comprobar si el bloqueo temporal continúa vigente. |
+| **Entrada** | `ahora: Timestamp`: fecha y hora actual proporcionada por el backend. |
+| **Salida** | `true` si existe `bloqueadoHasta` y `ahora` es anterior a esa fecha; `false` si no existe fecha de bloqueo o ya se alcanzó su finalización. |
+| **Precondiciones** | El estado fue recuperado y la hora proporcionada es válida y comparable con `bloqueadoHasta`. |
+| **Postcondiciones** | Se informa si el usuario sigue bloqueado en el instante consultado. Al alcanzar exactamente la fecha de finalización, devuelve `false`. |
+| **Resultados de fallo** | Una hora inválida o un estado que no pueda evaluarse se comunica como error al servicio; no se devuelve `false` para ocultar el problema. |
+| **Invariantes y efectos secundarios** | Es una consulta: no incrementa ni reinicia intentos, no cambia `bloqueadoHasta` y no accede a PostgreSQL. |
+
+#### 5. Usuario.verificarCredenciales
+
+**Interacción:** `ServicioAutenticacion → Usuario`
+
+**Firma:** `verificarCredenciales(credencial: String): Boolean`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Comprobar si la contraseña recibida corresponde al usuario. |
+| **Entrada** | `credencial: String`: contraseña ingresada durante el intento de autenticación. |
+| **Salida** | `true` si la contraseña corresponde al hash almacenado; `false` si no corresponde. |
+| **Precondiciones** | El objeto Usuario dispone de un `credencialHash` válido. En CU-03, el servicio ya comprobó que no existe un bloqueo vigente. |
+| **Postcondiciones** | Se obtiene el resultado de la comprobación mediante el mecanismo de verificación de contraseñas elegido. |
+| **Resultados de fallo** | Una contraseña incorrecta devuelve `false`. Un fallo técnico que impida verificarla se comunica como error al servicio. |
+| **Invariantes y efectos secundarios** | No modifica al usuario, no registra intentos y no concede acceso. No guarda la contraseña recibida ni expone el hash. |
+
+#### 6. EstadoAutenticacion.registrarFallo
+
+**Interacción:** `ServicioAutenticacion → EstadoAutenticacion`
+
+**Firma:** `registrarFallo(ahora: Timestamp): Boolean`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Registrar un intento fallido y establecer el bloqueo cuando se alcanza el quinto fallo consecutivo. |
+| **Entrada** | `ahora: Timestamp`: fecha y hora del intento, obtenida por el backend. |
+| **Salida** | `true` si el estado queda bloqueado después de registrar el fallo; `false` si todavía no corresponde aplicar el bloqueo. |
+| **Precondiciones** | La credencial ya se verificó y es incorrecta. No existe un bloqueo vigente. La fecha y hora son válidas. |
+| **Postcondiciones** | Se incrementa `intentosFallidos`. Al llegar a cinco, se establece `bloqueadoHasta = ahora + 5 minutos` y se devuelve `true`. Si el contador permanece por debajo de cinco, se devuelve `false`. Conforme a la regla de reinicio definida en la sección 2.4, si había un bloqueo vencido, se inicia un nuevo ciclo con un fallo y se limpia la fecha anterior. |
+| **Resultados de fallo** | Si se invoca durante un bloqueo vigente o con datos inválidos, se comunica el incumplimiento sin modificar el estado. `false` no representa un error: indica que el usuario todavía no queda bloqueado. |
+| **Invariantes y efectos secundarios** | Modifica únicamente el objeto en memoria. No guarda en PostgreSQL ni modifica al usuario. El servicio debe persistir el estado antes de comunicar el resultado definitivo del intento. |
+
+#### 7. EstadoAutenticacion.registrarExito
+
+**Interacción:** `ServicioAutenticacion → EstadoAutenticacion`
+
+**Firma:** `registrarExito(): void`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Reiniciar el estado de intentos fallidos después de verificar una contraseña correcta. |
+| **Entrada** | No recibe parámetros. |
+| **Salida** | `void`: no devuelve un valor. |
+| **Precondiciones** | El servicio comprobó que no existe un bloqueo vigente y que la credencial es correcta. |
+| **Postcondiciones** | `intentosFallidos` queda en cero y `bloqueadoHasta` queda sin valor. |
+| **Resultados de fallo** | Si no se cumplen las condiciones para registrar el éxito, se comunica el error sin aplicar el reinicio. |
+| **Invariantes y efectos secundarios** | Actualiza el objeto en memoria. No guarda en PostgreSQL ni concede acceso por sí mismo. El servicio debe guardar el estado antes de confirmar la autenticación exitosa. |
+
+#### 8. RepositorioEstadoAutenticacion.guardarEstado
+
+**Interacción:** `ServicioAutenticacion → RepositorioEstadoAutenticacion`
+
+**Firma:** `guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): EstadoAutenticacion`
+
+| Elemento | Especificación |
+|---|---|
+| **Propósito** | Guardar el estado de autenticación del usuario para conservarlo entre solicitudes y reinicios del servidor. |
+| **Entrada** | `usuarioId: Integer`: identificador del usuario.<br>`estado: EstadoAutenticacion`: estado que contiene el contador y la fecha de finalización del bloqueo que deben guardarse. |
+| **Salida** | Un objeto `EstadoAutenticacion` que representa el estado guardado correctamente. |
+| **Precondiciones** | El usuario existe, el objeto de estado es válido y corresponde al usuario indicado. El contador y la fecha respetan las reglas de autenticación definidas. |
+| **Postcondiciones** | `intentosFallidos` y `bloqueadoHasta` quedan almacenados conjuntamente en PostgreSQL. El objeto devuelto refleja los datos guardados. |
+| **Resultados de fallo** | Si no puede completarse el almacenamiento, se comunica el error al servicio y no se devuelve un estado como si el guardado hubiera terminado correctamente. No se permiten actualizaciones parciales del contador y la fecha. |
+| **Invariantes y efectos secundarios** | No valida contraseñas ni recalcula el bloqueo: persiste el estado recibido. No modifica otros usuarios. Su retorno confirma el almacenamiento, no que el acceso esté permitido. |
+
+### Ejemplos verificables — CU-03
+
+Los nombres de usuario y las credenciales de los ejemplos son datos ficticios de prueba. Se supone que cada cuenta existe, está activa y dispone de su estado de autenticación.
+
+| Caso | Estado previo | Solicitud | Resultado esperado |
+|---|---|---|---|
+| **Principal: quinto fallo consecutivo** | El auxiliar tiene cuatro fallos y no existe bloqueo vigente. El servidor registra el intento a las 16:20. | `autenticar("auxiliar01", "claveIncorrecta")` | `verificarCredenciales(...)` devuelve `false`. `registrarFallo(ahora)` aumenta el contador a cinco, establece el bloqueo hasta las 16:25 y devuelve `true`. Se guarda el estado y se devuelve `ResultadoAutenticacion` con `autenticado=false`, mensaje de bloqueo y `usuario=null`. |
+| **Alternativo: autenticación exitosa** | El regente tiene tres fallos y no existe bloqueo vigente. | `autenticar("regente01", "claveCorrecta")` | `verificarCredenciales(...)` devuelve `true`. `registrarExito()` reinicia el contador y limpia el bloqueo. Después del guardado, se devuelve `autenticado=true`, mensaje de éxito y el usuario autenticado. |
+| **Excepción: intento durante el bloqueo** | El auxiliar está bloqueado hasta las 16:25 e intenta autenticarse a las 16:22. | `autenticar("auxiliar01", "claveIngresada")` | `estaBloqueado(ahora)` devuelve `true`. No se llama a `verificarCredenciales`, `registrarFallo`, `registrarExito` ni `guardarEstado`. Se devuelve `autenticado=false`, mensaje de bloqueo vigente y `usuario=null`. El bloqueo sigue terminando a las 16:25. |
+
+---
+
 ---
 
 ## 4. Consistencia cruzada y cambios al Entregable 1
