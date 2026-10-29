@@ -254,19 +254,21 @@ sequenceDiagram
 
 | Información | Necesitada por (casos de uso) | ¿Persistida? | ¿Por qué (o por qué no)? |
 |---|---|---|---|
-| Datos de los usuarios | CU-02, CU-03 | Sí | Permiten identificar a los usuarios del sistema y verificar sus credenciales y permisos. |
-| Roles y permisos | CU-02, CU-03 | Sí | Permiten determinar qué operaciones puede realizar cada usuario, como el bloqueo de lotes. |
-| Estado de autenticación | CU-03 | Sí | Permite conservar el contador de intentos fallidos y la fecha y hora hasta las que permanece bloqueado el acceso. |
-| Datos de los productos | CU-02 | Sí | Permiten identificar los productos farmacéuticos y consultar su información general. |
-| Datos de los lotes | CU-02 | Sí | Permiten identificar cada lote y conservar su fecha de vencimiento, cantidad disponible y estado. |
-| Información del bloqueo del lote | CU-02 | Sí | Permite conservar el estado del lote, el motivo y la fecha del bloqueo, así como la relación con el usuario que realizó la operación. |
-| Movimientos de inventario | CU-02 | Sí | Permiten conservar el historial de entradas, salidas y ajustes realizados sobre los lotes. |
-| Resultado de autenticación | CU-03 | No, como registro independiente | `ResultadoAutenticacion` representa el resultado de una operación. El estado necesario para controlar los intentos fallidos se conserva en `EstadoAutenticacion`. |
-| Información del lote mostrada en pantalla | CU-02 | No, como copia independiente | Se obtiene mediante las consultas al sistema. El frontend presenta la información recibida, pero no es responsable de mantenerla. |
+| Datos de los usuarios | CU-02, CU-03 | Sí | Permiten identificar a los usuarios registrados, verificar sus credenciales y relacionarlos con las operaciones que realizan. Las contraseñas se conservan mediante un hash, no en texto plano. |
+| Roles y permisos | CU-02, CU-03 | Sí | Permiten comprobar qué operaciones puede realizar cada usuario. En CU-02 se verifica el permiso `BLOQUEAR_LOTE` antes de modificar el lote. |
+| Estado de autenticación | CU-03 | Sí | Permite conservar `intentosFallidos` y `bloqueadoHasta`, de modo que los intentos acumulados y el bloqueo temporal no se pierdan al reiniciar el servidor. |
+| Datos de los productos | CU-02 | Sí | Permiten identificar el producto seleccionado y consultar los lotes asociados a él. |
+| Datos de los lotes | CU-02 | Sí | Permiten identificar cada lote y conservar su producto, número de lote, fecha de vencimiento, cantidad disponible y estado. |
+| Información del bloqueo del lote | CU-02 | Sí | Permite conservar el estado `BLOQUEADO`, el motivo, la fecha y la referencia al usuario que realizó el bloqueo. Esta información forma parte del lote. |
+| Movimientos de inventario | Operaciones de inventario relacionadas con CU-02 en el Entregable 1 | Sí | Permiten conservar el historial de movimientos de los lotes. Bloquear un lote no crea por sí mismo un movimiento; la restricción de salida se comprueba al intentar registrar una salida de inventario. |
+| Resultado de autenticación | CU-03 | No, como registro independiente | `ResultadoAutenticacion` comunica el resultado mediante `autenticado`, `mensaje` y la referencia opcional a `usuario`. El estado de seguridad que debe conservarse se almacena en `EstadoAutenticacion`. |
+| Información del lote mostrada en pantalla | CU-02 | No, como copia persistente independiente | El frontend muestra los datos obtenidos mediante la API. PostgreSQL conserva la información persistente del lote; la información mostrada debe actualizarse mediante nuevas consultas cuando corresponda. |
 
 ### 2.2 Modelo de datos
 
-Se utiliza un modelo relacional porque el sistema necesita conservar información estructurada sobre productos, lotes, usuarios y movimientos de inventario, manteniendo relaciones e integridad entre ellos. PostgreSQL permite almacenar estos datos de manera persistente y aplicar restricciones para proteger la consistencia del inventario y del estado de autenticación.
+Se utiliza un modelo relacional porque el sistema necesita conservar información estructurada sobre productos, lotes, usuarios, permisos y movimientos de inventario, manteniendo relaciones consistentes entre ellos.
+
+PostgreSQL almacena los datos de forma persistente y permite aplicar claves primarias, claves foráneas, restricciones de unicidad y validaciones sobre los valores almacenados. Las reglas de autorización y de bloqueo temporal se ejecutan en el backend; la base de datos conserva sus resultados.
 
 #### Modelo relacional
 
@@ -283,7 +285,7 @@ erDiagram
 
     PRODUCTO {
         int productoId PK
-        string codigo
+        string codigo UK
         string nombre
         string presentacion
         boolean controlado
@@ -316,7 +318,7 @@ erDiagram
         int usuarioId PK
         int rolId FK
         string nombre
-        string nombreUsuario
+        string nombreUsuario UK
         string credencialHash
         boolean activo
     }
@@ -329,7 +331,7 @@ erDiagram
 
     PERMISO {
         int permisoId PK
-        string nombre
+        string nombre UK
         string descripcion
     }
 
@@ -341,98 +343,109 @@ erDiagram
     ESTADO_AUTENTICACION {
         int usuarioId PK, FK
         int intentosFallidos
-        timestamp bloqueoHasta
+        timestamp bloqueadoHasta
     }
 ```
 
 **Descripción del modelo:**
 
-- `Producto` almacena la información general de cada producto farmacéutico.
-- `Lote` almacena los datos específicos de cada lote, su cantidad disponible, su estado y la información asociada al bloqueo. `bloqueadoPorUsuarioId` representa la relación con el usuario que realizó el bloqueo.
-- `MovimientoInventario` conserva los movimientos asociados a los lotes y a los usuarios que los realizan.
-- `Usuario`, `Rol` y `Permiso` representan los usuarios y las autorizaciones del sistema.
-- `RolPermiso` es una tabla intermedia que permite representar la asignación de varios permisos a un rol y de un mismo permiso a distintos roles.
-- `EstadoAutenticacion` conserva el contador de intentos fallidos y la fecha y hora de finalización del bloqueo temporal.
-
+- `Producto` almacena la información general de cada producto farmacéutico. Cada producto puede tener cero o varios lotes y cada lote pertenece a un único producto.
+- `Lote` almacena los datos específicos de cada lote, su cantidad disponible y su estado. Los campos `motivoBloqueo`, `fechaBloqueo` y `bloqueadoPorUsuarioId` conservan la información del bloqueo.
+- `bloqueadoPorUsuarioId` es una clave foránea opcional que referencia a `Usuario`. Un lote sin bloqueo puede no tener un usuario asociado a esta operación; un lote bloqueado debe conservar la referencia a quien lo bloqueó.
+- `MovimientoInventario` conserva los movimientos asociados a un lote y al usuario que los realiza. El bloqueo del lote no genera automáticamente un movimiento de inventario.
+- `Usuario`, `Rol` y `Permiso` representan a los usuarios y las autorizaciones del sistema. Cada usuario tiene un rol y cada rol puede estar asignado a varios usuarios.
+- `RolPermiso` es una tabla intermedia que permite asignar varios permisos a un rol y utilizar un mismo permiso en distintos roles.
+- `EstadoAutenticacion` conserva `intentosFallidos` y `bloqueadoHasta`. Se establece un registro de estado por usuario, identificado mediante `usuarioId`, que funciona como clave primaria y clave foránea.
+- `bloqueadoHasta` puede ser nulo cuando no existe un bloqueo establecido. Una fecha almacenada no implica por sí sola un bloqueo vigente: el backend debe compararla con la hora actual.
+- Los campos temporales representan instantes y deben almacenarse e interpretarse de forma consistente. Para su implementación en PostgreSQL se utilizará `timestamp with time zone` (`timestamptz`).
 
 #### Entidades y restricciones
 
 | Entidad / tipo de documento | Significado en el sistema | Identificador | Restricciones (requeridos, únicos, valores permitidos) |
 |---|---|---|---|
-| `Producto` | Representa un producto farmacéutico. | `productoId` | El identificador es obligatorio. El código debe permitir identificar el producto de forma inequívoca. |
-| `Lote` | Representa un lote perteneciente a un producto. | `loteId` | Debe estar asociado a un producto existente. La cantidad disponible no puede ser negativa. El estado debe ser `DISPONIBLE` o `BLOQUEADO`. Si se registra el bloqueo, la referencia al usuario, el motivo y la fecha deben corresponder a la operación realizada. |
-| `MovimientoInventario` | Representa una entrada, salida o ajuste de inventario. | `movimientoId` | Debe estar asociado a un lote y al usuario que realiza la operación. La cantidad debe ser válida y el tipo debe corresponder a los valores de `TipoMovimiento`. |
-| `Usuario` | Representa a una persona autorizada para utilizar el sistema. | `usuarioId` | El nombre de usuario debe ser único. Las credenciales deben conservarse mediante su hash, no como contraseña en texto plano. |
-| `Rol` | Representa un conjunto de permisos asignados a los usuarios. | `rolId` | Debe tener un identificador y un nombre válidos. |
-| `Permiso` | Representa una acción autorizada dentro del sistema. | `permisoId` | Debe tener un identificador y un nombre válidos. Cada permiso debe poder identificarse inequívocamente. |
-| `RolPermiso` | Representa la asignación de permisos a los roles. | `rolId` y `permisoId` | Ambos campos deben referenciar registros existentes. La combinación de los dos identificadores debe ser única. |
-| `EstadoAutenticacion` | Representa el estado de seguridad asociado a un usuario. | `usuarioId` | Debe estar asociado a un usuario existente. El contador de intentos fallidos no puede ser negativo. El acceso debe bloquearse durante cinco minutos después de cinco intentos consecutivos fallidos. |
-
+| `Producto` | Representa un producto farmacéutico. | `productoId` | Clave primaria obligatoria. `codigo` debe ser obligatorio y único. Deben conservarse los datos generales definidos en el modelo de clases. |
+| `Lote` | Representa un lote perteneciente a un producto. | `loteId` | Clave primaria obligatoria. `productoId` debe referenciar un producto existente. `numeroLote`, `fechaVencimiento`, `cantidadDisponible` y `estado` son obligatorios. La cantidad debe ser un entero mayor o igual que cero. El estado solo puede ser `DISPONIBLE` o `BLOQUEADO`. Si está `BLOQUEADO`, deben existir un usuario responsable, un motivo no vacío y una fecha de bloqueo. |
+| `MovimientoInventario` | Representa un movimiento realizado sobre un lote. | `movimientoId` | Clave primaria obligatoria. Debe referenciar un lote y un usuario existentes. `cantidad` debe ser un entero positivo para las operaciones de entrada y salida. `tipo` debe corresponder a `ENTRADA`, `SALIDA` o `AJUSTE`, según `TipoMovimiento`. Las reglas específicas de los ajustes deberán definirse antes de implementar esa operación. |
+| `Usuario` | Representa a un usuario registrado en el sistema. | `usuarioId` | Clave primaria obligatoria. `nombreUsuario` debe ser obligatorio y único. `credencialHash` es obligatorio y no debe contener la contraseña en texto plano. `rolId` debe referenciar un rol existente. `activo` indica si la cuenta está habilitada. |
+| `Rol` | Representa un conjunto de permisos asignado a los usuarios. | `rolId` | Clave primaria obligatoria. Debe tener un nombre obligatorio y no vacío. |
+| `Permiso` | Representa una acción que puede autorizarse dentro del sistema. | `permisoId` | Clave primaria obligatoria. El nombre del permiso debe ser obligatorio y único. `BLOQUEAR_LOTE` identifica el permiso utilizado en CU-02. |
+| `RolPermiso` | Representa la asignación de un permiso a un rol. | `rolId` y `permisoId` | Ambos campos son obligatorios y deben referenciar registros existentes. Forman una clave primaria compuesta que impide repetir la misma asignación. |
+| `EstadoAutenticacion` | Representa el estado de seguridad asociado a un usuario. | `usuarioId` | Clave primaria y foránea que referencia a un usuario existente. `intentosFallidos` es obligatorio, comienza en cero y se mantiene entre cero y cinco. `bloqueadoHasta` puede ser nulo. El backend establece el bloqueo de cinco minutos al registrar el quinto fallo consecutivo y no incrementa el contador durante un bloqueo vigente. |
 
 ### 2.3 Propiedad de los datos
 
+La propiedad indica qué componente controla las reglas de modificación de la información. Los repositorios proporcionan acceso a la persistencia, pero no sustituyen las responsabilidades de los módulos funcionales.
+
 | Información | Propietario autorizado (componente responsable de mantenerla) | Consumido por (lo utiliza sin ser propietario) | Acceso a través de |
 |---|---|---|---|
-| Datos de los usuarios | Módulo de autenticación y autorización | Módulo de lotes y módulo de control de inventario, cuando necesitan identificar o autorizar al usuario | `ServicioAutenticacion`, que utiliza `RepositorioUsuario` internamente para consultar los datos de los usuarios. |
-| Roles y permisos | Módulo de autenticación y autorización | Módulo de lotes, módulo de productos y módulo de control de inventario | `ServicioAutenticacion`, que verifica los permisos solicitados. |
-| Estado de autenticación | Módulo de autenticación y autorización | Frontend y controlador de API, para comunicar el resultado de la autenticación | `ServicioAutenticacion`, que utiliza `RepositorioEstadoAutenticacion` para consultar y persistir el estado. |
-| Datos de los productos | Módulo de productos | Módulo de lotes y frontend | `ServicioProducto`, que utiliza `RepositorioProducto` para consultar y mantener los datos. |
-| Datos y estado de los lotes | Módulo de lotes | Módulo de control de inventario y frontend | `ServicioLote`, que utiliza `RepositorioLote` para consultar y guardar los lotes. |
-| Motivo y fecha de bloqueo del lote | Módulo de lotes | Frontend y módulo de control de inventario, cuando necesitan consultar el estado del lote | `ServicioLote`, mediante las operaciones de consulta de lotes. |
-| Usuario asociado al bloqueo del lote | Módulo de lotes, como parte de la información asociada al bloqueo | Frontend y componentes autorizados que necesiten consultar quién realizó el bloqueo | `ServicioLote`, que utiliza `RepositorioLote` y la relación con `Usuario`. |
-| Movimientos de inventario | Módulo de control de inventario | Frontend y otros componentes que necesitan consultar los movimientos | `ServicioInventario`, que utiliza `RepositorioMovimiento` para registrar los movimientos. |
-
+| Datos de los usuarios | Módulo de autenticación y autorización | Módulos de productos, lotes y control de inventario, cuando necesitan identificar o autorizar al usuario | `ServicioAutenticacion` utiliza `RepositorioUsuario` para recuperar al usuario. La comprobación de credenciales se delega en `Usuario.verificarCredenciales(credencial)`. |
+| Roles y permisos | Módulo de autenticación y autorización | Módulos de productos, lotes y control de inventario | `ServicioAutenticacion.autorizar(usuario, permiso)`, que utiliza `Usuario.tienePermiso(permiso)`. |
+| Estado de autenticación | Módulo de autenticación y autorización | Controlador de API y frontend, que reciben el resultado de la autenticación | `ServicioAutenticacion` consulta y guarda el estado mediante `RepositorioEstadoAutenticacion`. La API y el frontend reciben el resultado necesario para informar al usuario, sin administrar directamente el contador ni el bloqueo. |
+| Datos de los productos | Módulo de productos | Frontend y funcionalidades que necesitan identificar los productos asociados a los lotes | `ServicioProducto`, mediante `RepositorioProducto`. |
+| Datos y estado de los lotes | Módulo de lotes, para la consulta y el bloqueo; módulo de control de inventario, para modificar cantidades mediante movimientos | Frontend y funcionalidades de inventario que necesitan comprobar las condiciones del lote | `ServicioLote` consulta y bloquea lotes mediante `RepositorioLote`. `ServicioInventario` valida y actualiza las cantidades mediante las colaboraciones y los repositorios definidos en el Entregable 1. |
+| Motivo y fecha de bloqueo del lote | Módulo de lotes | Frontend y componentes autorizados que consulten la información del lote | `ServicioLote.consultarLote(loteId)` y `ServicioLote.consultarLotes(productoId)`, mediante `RepositorioLote`. |
+| Usuario asociado al bloqueo del lote | Módulo de lotes, como parte de los datos del bloqueo | Frontend y componentes autorizados que necesiten identificar al responsable | `ServicioLote` conserva la relación con `Usuario` al ejecutar el bloqueo y la persiste mediante `RepositorioLote`. |
+| Movimientos de inventario | Módulo de control de inventario | Funcionalidades autorizadas de seguimiento del inventario | `ServicioInventario` registra los movimientos mediante `RepositorioMovimiento.guardar(movimiento)`. El modelo actual no define una operación de consulta del historial en este repositorio. |
 
 ### 2.4 Reglas de negocio e invariantes aplicadas a los datos
 
+Para completar el comportamiento posterior al vencimiento del bloqueo de autenticación, este diseño incorpora una regla de reinicio del ciclo de intentos. Esta precisión deberá mantenerse también en la documentación de RF-03.
+
 | Regla de negocio o invariante | Dónde se aplica (lógica del componente, restricción de datos o ambas) | Cómo se aplica |
 |---|---|---|
-| Un lote debe estar asociado a un producto existente. | Ambas | `ServicioLote` valida la operación y la base de datos debe garantizar la integridad referencial mediante una clave foránea. |
-| El estado de un lote solo puede ser `DISPONIBLE` o `BLOQUEADO`. | Ambas | `Lote` gestiona su estado mediante `EstadoLote`, y la persistencia debe impedir valores no permitidos. |
-| Un lote bloqueado no puede utilizarse para registrar salidas de inventario. | Lógica del componente | `ServicioInventario` consulta el estado del lote y comprueba `Lote.estaBloqueado()` y las condiciones de salida antes de registrar el movimiento. |
-| El bloqueo de un lote debe conservar el motivo, la fecha y el usuario que lo realizó. | Lógica del componente y persistencia | `ServicioLote` solicita el bloqueo mediante `Lote.bloquear(usuario, motivo)` y guarda el lote con `RepositorioLote`. La relación con `Usuario` se representa mediante la clave foránea `bloqueadoPorUsuarioId`. |
-| Un lote debe permanecer bloqueado mientras no exista una operación autorizada que cambie su estado. | Lógica del componente y persistencia | `ServicioLote` actualiza el estado y persiste el cambio mediante `RepositorioLote`. El alcance actual no contempla el desbloqueo. |
-| Solo un usuario con el permiso correspondiente puede bloquear un lote. | Lógica del componente | `ServicioLote` solicita a `ServicioAutenticacion` la verificación del permiso antes de ejecutar el bloqueo. |
-| La cantidad disponible de un lote no puede ser negativa. | Ambas | `ServicioInventario` valida las cantidades antes de registrar movimientos y la base de datos debe aplicar una restricción para impedir valores negativos. |
-| El registro de una salida debe respetar el estado del lote y la cantidad disponible. | Lógica del componente y persistencia | `ServicioInventario` comprueba el bloqueo y la cantidad disponible. El descuento y el registro del movimiento deben ejecutarse en una misma transacción. |
-| Los permisos asignados a los roles deben corresponder a registros existentes. | Ambas | `ServicioAutenticacion` verifica los permisos y la base de datos debe garantizar la integridad de la tabla intermedia `RolPermiso` mediante claves foráneas y una clave primaria compuesta. |
-| Después de cinco intentos fallidos consecutivos, el acceso debe bloquearse durante cinco minutos. | Lógica del componente | `EstadoAutenticacion.registrarFallo(ahora)` actualiza el contador y establece `bloqueoHasta` cuando se alcanza el límite. |
-| Una autenticación exitosa reinicia el contador de intentos fallidos. | Lógica del componente y persistencia | `EstadoAutenticacion.registrarExito()` reinicia el contador y `RepositorioEstadoAutenticacion.guardarEstado(...)` persiste el estado actualizado. |
-| El estado de autenticación debe conservarse entre reinicios del servidor. | Persistencia | `RepositorioEstadoAutenticacion` guarda y recupera el contador de intentos fallidos y la fecha de finalización del bloqueo en PostgreSQL. |
-| Los datos de productos, lotes y movimientos deben mantener relaciones consistentes. | Ambas | Los servicios validan las operaciones y la base de datos utiliza claves foráneas y transacciones para mantener la integridad de la información. |
-
-
+| Un lote debe estar asociado a un producto existente. | Ambas | La lógica que registra o modifica la asociación debe respetar esta condición y PostgreSQL la garantiza mediante la clave foránea `productoId`. |
+| El estado de un lote solo puede ser `DISPONIBLE` o `BLOQUEADO`. | Ambas | `Lote` utiliza los valores de `EstadoLote` y PostgreSQL aplica una restricción que impide almacenar otros valores. |
+| Las unidades de un lote bloqueado no pueden utilizarse para registrar una salida de inventario. | Lógica del componente | `ServicioInventario` comprueba el estado mediante `Lote.estaBloqueado()` y valida las condiciones de salida antes de descontar unidades o registrar el movimiento. Esta comprobación corresponde al proceso de registrar una salida, no a una rama adicional de CU-02. |
+| El bloqueo de un lote debe conservar el motivo, la fecha y el usuario responsable. | Ambas | `ServicioLote` invoca `Lote.bloquear(usuario, motivo)` y guarda el resultado mediante `RepositorioLote.guardar(lote)`. La base de datos exige los datos del bloqueo cuando el estado es `BLOQUEADO` y valida la referencia `bloqueadoPorUsuarioId`. |
+| El estado bloqueado debe conservarse después de guardar y consultar nuevamente el lote. | Lógica del componente y persistencia | El estado se almacena en PostgreSQL y las consultas posteriores recuperan `BLOQUEADO`. El alcance actual no contempla una operación de desbloqueo. |
+| Solo un usuario con el permiso `BLOQUEAR_LOTE` puede bloquear un lote. | Lógica del componente | `ServicioLote` solicita `ServicioAutenticacion.autorizar(usuario, "BLOQUEAR_LOTE")` antes de invocar `Lote.bloquear(usuario, motivo)`. Si la autorización falla, no modifica ni guarda el lote. |
+| Bloquear un lote no modifica su cantidad disponible ni genera un movimiento de inventario. | Lógica del componente | `Lote.bloquear(usuario, motivo)` modifica los datos del bloqueo. No descuenta unidades ni invoca el registro de movimientos. |
+| La cantidad disponible de un lote no puede ser negativa. | Ambas | `ServicioInventario` valida las cantidades y las existencias. PostgreSQL aplica una restricción que impide almacenar una cantidad negativa. |
+| Una salida debe respetar el bloqueo y la cantidad disponible del lote. | Lógica del componente y persistencia | `ServicioInventario` vuelve a comprobar las condiciones del lote dentro de la transacción antes de actualizarlo. El descuento de unidades y el registro del movimiento se confirman juntos; si falla alguno, se revierten los cambios de la transacción. |
+| Las asignaciones de permisos deben referenciar roles y permisos existentes y no repetirse. | Ambas | La gestión de asignaciones debe validar sus referencias. PostgreSQL utiliza claves foráneas y una clave primaria compuesta en `RolPermiso`. La autorización consulta los permisos asignados; no crea esas asignaciones. |
+| El quinto intento fallido consecutivo debe bloquear el acceso durante cinco minutos. | Lógica del componente y persistencia | `EstadoAutenticacion.registrarFallo(ahora)` incrementa `intentosFallidos` y, al llegar a cinco, establece `bloqueadoHasta = ahora + 5 minutos`. `ServicioAutenticacion` guarda el estado mediante `RepositorioEstadoAutenticacion` antes de confirmar el bloqueo. |
+| Un bloqueo vigente impide volver a validar las credenciales. | Lógica del componente | `ServicioAutenticacion` consulta `EstadoAutenticacion.estaBloqueado(ahora)` antes de llamar a `Usuario.verificarCredenciales(credencial)`. Si devuelve `true`, rechaza el intento sin incrementar el contador ni prolongar `bloqueadoHasta`. |
+| Una autenticación exitosa reinicia el contador de intentos fallidos. | Lógica del componente y persistencia | `EstadoAutenticacion.registrarExito()` establece `intentosFallidos` en cero y limpia `bloqueadoHasta`. El servicio guarda el estado actualizado antes de devolver el resultado exitoso. |
+| El bloqueo deja de estar vigente cuando se alcanza su fecha de finalización. | Lógica del componente | `estaBloqueado(ahora)` devuelve `true` únicamente cuando existe `bloqueadoHasta` y `ahora` es anterior a esa fecha. Si la fecha ya se alcanzó, permite evaluar un nuevo intento. No es necesario borrar el registro ni ejecutar una tarea periódica para comprobar el vencimiento. |
+| Después de vencer un bloqueo, el siguiente intento inicia un nuevo ciclo de conteo. | Lógica del componente y persistencia | Como precisión de este diseño, si el siguiente intento falla, `registrarFallo(ahora)` reconoce el bloqueo vencido, reinicia el ciclo y registra ese intento como el primer fallo, dejando `intentosFallidos = 1` y sin bloqueo vigente. Si el intento tiene éxito, `registrarExito()` reinicia el estado. El servicio persiste el resultado. |
+| El contador y el bloqueo se controlan en el backend y se conservan entre reinicios del servidor. | Lógica del componente y persistencia | El servidor calcula el tiempo y administra el estado. `RepositorioEstadoAutenticacion` guarda y recupera `intentosFallidos` y `bloqueadoHasta` en PostgreSQL, conforme a ADR-0003. |
+| Un error de persistencia no debe permitir omitir el control de autenticación. | Lógica del componente y persistencia | Si no puede consultarse o guardarse el estado necesario para completar la autenticación, el sistema informa el error y no concede el acceso. Este escenario técnico se mantiene como obligación de ADR-0003, aunque no se desarrolle entre los tres escenarios seleccionados de CU-03. |
+| Los datos de productos, lotes, usuarios y movimientos deben mantener relaciones consistentes. | Ambas | Los servicios validan las operaciones y PostgreSQL aplica claves foráneas y transacciones. Los cambios relacionados se confirman de forma conjunta cuando la operación lo requiere. |
 
 ---
 
 ## 3. Contrato de interfaz
 
-Se selecciona la operación de bloqueo de lotes porque permite implementar el requisito RF-02, conservar la información del bloqueo y evitar que las unidades de un lote bloqueado se registren como disponibles para salida.
+Se selecciona la operación de bloqueo de lotes porque implementa el cambio de estado definido en RF-02 y conserva la información necesaria para identificar el bloqueo y a su responsable.
 
-**Interacción seleccionada (del diagrama 1.2, mensaje `bloquearLote(loteId, usuario, motivo)`):**
+La restricción de salida se hace efectiva cuando `ServicioInventario` comprueba el estado del lote antes de registrar una salida. La operación de bloqueo no registra una salida ni modifica las existencias.
+
+**Interacción seleccionada (del diagrama de CU-02, mensaje `bloquearLote(loteId, usuario, motivo)`):**
 
 `Controlador de API → ServicioLote: bloquearLote(loteId, usuario, motivo)`
 
 | Elemento | Especificación |
 |---|---|
-| **Operación y propósito** | `ServicioLote.bloquearLote(loteId, usuario, motivo)` permite al regente de farmacia solicitar el bloqueo de un lote. El servicio verifica que el usuario tenga el permiso `BLOQUEAR_LOTE`, consulta el lote, actualiza su estado a `BLOQUEADO` y guarda los cambios mediante `RepositorioLote`. |
-| **Entrada (parámetros y tipos)** | `loteId: Integer`: identificador del lote que se desea bloquear.<br>`usuario: Usuario`: usuario autenticado que solicita el bloqueo.<br>`motivo: String`: motivo del bloqueo. |
-| **Salida (resultado exitoso y estructura de datos)** | Devuelve el objeto `Lote` con el estado actualizado a `BLOQUEADO`, el motivo y la fecha del bloqueo. La información del usuario que realizó la operación se conserva mediante la relación entre `Lote` y `Usuario`, representada en el modelo relacional mediante la clave foránea `bloqueadoPorUsuarioId`. El sistema confirma el éxito únicamente después de guardar los cambios correctamente. |
-| **Precondiciones (qué debe cumplir quien invoca la operación)** | El usuario debe estar autenticado y ser identificado por el controlador de API. Deben proporcionarse el identificador del lote y el motivo del bloqueo. El lote debe estar registrado y el usuario debe contar con el permiso `BLOQUEAR_LOTE`. El servicio verifica la autorización antes de realizar la operación. |
-| **Postcondiciones (qué se garantiza si la operación termina correctamente)** | El lote queda en estado `BLOQUEADO` y la información actualizada se guarda mediante `RepositorioLote`. Se conservan el motivo, la fecha del bloqueo y la relación con el usuario que realizó la operación. Mientras permanezca bloqueado, el lote no puede utilizarse para registrar unidades como disponibles para salida. El bloqueo no modifica por sí mismo la cantidad disponible ni registra un movimiento de salida. |
-| **Resultados de fallo (cada fallo y estado posterior)** | **Usuario sin permiso:** se rechaza la solicitud y no se modifica el lote.<br>**Lote inexistente:** se informa que el lote no fue encontrado y no se modifica ningún lote.<br>**Error de persistencia:** se informa que no fue posible completar el bloqueo y no se confirma la operación como exitosa. La implementación debe evitar que un fallo de almacenamiento deje el estado persistido parcialmente actualizado. |
-| **Invariantes y efectos secundarios (qué debe mantenerse y qué puede cambiar)** | El estado del lote debe corresponder a los valores definidos en `EstadoLote`: `DISPONIBLE` o `BLOQUEADO`. Solo los usuarios autorizados pueden realizar el bloqueo. La información del bloqueo debe conservar la relación con el usuario que lo efectuó. El bloqueo no cambia la cantidad disponible ni registra una salida de inventario. Las salidas deben comprobar el estado del lote antes de registrarse. |
+| **Operación y propósito** | `ServicioLote.bloquearLote(loteId: Integer, usuario: Usuario, motivo: String): Lote` solicita el bloqueo de un lote. El servicio comprueba el permiso `BLOQUEAR_LOTE`, recupera el lote, invoca `Lote.bloquear(usuario, motivo)` y guarda el cambio mediante `RepositorioLote.guardar(lote)`. El flujo principal termina con el bloqueo persistido y su confirmación. |
+| **Entrada (parámetros y tipos)** | `loteId: Integer`: identificador del lote que se desea bloquear.<br>`usuario: Usuario`: objeto que representa al usuario autenticado y que el controlador obtiene del contexto de autenticación; no se acepta como prueba de identidad un usuario enviado libremente por el frontend.<br>`motivo: String`: motivo del bloqueo, obligatorio y no vacío. |
+| **Salida (resultado exitoso y estructura de datos)** | Devuelve un objeto `Lote` con `estado = BLOQUEADO`, `motivoBloqueo`, `fechaBloqueo` y la relación con el usuario responsable. En PostgreSQL, esta relación se representa mediante `bloqueadoPorUsuarioId`. Conserva el identificador, producto, número de lote, vencimiento y cantidad disponible. El servicio devuelve el resultado exitoso únicamente después de confirmar el almacenamiento. El controlador presenta al frontend los datos necesarios, sin exponer `credencialHash`. |
+| **Precondiciones (qué debe cumplir quien invoca la operación)** | El usuario debe estar autenticado y ser identificado por el controlador. Deben proporcionarse un `loteId` válido y un motivo no vacío. La autorización y la existencia actual del lote se comprueban en el servicio como condiciones para completar la operación. En los tres escenarios seleccionados del diagrama se presupone que el lote existe; el contrato también contempla que una invocación pueda referenciar un lote inexistente. |
+| **Postcondiciones (qué se garantiza si la operación termina correctamente)** | El lote queda persistido en estado `BLOQUEADO`, con el motivo, la fecha y la referencia al usuario responsable. Una consulta posterior recupera el estado bloqueado. Mientras permanezca así, `ServicioInventario` debe rechazar las salidas de ese lote. El bloqueo no modifica por sí mismo `cantidadDisponible` ni crea un movimiento de inventario. |
+| **Resultados de fallo (cada fallo y estado posterior)** | **Usuario sin permiso — flujo alternativo representado:** se rechaza la solicitud antes de modificar el lote; no se guardan cambios.<br>**Lote inexistente — validación adicional del contrato:** se informa que no se encontró el lote; no se modifica ningún lote. Este caso no se desarrolla como una cuarta rama del diagrama seleccionado.<br>**Error de persistencia — excepción representada:** se informa que no fue posible completar el bloqueo y no se devuelve un resultado exitoso. La escritura de los datos del bloqueo debe ser atómica, sin cambios parcialmente confirmados. Si se modificó un objeto en memoria antes del error, no debe reutilizarse como si el bloqueo estuviera confirmado en PostgreSQL. |
+| **Invariantes y efectos secundarios (qué debe mantenerse y qué puede cambiar)** | El estado solo puede tomar valores de `EstadoLote`: `DISPONIBLE` o `BLOQUEADO`. Solo un usuario autorizado puede ejecutar el bloqueo. Se conservan el motivo, la fecha y el usuario responsable. No cambian el producto asociado, el número de lote, la fecha de vencimiento ni la cantidad disponible. No se registra una salida. Las operaciones de salida deben comprobar el bloqueo antes de modificar el inventario. Los errores se comunican por el mecanismo de excepciones de la implementación; no se sustituyen por un objeto `Lote` que aparente éxito. |
 
 ### Ejemplos verificables
 
+Los ejemplos de bloqueo exitoso, usuario sin permiso y error de persistencia corresponden a los tres escenarios del diagrama. El ejemplo de lote inexistente verifica una validación adicional del contrato de la operación.
+
 | Caso | Estado previo | Solicitud | Resultado esperado |
 |---|---|---|---|
-| Bloqueo exitoso | El lote existe, está `DISPONIBLE` y el usuario tiene el permiso correspondiente. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | El lote queda `BLOQUEADO`. Se guardan el motivo, la fecha del bloqueo y la relación con el usuario que realizó la operación. El sistema confirma el éxito. |
-| Usuario sin permiso | El lote existe y está `DISPONIBLE`, pero el usuario no tiene el permiso requerido. | `bloquearLote(15, usuarioSinPermiso, "Lote en revisión")` | La solicitud se rechaza y el estado persistido del lote permanece sin cambios. |
-| Lote inexistente | No existe un lote con identificador `9999`. | `bloquearLote(9999, usuarioRegente, "Lote en revisión")` | El sistema informa que el lote no fue encontrado y no modifica ningún lote. |
-| Error de persistencia | El lote existe, está `DISPONIBLE` y el usuario tiene permiso, pero falla el almacenamiento. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | El sistema informa que no pudo completar el bloqueo. No confirma la operación como exitosa y el estado persistido del lote permanece consistente. |
+| Bloqueo exitoso | El lote `15` existe, está `DISPONIBLE` y el usuario autenticado tiene el permiso `BLOQUEAR_LOTE`. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | Devuelve el lote en estado `BLOQUEADO` después de guardar el motivo, la fecha y la referencia al usuario responsable. Una consulta posterior muestra el bloqueo. La cantidad disponible permanece igual y no se crea un movimiento de inventario. |
+| Usuario sin permiso | El lote `15` existe y está `DISPONIBLE`, pero el usuario autenticado no tiene `BLOQUEAR_LOTE`. | `bloquearLote(15, usuarioSinPermiso, "Lote en revisión")` | Se rechaza la solicitud por falta de autorización. No se invoca el bloqueo del lote ni se guardan cambios. |
+| Lote inexistente | El usuario está autenticado y autorizado, pero no existe un lote con identificador `9999`. | `bloquearLote(9999, usuarioRegente, "Lote en revisión")` | Se informa que el lote no fue encontrado. No se invoca `Lote.bloquear(...)` ni se guarda ningún lote. Es una validación del contrato fuera de los tres escenarios seleccionados. |
+| Error de persistencia | El lote `15` existe y está `DISPONIBLE`; el usuario está autorizado. Se simula un fallo de escritura que impide confirmar el almacenamiento. | `bloquearLote(15, usuarioRegente, "Lote en revisión")` | Se informa que no fue posible completar el bloqueo y no se devuelve un resultado exitoso. La escritura fallida no deja datos de bloqueo parcialmente confirmados. El objeto modificado en memoria se descarta o se recarga antes de volver a utilizarlo. |
 
-
+---
 
 ---
 
