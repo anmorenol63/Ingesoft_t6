@@ -128,36 +128,28 @@ sequenceDiagram
 | **Flujo alternativo: autenticación exitosa antes de alcanzar cinco fallos** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>SA → US: verificarCredenciales(credencial).<br>SA → EA: registrarExito().<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar contador reiniciado y sin bloqueo.<br>SA → API: ResultadoAutenticacion con autenticado=true y el usuario autenticado.<br>API → FE: Informar autenticación exitosa.<br>FE → U: Permitir acceso al sistema. | Credenciales válidas y estado sin bloqueo vigente. Se reinicia `intentosFallidos` a cero y se limpia `bloqueadoHasta`. Se guarda el estado actualizado en PostgreSQL y se devuelve un resultado con `autenticado=true`, mensaje de éxito y el usuario autenticado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean`<br>`Usuario.verificarCredenciales(credencial: String): Boolean`<br>`EstadoAutenticacion.registrarExito(): void`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): void` |
 | **Excepción: intento de autenticación durante un bloqueo vigente** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>EA → SA: bloqueado=true.<br>SA → API: ResultadoAutenticacion con autenticado=false y mensaje de bloqueo vigente.<br>API → FE: Informar bloqueo temporal vigente.<br>FE → U: Mostrar que debe esperar hasta que finalice el bloqueo. | Identificación del usuario, estado almacenado y fecha de finalización del bloqueo. Se determina que el bloqueo continúa vigente y se devuelve un resultado con `autenticado=false`, mensaje de bloqueo y `usuario=null`. No se validan nuevamente las credenciales ni se modifica el estado almacenado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean` |
 
-```
-
-
-### Correspondencia entre los flujos y las operaciones del Entregable 1
-
-| Paso o flujo del caso de uso | Mensaje(s) en el diagrama | Información intercambiada | Operación definida en el Entregable 1 |
-|---|---|---|---|
-| **Flujo principal: bloqueo tras el quinto intento fallido consecutivo** | U → FE: Ingresa nombre de usuario y contraseña.<br>FE → API: Solicitar autenticación(nombreUsuario, credencial).<br>API → SA: autenticar(nombreUsuario, credencial).<br>SA → RU: buscarPorNombre(nombreUsuario).<br>SA → REA: buscarEstado(usuarioId).<br>SA → EA: estaBloqueado(ahora).<br>SA → US: verificarCredenciales(credencial).<br>SA → EA: registrarFallo(ahora).<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar intentosFallidos y bloqueadoHasta.<br>SA → API: ResultadoAutenticacion con autenticado=false y mensaje de bloqueo.<br>API → FE: Informar bloqueo temporal.<br>FE → U: Mostrar acceso bloqueado durante 5 minutos. | Nombre de usuario, credencial, objeto Usuario y estado de autenticación con cuatro fallos consecutivos previos. Se comprueba que no exista bloqueo vigente y que las credenciales sean incorrectas. El contador aumenta de cuatro a cinco y se establece `bloqueadoHasta = ahora + 5 minutos`. Se guarda el estado en PostgreSQL y se devuelve un resultado con `autenticado=false`, mensaje de bloqueo y `usuario=null`. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean`<br>`Usuario.verificarCredenciales(credencial: String): Boolean`<br>`EstadoAutenticacion.registrarFallo(ahora: Timestamp): void`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): void` |
-| **Flujo alternativo: autenticación exitosa antes de alcanzar cinco fallos** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>SA → US: verificarCredenciales(credencial).<br>SA → EA: registrarExito().<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar contador reiniciado y sin bloqueo.<br>SA → API: ResultadoAutenticacion con autenticado=true y el usuario autenticado.<br>API → FE: Informar autenticación exitosa.<br>FE → U: Permitir acceso al sistema. | Credenciales válidas y estado sin bloqueo vigente. Se reinicia `intentosFallidos` a cero y se limpia `bloqueadoHasta`. Se guarda el estado actualizado en PostgreSQL y se devuelve un resultado con `autenticado=true`, mensaje de éxito y el usuario autenticado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean`<br>`Usuario.verificarCredenciales(credencial: String): Boolean`<br>`EstadoAutenticacion.registrarExito(): void`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): void` |
-| **Excepción: intento de autenticación durante un bloqueo vigente** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>EA → SA: bloqueado=true.<br>SA → API: ResultadoAutenticacion con autenticado=false y mensaje de bloqueo vigente.<br>API → FE: Informar bloqueo temporal vigente.<br>FE → U: Mostrar que debe esperar hasta que finalice el bloqueo. | Identificación del usuario, estado almacenado y fecha de finalización del bloqueo. Se determina que el bloqueo continúa vigente y se devuelve un resultado con `autenticado=false`, mensaje de bloqueo y `usuario=null`. No se validan nuevamente las credenciales ni se modifica el estado almacenado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean` |
-
 
 
 ### CU-02. Bloquear lote de inventario — RF-02: Bloquear lotes de inventario
 
-```mermaid
+El diagrama representa tres escenarios: bloqueo exitoso del lote, rechazo por falta de permiso y error de persistencia.
 
+Precondiciones: el usuario está autenticado, tiene acceso al módulo de inventario y el lote seleccionado existe. Para los escenarios representados, el lote continúa existiendo durante la operación. El permiso para bloquear se comprueba en el backend.
+
+```mermaid
 sequenceDiagram
     actor R as Regente de farmacia
     participant FE as Frontend (aplicación web)
     participant API as Controlador de API
     participant SL as ServicioLote
     participant SA as ServicioAutenticacion
-    participant USR as Usuario
+    participant USR as usuario: Usuario
     participant RL as RepositorioLote
-    participant LOT as Lote
+    participant LOT as lote: Lote
     participant BD as PostgreSQL
 
-    Note over API: S2. El controlador identifica al Usuario autenticado y lo pasa a los servicios
-    Note over R,BD: S8. El regente ya eligió un producto en el inventario
+    Note over API,USR: El controlador obtiene el usuario de la sesión autenticada
+    Note over R,BD: El regente ya eligió un producto del inventario
 
     R->>FE: Consulta los lotes del producto
     FE->>API: Solicitar lotes(productoId)
@@ -165,10 +157,10 @@ sequenceDiagram
     SL->>RL: buscarPorProducto(productoId)
     RL->>BD: Consultar lotes del producto
     BD-->>RL: Devolver lotes registrados
-    RL-->>SL: Devolver lista de lotes
-    SL-->>API: Devolver lista de lotes
+    RL-->>SL: Lista de lotes
+    SL-->>API: Lista de lotes
     API-->>FE: Informar lotes registrados
-    FE-->>R: Mostrar los lotes del producto
+    FE-->>R: Mostrar lotes del producto
 
     R->>FE: Selecciona el lote que desea bloquear
     FE->>API: Solicitar consulta de lote(loteId)
@@ -176,85 +168,85 @@ sequenceDiagram
     SL->>RL: buscarPorId(loteId)
     RL->>BD: Consultar datos del lote
     BD-->>RL: Devolver datos del lote
-    RL-->>SL: Devolver lote
-    SL-->>API: Devolver lote
+    RL-->>SL: lote: Lote
+    SL-->>API: Lote consultado
     API-->>FE: Informar datos del lote
-    FE-->>R: Mostrar la información del lote seleccionado
+    FE-->>R: Mostrar información del lote seleccionado
 
     R->>FE: Selecciona Bloquear lote e indica el motivo
     FE->>API: Solicitar bloqueo(loteId, motivo)
     API->>SL: bloquearLote(loteId, usuario, motivo)
 
-    SL->>SA: autorizar(usuario, BLOQUEAR_LOTE)
-    Note over SA: S3. BLOQUEAR_LOTE es el permiso asociado al rol Regente
-    SA->>USR: tienePermiso(BLOQUEAR_LOTE)
-    USR-->>SA: true o false
-    SA-->>SL: true o false
+    SL->>SA: autorizar(usuario, "BLOQUEAR_LOTE")
+    SA->>USR: tienePermiso("BLOQUEAR_LOTE")
+    USR-->>SA: permisoConcedido: Boolean
+    SA-->>SL: autorizado: Boolean
 
-    alt El usuario no tiene permiso
-        SL-->>API: Error usuario sin permisos
+    alt Usuario autorizado
+        SL->>RL: buscarPorId(loteId)
+        RL->>BD: Consultar datos actuales del lote
+        BD-->>RL: Devolver datos del lote existente
+        RL-->>SL: lote: Lote
+
+        Note over SL,LOT: LOT representa el objeto Lote recuperado por RL
+
+        SL->>LOT: bloquear(usuario, motivo)
+        Note over LOT: Establecer estado BLOQUEADO, motivoBloqueo y fechaBloqueo
+        Note over LOT: Asociar el usuario que realiza el bloqueo
+        LOT-->>SL: Operación completada
+
+        SL->>RL: guardar(lote)
+        RL->>BD: Guardar estado y datos del bloqueo
+
+        alt PRINCIPAL: almacenamiento exitoso
+            BD-->>RL: Confirmar almacenamiento
+            RL-->>SL: Lote guardado
+            SL-->>API: Lote bloqueado
+            API-->>FE: Informar bloqueo exitoso
+            FE-->>R: Confirmar que el lote fue bloqueado
+
+            Note over R,BD: Consulta posterior para verificar estado y permanencia del bloqueo
+
+            R->>FE: Consulta nuevamente el lote
+            FE->>API: Solicitar consulta de lote(loteId)
+            API->>SL: consultarLote(loteId)
+            SL->>RL: buscarPorId(loteId)
+            RL->>BD: Consultar datos del lote
+            BD-->>RL: Devolver lote con estado BLOQUEADO
+            RL-->>SL: Lote consultado
+            SL-->>API: Lote consultado
+            API-->>FE: Informar datos del lote
+            FE-->>R: Mostrar lote en estado Bloqueado
+
+        else EXCEPCIÓN: error al guardar el bloqueo
+            BD-->>RL: Error de almacenamiento
+            RL-->>SL: Propagar error de persistencia
+            SL-->>API: Informar que no se pudo completar el bloqueo
+            API-->>FE: Informar error del sistema
+            FE-->>R: Mostrar que no fue posible completar el bloqueo
+
+            Note over SL,BD: No confirmar el bloqueo como persistido
+        end
+
+    else ALTERNATIVO: usuario sin permiso
+        SL-->>API: Informar rechazo por falta de permiso
         API-->>FE: Informar error de autorización
         FE-->>R: Mostrar que no tiene permiso para bloquear lotes
 
-    else El usuario está autorizado
-        SL->>RL: buscarPorId(loteId)
-        RL->>BD: Consultar datos del lote
-        BD-->>RL: Devolver datos del lote o resultado vacío
-        RL-->>SL: Devolver lote o no encontrado
-
-        alt El lote no se encuentra
-            SL-->>API: Error lote no encontrado
-            API-->>FE: Informar error
-            FE-->>R: Mostrar que el lote no existe
-
-        else El lote se encuentra
-            SL->>LOT: bloquear(usuario, motivo)
-            Note over LOT: Fija estado BLOQUEADO, motivoBloqueo y fechaBloqueo
-            LOT-->>SL: Lote con estado actualizado
-
-            SL->>RL: guardar(lote)
-            RL->>BD: Guardar estado de bloqueo del lote
-
-            alt Persistencia exitosa (CA-01)
-                BD-->>RL: Confirmar almacenamiento
-                RL-->>SL: Devolver lote bloqueado
-                SL-->>API: Devolver lote bloqueado
-                API-->>FE: Informar bloqueo exitoso
-                FE-->>R: Confirmar que el lote fue bloqueado
-
-                Note over R,BD: Verificación del estado (CA-02, CA-04)
-                R->>FE: Consulta nuevamente el lote
-                FE->>API: Solicitar consulta de lote(loteId)
-                API->>SL: consultarLote(loteId)
-                SL->>RL: buscarPorId(loteId)
-                RL->>BD: Consultar datos del lote
-                BD-->>RL: Devolver datos del lote con estado BLOQUEADO
-                RL-->>SL: Devolver lote
-                SL-->>API: Devolver lote
-                API-->>FE: Informar datos del lote
-                FE-->>R: Mostrar el lote en estado Bloqueado
-
-            else Excepción S7. Error al guardar el estado
-                BD-->>RL: Error de almacenamiento
-                RL-->>SL: Informar error de persistencia
-                SL-->>API: Error no se pudo bloquear el lote
-                API-->>FE: Informar error del sistema
-                FE-->>R: Mostrar que no fue posible bloquear el lote
-            end
-        end
+        Note over SL,BD: No modificar ni guardar el estado del lote
     end
 
+    Note over LOT: Mientras el lote esté BLOQUEADO, sus unidades no deben habilitarse para salida
 ```
+
+### Correspondencia entre los flujos y las operaciones del Entregable 1
 
 | Paso o flujo del caso de uso | Mensaje(s) en el diagrama | Información intercambiada | Operación definida en el Entregable 1 |
 |---|---|---|---|
-| Flujo principal, paso 1 | `R → FE: Consulta los lotes del producto`<br>`FE → API: Solicitar lotes(productoId)`<br>`API → SL: consultarLotes(productoId)`<br>`SL → RL: buscarPorProducto(productoId)`<br>`RL → BD: Consultar lotes del producto`<br>`R → FE: Selecciona el lote que desea bloquear`<br>`API → SL: consultarLote(loteId)`<br>`SL → RL: buscarPorId(loteId)`<br>`R → FE: Selecciona Bloquear lote e indica el motivo`<br>`API → SL: bloquearLote(loteId, usuario, motivo)`<br>`SL → SA: autorizar(usuario, BLOQUEAR_LOTE)`<br>`SL → LOT: bloquear(usuario, motivo)`<br>`SL → RL: guardar(lote)`<br>`R → FE: Consulta nuevamente el lote`<br>`FE → API: Solicitar consulta de lote(loteId)`<br>`API → SL: consultarLote(loteId)` | Identificador del producto y del lote, datos del lote seleccionado, usuario que solicita el bloqueo, motivo del bloqueo y estado actualizado del lote. Después de guardar el cambio, se consulta nuevamente el lote para verificar que permanezca en estado `BLOQUEADO`. | `ServicioLote.consultarLotes(...)`<br>`RepositorioLote.buscarPorProducto(productoId)`<br>`ServicioLote.consultarLote(loteId)`<br>`RepositorioLote.buscarPorId(loteId)`<br>`ServicioLote.bloquearLote(loteId, usuario, motivo)`<br>`ServicioAutenticacion.autorizar(usuario, permiso)`<br>`Usuario.tienePermiso(permiso)`<br>`Lote.bloquear(usuario, motivo)`<br>`RepositorioLote.guardar(lote)` |
-| Flujo alternativo | `SL → SA: autorizar(usuario, BLOQUEAR_LOTE)`<br>`SA → SL: true o false`<br>`SL → API: Error usuario sin permisos`<br>`API → FE: Informar error de autorización`<br>`FE → R: Mostrar que no tiene permiso para bloquear lotes`<br><br>`SL → RL: buscarPorId(loteId)`<br>`RL → SL: Devolver lote o no encontrado`<br>`SL → API: Error lote no encontrado`<br>`API → FE: Informar error`<br>`FE → R: Mostrar que el lote no existe` | Resultado de la comprobación de permisos y resultado de la búsqueda del lote. Si el usuario no tiene autorización o el lote no existe, el sistema rechaza la solicitud y no completa el bloqueo. | `ServicioAutenticacion.autorizar(usuario, permiso)`<br>`Usuario.tienePermiso(permiso)`<br>`RepositorioLote.buscarPorId(loteId)` |
-| Excepción | `BD → RL: Error de almacenamiento`<br>`RL → SL: Informar error de persistencia`<br>`SL → API: Error no se pudo bloquear el lote`<br>`API → FE: Informar error del sistema`<br>`FE → R: Mostrar que no fue posible bloquear el lote` | Error al guardar en PostgreSQL el estado actualizado del lote. El sistema informa que no fue posible completar el bloqueo y no confirma la operación como exitosa. | `RepositorioLote.guardar(lote)` |
+| **Flujo principal: bloqueo exitoso de un lote** | R → FE: Consulta los lotes del producto.<br>API → SL: consultarLotes(productoId).<br>SL → RL: buscarPorProducto(productoId).<br>R → FE: Selecciona el lote.<br>API → SL: consultarLote(loteId).<br>SL → RL: buscarPorId(loteId).<br>R → FE: Selecciona Bloquear lote e indica el motivo.<br>API → SL: bloquearLote(loteId, usuario, motivo).<br>SL → SA: autorizar(usuario, "BLOQUEAR_LOTE").<br>SA → USR: tienePermiso("BLOQUEAR_LOTE").<br>SL → RL: buscarPorId(loteId).<br>SL → LOT: bloquear(usuario, motivo).<br>SL → RL: guardar(lote).<br>RL → BD: Guardar estado y datos del bloqueo.<br>FE → R: Confirmar bloqueo exitoso.<br>R → FE: Consulta nuevamente el lote.<br>API → SL: consultarLote(loteId).<br>SL → RL: buscarPorId(loteId).<br>FE → R: Mostrar lote en estado Bloqueado. | Identificador del producto y del lote, usuario autenticado, permiso solicitado, motivo del bloqueo y datos del lote. Se establece el estado `BLOQUEADO`, se registran el motivo, la fecha y el usuario responsable, y se guarda el cambio en PostgreSQL. Una consulta posterior recupera el lote y muestra que permanece bloqueado. | `ServicioLote.consultarLotes(productoId: Integer): List<Lote>`<br>`RepositorioLote.buscarPorProducto(productoId: Integer): List<Lote>`<br>`ServicioLote.consultarLote(loteId: Integer): Lote`<br>`RepositorioLote.buscarPorId(loteId: Integer): Lote`<br>`ServicioLote.bloquearLote(loteId: Integer, usuario: Usuario, motivo: String): Lote`<br>`ServicioAutenticacion.autorizar(usuario: Usuario, permiso: String): Boolean`<br>`Usuario.tienePermiso(permiso: String): Boolean`<br>`Lote.bloquear(usuario: Usuario, motivo: String): void`<br>`RepositorioLote.guardar(lote: Lote): Lote` |
+| **Flujo alternativo: rechazo por falta de permiso** | API → SL: bloquearLote(loteId, usuario, motivo).<br>SL → SA: autorizar(usuario, "BLOQUEAR_LOTE").<br>SA → USR: tienePermiso("BLOQUEAR_LOTE").<br>USR → SA: false.<br>SA → SL: false.<br>SL → API: Informar rechazo por falta de permiso.<br>API → FE: Informar error de autorización.<br>FE → R: Mostrar que no tiene permiso para bloquear lotes. | Usuario autenticado, permiso `BLOQUEAR_LOTE` y resultado negativo de autorización. Se rechaza la solicitud sin modificar el lote ni guardar cambios. | `ServicioLote.bloquearLote(loteId: Integer, usuario: Usuario, motivo: String): Lote`<br>`ServicioAutenticacion.autorizar(usuario: Usuario, permiso: String): Boolean`<br>`Usuario.tienePermiso(permiso: String): Boolean` |
+| **Excepción: error al guardar el bloqueo** | SL → RL: guardar(lote).<br>RL → BD: Guardar estado y datos del bloqueo.<br>BD → RL: Error de almacenamiento.<br>RL → SL: Propagar error de persistencia.<br>SL → API: Informar que no se pudo completar el bloqueo.<br>API → FE: Informar error del sistema.<br>FE → R: Mostrar que no fue posible completar el bloqueo. | Datos del lote con el bloqueo preparado y error producido al intentar almacenarlos en PostgreSQL. El error se propaga hasta la interfaz y no se confirma el bloqueo como persistido. | `RepositorioLote.guardar(lote: Lote): Lote`<br>`ServicioLote.bloquearLote(loteId: Integer, usuario: Usuario, motivo: String): Lote` |
 
-
-
----
 
 ## 2. Diseño de datos
 
