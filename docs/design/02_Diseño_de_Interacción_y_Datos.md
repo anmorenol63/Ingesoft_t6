@@ -32,20 +32,23 @@ HOW TO USE THIS TEMPLATE
 
 ### CU-03. Autenticación de usuarios — RF-03: Bloqueo temporal del acceso después de cinco intentos fallidos
 
+El diagrama representa tres escenarios seleccionados: el flujo principal de bloqueo después del quinto intento fallido consecutivo, el flujo alternativo de autenticación exitosa y la excepción de intento durante un bloqueo vigente.
+
+En el flujo principal, los cuatro intentos fallidos consecutivos anteriores ya se encuentran registrados en PostgreSQL. Se representa el quinto intento, que activa el bloqueo temporal.
+
 ```mermaid
-
-
 sequenceDiagram
     actor U as Usuario registrado en el sistema
     participant FE as Frontend (Aplicación web)
     participant API as Controlador de API
     participant SA as ServicioAutenticacion
     participant RU as RepositorioUsuario
+    participant US as usuario: Usuario
     participant REA as RepositorioEstadoAutenticacion
-    participant EA as EstadoAutenticacion
+    participant EA as estado: EstadoAutenticacion
     participant BD as PostgreSQL
 
-    Note over U,BD: CU-03: Bloquear acceso tras intentos fallidos
+    Note over U,BD: RF-03: Bloquear acceso tras cinco intentos fallidos consecutivos
     Note over U,SA: Precondición: usuario registrado y activo que intenta autenticarse
 
     U->>FE: Ingresa nombre de usuario y contraseña
@@ -55,70 +58,86 @@ sequenceDiagram
     SA->>RU: buscarPorNombre(nombreUsuario)
     RU->>BD: Consultar datos del usuario
     BD-->>RU: Devolver datos del usuario
-    RU-->>SA: Devolver usuario
+    RU-->>SA: usuario: Usuario
+
+    Note over SA,US: US representa el objeto Usuario recuperado por RU
 
     SA->>REA: buscarEstado(usuarioId)
-    REA->>BD: Consultar contador y bloqueoHasta
+    REA->>BD: Consultar intentosFallidos y bloqueadoHasta
     BD-->>REA: Devolver estado almacenado
-    REA-->>SA: Devolver EstadoAutenticacion
+    REA-->>SA: estado: EstadoAutenticacion
+
+    Note over SA,EA: EA representa el estado recuperado por REA
 
     SA->>EA: estaBloqueado(ahora)
-    Note over EA: Bloqueo vigente mientras ahora sea anterior a bloqueoHasta
-    EA-->>SA: Indicar si el bloqueo está vigente
+    Note over EA: Devuelve true si existe bloqueadoHasta y ahora es anterior a esa fecha
+    EA-->>SA: bloqueado: Boolean
 
     alt No existe bloqueo vigente
-        SA->>SA: Verificar credenciales del usuario
+        SA->>US: verificarCredenciales(credencial)
+        US-->>SA: credencialesValidas: Boolean
 
         alt PRINCIPAL: credenciales incorrectas y cuatro fallos previos
             Note over SA,EA: Los cuatro fallos consecutivos anteriores ya están persistidos
 
             SA->>EA: registrarFallo(ahora)
-            Note over EA: Incrementar contador de 4 a 5
-            Note over EA: Establecer bloqueoHasta = ahora + 5 minutos
-            EA-->>SA: Estado actualizado con bloqueo temporal
+            Note over EA: Incrementar intentosFallidos de 4 a 5
+            Note over EA: Establecer bloqueadoHasta = ahora + 5 minutos
+            EA-->>SA: Operación completada
 
             SA->>REA: guardarEstado(usuarioId, estado)
-            REA->>BD: Guardar contador y bloqueoHasta
+            REA->>BD: Guardar intentosFallidos y bloqueadoHasta
             BD-->>REA: Confirmar almacenamiento
-            REA-->>SA: Confirmar persistencia
+            REA-->>SA: Operación completada
 
-            SA-->>API: ResultadoAutenticacion(false, bloqueo por 5 minutos)
+            SA-->>API: ResultadoAutenticacion: autenticado=false, mensaje="Acceso bloqueado por 5 minutos", usuario=null
             API-->>FE: Informar bloqueo temporal
             FE-->>U: Mostrar acceso bloqueado durante 5 minutos
 
         else ALTERNATIVO: credenciales correctas antes de cinco fallos
             SA->>EA: registrarExito()
-            Note over EA: Reiniciar contador a cero y limpiar bloqueoHasta
-            EA-->>SA: Estado actualizado sin bloqueo
+            Note over EA: Reiniciar intentosFallidos a cero y limpiar bloqueadoHasta
+            EA-->>SA: Operación completada
 
             SA->>REA: guardarEstado(usuarioId, estado)
             REA->>BD: Guardar contador reiniciado y sin bloqueo
             BD-->>REA: Confirmar almacenamiento
-            REA-->>SA: Confirmar persistencia
+            REA-->>SA: Operación completada
 
-            SA-->>API: ResultadoAutenticacion(true, usuario)
+            SA-->>API: ResultadoAutenticacion: autenticado=true, mensaje="Autenticación exitosa", usuario=usuario
             API-->>FE: Informar autenticación exitosa
             FE-->>U: Permitir acceso al sistema
         end
 
     else EXCEPCIÓN: existe un bloqueo vigente
-        Note over SA,EA: No validar credenciales ni modificar el contador o bloqueoHasta
+        Note over SA,EA: No validar credenciales ni modificar intentosFallidos o bloqueadoHasta
 
-        SA-->>API: ResultadoAutenticacion(false, acceso bloqueado)
+        SA-->>API: ResultadoAutenticacion: autenticado=false, mensaje="Bloqueo temporal vigente", usuario=null
         API-->>FE: Informar bloqueo temporal vigente
         FE-->>U: Mostrar que debe esperar hasta que finalice el bloqueo
     end
 
-    Note over SA,EA: Al cumplirse los 5 minutos, estaBloqueado(ahora) devuelve false y permite evaluar un nuevo intento
-
-
+    Note over SA,EA: Al finalizar los 5 minutos, estaBloqueado(ahora) devuelve false en una nueva consulta y permite evaluar otro intento
 ```
+
+### Correspondencia entre los flujos y las operaciones del Entregable 1
 
 | Paso o flujo del caso de uso | Mensaje(s) en el diagrama | Información intercambiada | Operación definida en el Entregable 1 |
 |---|---|---|---|
-| **Flujo principal: bloqueo tras el quinto intento fallido consecutivo** | U → FE: Ingresa nombre de usuario y contraseña.<br>FE → API: Solicitar autenticación(nombreUsuario, credencial).<br>API → SA: autenticar(nombreUsuario, credencial).<br>SA → RU: buscarPorNombre(nombreUsuario).<br>SA → REA: buscarEstado(usuarioId).<br>SA → EA: estaBloqueado(ahora).<br>SA → SA: Verificar credenciales.<br>SA → EA: registrarFallo(ahora).<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar contador y bloqueoHasta.<br>SA → API: ResultadoAutenticacion(false, bloqueo por 5 minutos).<br>API → FE: Informar bloqueo temporal.<br>FE → U: Mostrar acceso bloqueado durante 5 minutos. | Nombre de usuario, credencial y estado de autenticación con cuatro fallos consecutivos previos. Se verifica que no exista un bloqueo vigente y que las credenciales sean incorrectas. El contador aumenta de cuatro a cinco y se establece `bloqueoHasta = ahora + 5 minutos`. El estado se guarda en PostgreSQL y se informa el bloqueo. | `ServicioAutenticacion.autenticar(nombreUsuario, credencial)`<br>`RepositorioUsuario.buscarPorNombre(nombreUsuario)`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId)`<br>`EstadoAutenticacion.estaBloqueado(ahora)`<br>`EstadoAutenticacion.registrarFallo(ahora)`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId, estado)` |
-| **Flujo alternativo: autenticación exitosa antes de alcanzar cinco fallos** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>SA → SA: Verificar credenciales.<br>SA → EA: registrarExito().<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar contador reiniciado y sin bloqueo.<br>SA → API: ResultadoAutenticacion(true, usuario).<br>API → FE: Informar autenticación exitosa.<br>FE → U: Permitir acceso al sistema. | Credenciales válidas y estado sin bloqueo vigente. El contador de intentos fallidos se reinicia a cero y se limpia `bloqueoHasta`. Se guarda el estado actualizado en PostgreSQL y se devuelve el resultado exitoso con los datos del usuario. | `ServicioAutenticacion.autenticar(nombreUsuario, credencial)`<br>`RepositorioUsuario.buscarPorNombre(nombreUsuario)`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId)`<br>`EstadoAutenticacion.estaBloqueado(ahora)`<br>`EstadoAutenticacion.registrarExito()`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId, estado)` |
-| **Excepción: intento de autenticación durante un bloqueo vigente** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>EA → SA: Indicar que el bloqueo está vigente.<br>SA → API: ResultadoAutenticacion(false, acceso bloqueado).<br>API → FE: Informar bloqueo temporal vigente.<br>FE → U: Mostrar que debe esperar hasta que finalice el bloqueo. | Identificación del usuario, estado almacenado y fecha de finalización del bloqueo. Se determina que el período de cinco minutos continúa vigente. Se rechaza el acceso sin validar nuevamente las credenciales ni modificar el contador o prolongar el bloqueo. | `ServicioAutenticacion.autenticar(nombreUsuario, credencial)`<br>`RepositorioUsuario.buscarPorNombre(nombreUsuario)`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId)`<br>`EstadoAutenticacion.estaBloqueado(ahora)` |
+| **Flujo principal: bloqueo tras el quinto intento fallido consecutivo** | U → FE: Ingresa nombre de usuario y contraseña.<br>FE → API: Solicitar autenticación(nombreUsuario, credencial).<br>API → SA: autenticar(nombreUsuario, credencial).<br>SA → RU: buscarPorNombre(nombreUsuario).<br>SA → REA: buscarEstado(usuarioId).<br>SA → EA: estaBloqueado(ahora).<br>SA → US: verificarCredenciales(credencial).<br>SA → EA: registrarFallo(ahora).<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar intentosFallidos y bloqueadoHasta.<br>SA → API: ResultadoAutenticacion con autenticado=false y mensaje de bloqueo.<br>API → FE: Informar bloqueo temporal.<br>FE → U: Mostrar acceso bloqueado durante 5 minutos. | Nombre de usuario, credencial, objeto Usuario y estado de autenticación con cuatro fallos consecutivos previos. Se comprueba que no exista bloqueo vigente y que las credenciales sean incorrectas. El contador aumenta de cuatro a cinco y se establece `bloqueadoHasta = ahora + 5 minutos`. Se guarda el estado en PostgreSQL y se devuelve un resultado con `autenticado=false`, mensaje de bloqueo y `usuario=null`. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean`<br>`Usuario.verificarCredenciales(credencial: String): Boolean`<br>`EstadoAutenticacion.registrarFallo(ahora: Timestamp): void`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): void` |
+| **Flujo alternativo: autenticación exitosa antes de alcanzar cinco fallos** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>SA → US: verificarCredenciales(credencial).<br>SA → EA: registrarExito().<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar contador reiniciado y sin bloqueo.<br>SA → API: ResultadoAutenticacion con autenticado=true y el usuario autenticado.<br>API → FE: Informar autenticación exitosa.<br>FE → U: Permitir acceso al sistema. | Credenciales válidas y estado sin bloqueo vigente. Se reinicia `intentosFallidos` a cero y se limpia `bloqueadoHasta`. Se guarda el estado actualizado en PostgreSQL y se devuelve un resultado con `autenticado=true`, mensaje de éxito y el usuario autenticado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean`<br>`Usuario.verificarCredenciales(credencial: String): Boolean`<br>`EstadoAutenticacion.registrarExito(): void`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): void` |
+| **Excepción: intento de autenticación durante un bloqueo vigente** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>EA → SA: bloqueado=true.<br>SA → API: ResultadoAutenticacion con autenticado=false y mensaje de bloqueo vigente.<br>API → FE: Informar bloqueo temporal vigente.<br>FE → U: Mostrar que debe esperar hasta que finalice el bloqueo. | Identificación del usuario, estado almacenado y fecha de finalización del bloqueo. Se determina que el bloqueo continúa vigente y se devuelve un resultado con `autenticado=false`, mensaje de bloqueo y `usuario=null`. No se validan nuevamente las credenciales ni se modifica el estado almacenado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean` |
+
+```
+
+
+### Correspondencia entre los flujos y las operaciones del Entregable 1
+
+| Paso o flujo del caso de uso | Mensaje(s) en el diagrama | Información intercambiada | Operación definida en el Entregable 1 |
+|---|---|---|---|
+| **Flujo principal: bloqueo tras el quinto intento fallido consecutivo** | U → FE: Ingresa nombre de usuario y contraseña.<br>FE → API: Solicitar autenticación(nombreUsuario, credencial).<br>API → SA: autenticar(nombreUsuario, credencial).<br>SA → RU: buscarPorNombre(nombreUsuario).<br>SA → REA: buscarEstado(usuarioId).<br>SA → EA: estaBloqueado(ahora).<br>SA → US: verificarCredenciales(credencial).<br>SA → EA: registrarFallo(ahora).<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar intentosFallidos y bloqueadoHasta.<br>SA → API: ResultadoAutenticacion con autenticado=false y mensaje de bloqueo.<br>API → FE: Informar bloqueo temporal.<br>FE → U: Mostrar acceso bloqueado durante 5 minutos. | Nombre de usuario, credencial, objeto Usuario y estado de autenticación con cuatro fallos consecutivos previos. Se comprueba que no exista bloqueo vigente y que las credenciales sean incorrectas. El contador aumenta de cuatro a cinco y se establece `bloqueadoHasta = ahora + 5 minutos`. Se guarda el estado en PostgreSQL y se devuelve un resultado con `autenticado=false`, mensaje de bloqueo y `usuario=null`. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean`<br>`Usuario.verificarCredenciales(credencial: String): Boolean`<br>`EstadoAutenticacion.registrarFallo(ahora: Timestamp): void`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): void` |
+| **Flujo alternativo: autenticación exitosa antes de alcanzar cinco fallos** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>SA → US: verificarCredenciales(credencial).<br>SA → EA: registrarExito().<br>SA → REA: guardarEstado(usuarioId, estado).<br>REA → BD: Guardar contador reiniciado y sin bloqueo.<br>SA → API: ResultadoAutenticacion con autenticado=true y el usuario autenticado.<br>API → FE: Informar autenticación exitosa.<br>FE → U: Permitir acceso al sistema. | Credenciales válidas y estado sin bloqueo vigente. Se reinicia `intentosFallidos` a cero y se limpia `bloqueadoHasta`. Se guarda el estado actualizado en PostgreSQL y se devuelve un resultado con `autenticado=true`, mensaje de éxito y el usuario autenticado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean`<br>`Usuario.verificarCredenciales(credencial: String): Boolean`<br>`EstadoAutenticacion.registrarExito(): void`<br>`RepositorioEstadoAutenticacion.guardarEstado(usuarioId: Integer, estado: EstadoAutenticacion): void` |
+| **Excepción: intento de autenticación durante un bloqueo vigente** | Se realizan la recepción de credenciales, la búsqueda del usuario y la consulta del estado.<br>SA → EA: estaBloqueado(ahora).<br>EA → SA: bloqueado=true.<br>SA → API: ResultadoAutenticacion con autenticado=false y mensaje de bloqueo vigente.<br>API → FE: Informar bloqueo temporal vigente.<br>FE → U: Mostrar que debe esperar hasta que finalice el bloqueo. | Identificación del usuario, estado almacenado y fecha de finalización del bloqueo. Se determina que el bloqueo continúa vigente y se devuelve un resultado con `autenticado=false`, mensaje de bloqueo y `usuario=null`. No se validan nuevamente las credenciales ni se modifica el estado almacenado. | `ServicioAutenticacion.autenticar(nombreUsuario: String, credencial: String): ResultadoAutenticacion`<br>`RepositorioUsuario.buscarPorNombre(nombre: String): Usuario`<br>`RepositorioEstadoAutenticacion.buscarEstado(usuarioId: Integer): EstadoAutenticacion`<br>`EstadoAutenticacion.estaBloqueado(ahora: Timestamp): Boolean` |
 
 
 
