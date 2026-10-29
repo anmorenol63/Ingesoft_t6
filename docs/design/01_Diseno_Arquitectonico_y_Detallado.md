@@ -135,7 +135,7 @@ de datos"| DB
 
 ### 3.2 Diagrama de clases
 
-![Diagrama de clases del sistema de inventario farmacéutico](diagrams/01_diagrama_clases_inventario.jpg)
+![Diagrama de clases del sistema de inventario farmacéutico](diagrams/01_corrección_de_diagrama_clases_inventario.png) 
 
 ### 3.3 Responsabilidades de las clases
 
