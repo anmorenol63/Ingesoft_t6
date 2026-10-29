@@ -45,6 +45,9 @@ sequenceDiagram
     participant EA as EstadoAutenticacion
     participant BD as PostgreSQL
 
+    Note over U,BD: CU-03: Bloquear acceso tras intentos fallidos
+    Note over U,SA: Precondición: usuario registrado y activo que intenta autenticarse
+
     U->>FE: Ingresa nombre de usuario y contraseña
     FE->>API: Solicitar autenticación(nombreUsuario, credencial)
     API->>SA: autenticar(nombreUsuario, credencial)
@@ -54,73 +57,59 @@ sequenceDiagram
     BD-->>RU: Devolver datos del usuario
     RU-->>SA: Devolver usuario
 
-    Note over SA: Se asume que el usuario existe según la precondición de CU-03
-
     SA->>REA: buscarEstado(usuarioId)
-    REA->>BD: Consultar intentos y fecha de bloqueo
+    REA->>BD: Consultar contador y bloqueoHasta
     BD-->>REA: Devolver estado almacenado
     REA-->>SA: Devolver EstadoAutenticacion
 
     SA->>EA: estaBloqueado(ahora)
-    EA-->>SA: true o false
+    Note over EA: Bloqueo vigente mientras ahora sea anterior a bloqueoHasta
+    EA-->>SA: Indicar si el bloqueo está vigente
 
-    alt El usuario tiene un bloqueo vigente
-        Note over SA,BD: No se validan nuevamente las credenciales ni se modifica el estado
-        SA-->>API: ResultadoAutenticacion(false, acceso bloqueado)
-        API-->>FE: Informar bloqueo temporal
-        FE-->>U: Mostrar que debe esperar a que finalicen los cinco minutos
-
-    else El usuario no está bloqueado
+    alt No existe bloqueo vigente
         SA->>SA: Verificar credenciales del usuario
 
-        alt Las credenciales son correctas
-            SA->>EA: registrarExito()
-            EA-->>SA: Contador de intentos reiniciado
+        alt PRINCIPAL: credenciales incorrectas y cuatro fallos previos
+            Note over SA,EA: Los cuatro fallos consecutivos anteriores ya están persistidos
+
+            SA->>EA: registrarFallo(ahora)
+            Note over EA: Incrementar contador de 4 a 5
+            Note over EA: Establecer bloqueoHasta = ahora + 5 minutos
+            EA-->>SA: Estado actualizado con bloqueo temporal
 
             SA->>REA: guardarEstado(usuarioId, estado)
-            REA->>BD: Guardar estado actualizado
+            REA->>BD: Guardar contador y bloqueoHasta
+            BD-->>REA: Confirmar almacenamiento
+            REA-->>SA: Confirmar persistencia
+
+            SA-->>API: ResultadoAutenticacion(false, bloqueo por 5 minutos)
+            API-->>FE: Informar bloqueo temporal
+            FE-->>U: Mostrar acceso bloqueado durante 5 minutos
+
+        else ALTERNATIVO: credenciales correctas antes de cinco fallos
+            SA->>EA: registrarExito()
+            Note over EA: Reiniciar contador a cero y limpiar bloqueoHasta
+            EA-->>SA: Estado actualizado sin bloqueo
+
+            SA->>REA: guardarEstado(usuarioId, estado)
+            REA->>BD: Guardar contador reiniciado y sin bloqueo
             BD-->>REA: Confirmar almacenamiento
             REA-->>SA: Confirmar persistencia
 
             SA-->>API: ResultadoAutenticacion(true, usuario)
-            API-->>FE: Autenticación exitosa
+            API-->>FE: Informar autenticación exitosa
             FE-->>U: Permitir acceso al sistema
-
-        else Las credenciales son incorrectas
-            SA->>EA: registrarFallo(ahora)
-            Note over EA: Registrar el fallo y establecer bloqueoHasta al alcanzar cinco fallos consecutivos
-            EA-->>SA: Estado actualizado
-
-            SA->>REA: guardarEstado(usuarioId, estado)
-            REA->>BD: Guardar contador y fecha de bloqueo
-
-            alt Persistencia exitosa
-                BD-->>REA: Confirmar almacenamiento
-                REA-->>SA: Confirmar persistencia
-
-                SA->>EA: estaBloqueado(ahora)
-                EA-->>SA: true o false
-
-                alt Se alcanzan cinco intentos fallidos consecutivos
-                    SA-->>API: ResultadoAutenticacion(false, acceso bloqueado por cinco minutos)
-                    API-->>FE: Informar bloqueo temporal
-                    FE-->>U: Mostrar mensaje de bloqueo
-
-                else No se alcanzan cinco intentos fallidos
-                    SA-->>API: ResultadoAutenticacion(false, credenciales incorrectas)
-                    API-->>FE: Informar error de autenticación
-                    FE-->>U: Mostrar mensaje de credenciales incorrectas
-                end
-
-            else Excepción: error al guardar el estado
-                BD-->>REA: Error de almacenamiento
-                REA-->>SA: Informar error de persistencia
-                SA-->>API: Error interno de autenticación
-                API-->>FE: Informar error del sistema
-                FE-->>U: Mostrar que no es posible completar la autenticación
-            end
         end
+
+    else EXCEPCIÓN: existe un bloqueo vigente
+        Note over SA,EA: No validar credenciales ni modificar el contador o bloqueoHasta
+
+        SA-->>API: ResultadoAutenticacion(false, acceso bloqueado)
+        API-->>FE: Informar bloqueo temporal vigente
+        FE-->>U: Mostrar que debe esperar hasta que finalice el bloqueo
     end
+
+    Note over SA,EA: Al cumplirse los 5 minutos, estaBloqueado(ahora) devuelve false y permite evaluar un nuevo intento
 
 
 ```
