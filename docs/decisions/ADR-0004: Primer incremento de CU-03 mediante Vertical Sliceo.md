@@ -36,9 +36,9 @@ El recorrido será el siguiente:
 
 1. El usuario ingresa su nombre de usuario y contraseña en el formulario.
 2. El frontend envía la solicitud a la API.
-3. `ServicioAutenticacion` recupera al usuario y su estado mediante los repositorios.
+3. ServicioAutenticacion recupera al usuario y su estado mediante los repositorios.
 4. Comprueba que no exista un bloqueo vigente y solicita verificar la contraseña.
-5. Si la contraseña es incorrecta, `EstadoAutenticacion` aumenta el contador de cuatro a cinco y establece el bloqueo por cinco minutos.
+5. Si la contraseña es incorrecta, EstadoAutenticacion aumenta el contador de cuatro a cinco y establece el bloqueo por cinco minutos.
 6. El servicio guarda el estado en PostgreSQL y devuelve el resultado.
 7. El frontend muestra el mensaje de bloqueo.
 
