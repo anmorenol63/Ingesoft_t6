@@ -3,8 +3,8 @@
 **Autores:**
 
 - Junior Andrés Arrieta Tabaco
-- Edgar Mauricio Montufar Molano
 - Kevin Alexis Bermúdez Caicedo
+- Edgar Mauricio Montufar Molano
 - Antonio José Moreno López
 
 
