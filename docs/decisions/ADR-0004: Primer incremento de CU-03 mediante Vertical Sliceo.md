@@ -7,11 +7,14 @@
 - Kevin Alexis Bermúdez Caicedo
 - Antonio José Moreno López
 
+
 **Fecha:** 2026-11-05
+
 
 ## Estado
 
 **Aceptado**
+
 
 ## Contexto
 
