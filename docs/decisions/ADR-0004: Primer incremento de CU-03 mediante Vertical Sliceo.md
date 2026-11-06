@@ -55,7 +55,6 @@ La autenticación exitosa y los demás escenarios se completarán en incrementos
 
 ### Convenciones de nombres
 
-La recomendación es la siguiente:
 
 - Código: variables, parámetros, funciones y métodos ---> `camelCase`
 - Carpetas ---> `kebab-case`
