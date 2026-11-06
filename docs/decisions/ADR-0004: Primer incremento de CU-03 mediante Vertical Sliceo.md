@@ -7,14 +7,11 @@
 - Edgar Mauricio Montufar Molano
 - Antonio José Moreno López
 
-
 **Fecha:** 2026-11-05
-
 
 ## Estado
 
 **Aceptado**
-
 
 ## Contexto
 
@@ -55,6 +52,16 @@ La autenticación exitosa y los demás escenarios se completarán en incrementos
 - Al finalizar el periodo, puede evaluarse un nuevo intento.
 - El contador y la fecha de bloqueo se conservan después de reiniciar el backend.
 - Si falla una consulta o un guardado necesario, se informa el error y no se concede acceso.
+
+### Convenciones de nombres
+
+La recomendación es la siguiente:
+
+- Código: variables, parámetros, funciones y métodos ---> `camelCase`
+- Carpetas ---> `kebab-case`
+- Archivos ---> `camelCase`
+- Base de datos ---> `snake_case`
+- Constantes ---> mayúsculas (`UPPER_SNAKE_CASE`)
 
 ## Alternativas consideradas
 
