@@ -57,10 +57,22 @@ La autenticación exitosa y los demás escenarios se completarán en incrementos
 
 
 - Código: variables, parámetros, funciones y métodos ---> `camelCase`
-- Carpetas ---> `kebab-case`
+- Carpetas ---> `kebab-case` ESTRUCTURA DE LA CARPETA 
 - Archivos ---> `camelCase`
 - Base de datos ---> `snake_case`
 - Constantes ---> mayúsculas (`UPPER_SNAKE_CASE`)
+
+- ### Convenciones de nombres
+
+Antes de comenzar la implementación, acordamos cómo nombrar los elementos del proyecto. Queremos que cualquier integrante del equipo pueda ubicar un archivo y reconocer en el código las operaciones que aparecen en los diagramas.
+
+- **Código JavaScript.** Usaremos `camelCase` para las variables, los parámetros, las funciones y los métodos. Por ejemplo, `nombreUsuario`, `intentosFallidos` y `registrarFallo()` siguen la escritura que ya usamos en el diseño de CU-03.
+- **Carpetas.** Escribiremos sus nombres en minúsculas. Las carpetas de una sola palabra tendrán nombres como `src/` o `docs/`. Cuando el nombre tenga varias palabras, las separaremos con guiones siguiendo la convención `kebab-case`, como en `datos-prueba/`.
+- **Archivos de código.** Usaremos `camelCase` para nombrarlos. Por ejemplo, el archivo que contiene la clase `ServicioAutenticacion` se llamará `servicioAutenticacion.js`.
+- **Base de datos.** En PostgreSQL usaremos `snake_case` para las tablas y columnas. Por ejemplo, en la tabla `estado_autenticacion` guardaremos el contador en la columna `intentos_fallidos`. Al recuperar ese dato, el repositorio lo entregará al código JavaScript como `intentosFallidos`.
+- **Constantes.** Escribiremos en mayúsculas los nombres de los valores fijos y separaremos las palabras con guiones bajos (`UPPER_SNAKE_CASE`). En CU-03, `MAX_INTENTOS_FALLIDOS` representará el límite de cinco fallos y `DURACION_BLOQUEO_MINUTOS` indicará cuánto dura el bloqueo.
+
+## Alternativas consideradas
 
 ## Alternativas consideradas
 
