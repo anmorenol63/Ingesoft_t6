@@ -53,26 +53,93 @@ La autenticación exitosa y los demás escenarios se completarán en incrementos
 - El contador y la fecha de bloqueo se conservan después de reiniciar el backend.
 - Si falla una consulta o un guardado necesario, se informa el error y no se concede acceso.
 
-### Convenciones de nombres
 
+## Convenciones a utilizar
 
-- Código: variables, parámetros, funciones y métodos ---> `camelCase`
-- Carpetas ---> `kebab-case` ESTRUCTURA DE LA CARPETA 
-- Archivos ---> `camelCase`
-- Base de datos ---> `snake_case`
-- Constantes ---> mayúsculas (`UPPER_SNAKE_CASE`)
+- **Código (variables, parámetros, funciones y métodos):** utilizaremos `camelCase`, comenzando con minúscula y escribiendo con mayúscula la primera letra de cada palabra siguiente. Ejemplos: `nombreUsuario`, `intentosFallidos` y `registrarFallo()`.
 
-- ### Convenciones de nombres
+- **Carpetas:** utilizaremos `kebab-case`, escribiendo los nombres en minúsculas y separando las palabras con guiones. Ejemplos: `datos-prueba` y `control-acceso`. Los nombres de una sola palabra, como `src`, `docs` y `autenticacion`, se escribirán en minúsculas. Conservaremos las rutas de documentación indicadas por el profesor.
 
-Antes de comenzar la implementación, acordamos cómo nombrar los elementos del proyecto. Queremos que cualquier integrante del equipo pueda ubicar un archivo y reconocer en el código las operaciones que aparecen en los diagramas.
+- **Archivos de código:** utilizaremos `camelCase` y la extensión correspondiente. Ejemplos: `servicioAutenticacion.js` y `formularioLogin.jsx`. Conservaremos nombres especiales como `package.json`, `README.md` y `.gitignore`. Los documentos académicos seguirán los nombres establecidos para sus entregas.
 
-- **Código JavaScript.** Usaremos `camelCase` para las variables, los parámetros, las funciones y los métodos. Por ejemplo, `nombreUsuario`, `intentosFallidos` y `registrarFallo()` siguen la escritura que ya usamos en el diseño de CU-03.
-- **Carpetas.** Escribiremos sus nombres en minúsculas. Las carpetas de una sola palabra tendrán nombres como `src/` o `docs/`. Cuando el nombre tenga varias palabras, las separaremos con guiones siguiendo la convención `kebab-case`, como en `datos-prueba/`.
-- **Archivos de código.** Usaremos `camelCase` para nombrarlos. Por ejemplo, el archivo que contiene la clase `ServicioAutenticacion` se llamará `servicioAutenticacion.js`.
-- **Base de datos.** En PostgreSQL usaremos `snake_case` para las tablas y columnas. Por ejemplo, en la tabla `estado_autenticacion` guardaremos el contador en la columna `intentos_fallidos`. Al recuperar ese dato, el repositorio lo entregará al código JavaScript como `intentosFallidos`.
-- **Constantes.** Escribiremos en mayúsculas los nombres de los valores fijos y separaremos las palabras con guiones bajos (`UPPER_SNAKE_CASE`). En CU-03, `MAX_INTENTOS_FALLIDOS` representará el límite de cinco fallos y `DURACION_BLOQUEO_MINUTOS` indicará cuánto dura el bloqueo.
+- **Base de datos:** utilizaremos `snake_case` para los nombres de las tablas y columnas de PostgreSQL, escribiendo en minúsculas y separando las palabras con guiones bajos. Ejemplos: `estado_autenticacion`, `intentos_fallidos` y `bloqueado_hasta`. Los repositorios realizarán la correspondencia entre estos nombres y los utilizados en JavaScript.
 
-## Alternativas consideradas
+- **Constantes:** utilizaremos mayúsculas y guiones bajos (`UPPER_SNAKE_CASE`) para los valores fijos definidos como constantes del sistema. Ejemplos: `MAX_INTENTOS_FALLIDOS` y `DURACION_BLOQUEO_MINUTOS`. Esta convención no se aplicará automáticamente a toda variable declarada con `const`.
+
+- **Clases y componentes de React:** utilizaremos `PascalCase`, comenzando cada palabra con mayúscula. Ejemplos: `ServicioAutenticacion`, `EstadoAutenticacion` y `FormularioLogin`. Sus archivos mantendrán la convención `camelCase`, como `servicioAutenticacion.js` y `formularioLogin.jsx`.
+
+### Estructura de carpetas
+
+Mantendremos la documentación existente en `docs/` y añadiremos las carpetas del frontend, el backend y la base de datos en la raíz del repositorio `Ingesoft_t6`.
+
+Dentro del código agruparemos los archivos relacionados con una misma funcionalidad. Comenzaremos con autenticación para implementar el primer incremento de CU-03.
+
+#### Documentación existente
+
+| Carpeta o archivo | Contenido |
+|---|---|
+| `docs/` | Documentación del proyecto. |
+| `docs/decisions/` | Registros de decisiones de arquitectura, incluidos los ADR-0001 a ADR-0004. |
+| `docs/design/` | Documentos de diseño arquitectónico, detallado, de interacción y de datos. |
+| `docs/design/diagrams/` | Imágenes de los diagramas utilizados en los documentos de diseño. |
+| `docs/req/` | Documentos existentes de RF-01, RF-02 y RF-03. |
+| `docs/requirements/` | Documentación existente de requisitos, incluido `REQ-RF-03.md`. |
+| `rfc_template.md` | Plantilla existente para propuestas de cambios. |
+| `README.md` | Presentación del proyecto e instrucciones para instalarlo, configurarlo y ejecutarlo. |
+
+Conservaremos `docs/req/` y `docs/requirements/` mientras revisamos su contenido y las referencias que reciben. Antes de unificar documentos, comprobaremos qué información aporta cada uno y actualizaremos los enlaces correspondientes.
+
+#### Backend — Node.js y Express
+
+| Carpeta o archivo | Contenido |
+|---|---|
+| `backend/` | Aplicación del servidor. |
+| `backend/package.json` | Dependencias y comandos para ejecutar y probar el backend. |
+| `backend/src/app.js` | Configuración de Express y registro de las rutas. |
+| `backend/src/server.js` | Inicio del servidor HTTP. |
+| `backend/src/config/` | Lectura de la configuración y conexión con PostgreSQL. |
+| `backend/src/autenticacion/` | Rutas, controlador, servicio, entidades y repositorios necesarios para CU-03. |
+| `backend/tests/unit/` | Pruebas de las reglas de bloqueo, como el contador de fallos y la fecha de finalización. |
+| `backend/tests/integration/` | Pruebas de la API y de la persistencia en PostgreSQL. |
+
+En `backend/src/autenticacion/` ubicaremos archivos como `rutasAutenticacion.js`, `controladorAutenticacion.js`, `servicioAutenticacion.js`, `usuario.js`, `estadoAutenticacion.js`, `repositorioUsuario.js` y `repositorioEstadoAutenticacion.js`.
+
+Esta agrupación mantendrá las responsabilidades del diseño: el controlador atenderá las solicitudes HTTP, el servicio coordinará el caso de uso, las entidades aplicarán sus reglas y los repositorios consultarán y guardarán los datos.
+
+#### Frontend — React
+
+| Carpeta o archivo | Contenido |
+|---|---|
+| `frontend/` | Aplicación web desarrollada con React. |
+| `frontend/package.json` | Dependencias y comandos para ejecutar y probar el frontend. |
+| `frontend/src/` | Código fuente de la interfaz. |
+| `frontend/src/autenticacion/` | Formulario de inicio de sesión, mensajes de bloqueo y comunicación con la API de autenticación. |
+| `frontend/src/shared/` | Componentes y recursos que utilicen varias funcionalidades, cuando sean necesarios. |
+| `frontend/tests/` | Pruebas del formulario y de los mensajes mostrados al usuario. |
+
+En `frontend/src/autenticacion/` ubicaremos archivos como `formularioLogin.jsx` y `apiAutenticacion.js`.
+
+El frontend recogerá los datos y mostrará la respuesta del servidor. La decisión de bloquear el acceso y el control de su duración permanecerán en el backend.
+
+#### Base de datos y pruebas completas
+
+| Carpeta o archivo | Contenido |
+|---|---|
+| `database/migrations/` | Scripts SQL ordenados para crear y modificar la estructura de PostgreSQL. |
+| `database/datos-prueba/` | Scripts para preparar los datos de prueba, incluida la cuenta activa con cuatro fallos previos. |
+| `tests/e2e/` | Pruebas del recorrido completo, desde el formulario hasta la respuesta del backend y la persistencia. |
+| `.gitignore` | Reglas para excluir archivos locales, dependencias instaladas y credenciales del repositorio. |
+| `backend/.env.example` | Ejemplo de las variables de configuración del backend, sin credenciales reales. |
+| `frontend/.env.example` | Ejemplo de la configuración pública del frontend, como la dirección de la API. |
+
+### Aplicación de la estructura
+
+Esta organización se aplicará a los archivos reales del proyecto y será visible en GitHub. Cada aplicación tendrá su propio `package.json`.
+
+Crearemos las carpetas conforme incorporamos su contenido. El primer incremento incluirá únicamente los elementos necesarios para implementar y comprobar el comportamiento acordado de CU-03.
+
+Mantendremos separadas las pruebas del backend, las del frontend y las del recorrido completo. Las nuevas funcionalidades se incorporarán en sus propias carpetas cuando comience su implementación.
+
 
 ## Alternativas consideradas
 
