@@ -4,6 +4,7 @@ Proyecto desarrollado para la asignatura **Ingeniería de Software I** de la **U
 
 El sistema busca facilitar el control del inventario de productos farmacéuticos mediante el seguimiento de productos, lotes, existencias y fechas de vencimiento.
 
+---
 ## Alcance
 
 Las funcionalidades previstas son:
@@ -17,6 +18,7 @@ Las funcionalidades previstas son:
 
 El proyecto se limita al control del inventario. No incluye ventas, compras, gestión de proveedores, facturación ni contabilidad.
 
+---
 ## Tecnologías
 
 | Área | Tecnología |
@@ -27,6 +29,7 @@ El proyecto se limita al control del inventario. No incluye ventas, compras, ges
 | Control de versiones | Git |
 | Repositorio y colaboración | GitHub |
 
+---
 ## Estado del proyecto
 
 El repositorio contiene la documentación de requisitos, diseño y decisiones de arquitectura.
@@ -40,6 +43,7 @@ Este incremento permitirá comprobar que:
 - Al finalizar el periodo de bloqueo se puede evaluar un nuevo intento.
 - El contador de fallos y la fecha de finalización del bloqueo permanecen almacenados en PostgreSQL.
 
+---
 ## Organización del repositorio
 
 ### Documentación actual
@@ -77,10 +81,12 @@ Estas carpetas se incorporarán conforme avance la construcción:
 
 Los documentos académicos conservarán los nombres establecidos para sus entregas. También se respetarán los nombres especiales de las herramientas, como `package.json` y `README.md`.
 
+---
 ## Instalación y ejecución
 
 Las instrucciones de instalación, configuración de PostgreSQL y ejecución se añadirán cuando esté disponible el primer incremento ejecutable.
 
+---
 ## Integrantes
 
 - Junior Andrés Arrieta Tabaco
@@ -88,6 +94,7 @@ Las instrucciones de instalación, configuración de PostgreSQL y ejecución se 
 - Edgar Mauricio Montufar Molano
 - Antonio José Moreno López
 
+---
 ## Uso académico
 
 Este proyecto se desarrolla con fines educativos como parte de la asignatura Ingeniería de Software I. Su propósito es aplicar los conocimientos de requisitos, diseño, construcción y pruebas de software.
