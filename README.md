@@ -4,7 +4,7 @@ Proyecto desarrollado para la asignatura **Ingeniería de Software I** de la **U
 
 El sistema busca facilitar el control del inventario de productos farmacéuticos mediante el seguimiento de productos, lotes, existencias y fechas de vencimiento.
 
----
+
 ## Alcance
 
 Las funcionalidades previstas son:
